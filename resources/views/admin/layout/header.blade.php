@@ -151,32 +151,15 @@
                             class="menu-arrow"></i></a>
                     <div class="menu-submenu menu-submenu-classic menu-submenu-left">
                         <ul class="menu-subnav">
-                            <li class="menu-item  menu-item-submenu" data-menu-toggle="hover"
-                                aria-haspopup="true">
-                                <a href="javascript:;" class="menu-link menu-toggle">
-                                    <i class="la la-bars mr-2"></i>
+                            <li class="menu-item menu-item-submenu @if(Route::is('admin.account.*')) menu-item-open menu-item-here @endif">
+                                <a href="{{ route('admin.account.index') }}" class="menu-link">
+                                    <i class="la la-bars align-self-center mr-2"></i>
                                     <span class="menu-text">Tài khoản</span>
-                                    <i class="menu-arrow"></i>
                                 </a>
-                                <div class="menu-submenu menu-submenu-classic menu-submenu-right">
-                                    <ul class="menu-subnav">
-                                        <li class="menu-item " aria-haspopup="true"><a
-                                                href="features/bootstrap/typography.html"
-                                                class="menu-link "><i
-                                                    class="menu-bullet menu-bullet-dot"><span></span></i><span
-                                                    class="menu-text">Danh sách</span></a></li>
-                                        <li class="menu-item " aria-haspopup="true"><a
-                                                href="features/bootstrap/buttons.html"
-                                                class="menu-link "><i
-                                                    class="menu-bullet menu-bullet-dot"><span></span></i><span
-                                                    class="menu-text">Thêm mới</span></a></li>
-                                        
-                                    </ul>
-                                </div>
                             </li>
-                            <li class="menu-item  menu-item-submenu @if(Route::is('admin.role.*')) menu-item-open menu-item-here @endif">
+                            <li class="menu-item menu-item-submenu @if(Route::is('admin.role.*')) menu-item-open menu-item-here @endif">
                                 <a href="{{ route('admin.role.index') }}" class="menu-link">
-                                    <i class="la la-bars mr-2"></i>
+                                    <i class="la la-bars align-self-center mr-2"></i>
                                     <span class="menu-text">Chức vụ</span>
                                 </a>
                             </li>

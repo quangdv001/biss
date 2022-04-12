@@ -15,4 +15,8 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('profile/password', 'AdminProfileController@postPassword')->name('profile.postPassword');
 
     Route::get('role', 'AdminRoleController@index')->name('role.index');
+    Route::post('role/create', 'AdminRoleController@create')->name('role.create');
+    Route::post('role/remove', 'AdminRoleController@remove')->name('role.remove');
+
+    Route::get('account', 'AdminAccountController@index')->name('account.index');
 });

@@ -2,7 +2,10 @@
 @section('title')
 Thông tin cá nhân
 @endsection
-
+@section('lib_js')
+<script src="assets/js/pages/widgets.js"></script>
+<script src="assets/js/pages/custom/profile/profile.js"></script>
+@endsection
 @section('content')
 <!--begin::Subheader-->
 <div class="subheader py-2 py-lg-6 " id="kt_subheader">

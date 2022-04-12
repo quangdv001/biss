@@ -18,5 +18,34 @@ class AdminRoleController extends Controller
         $data = $this->role->get();
         return view('admin.role.index', compact('data'));
     }
+
+    public function create(Request $request){
+        $params = $request->only('id', 'name', 'slug');
+        if(isset($params['id'])){
+            $role = $this->role->first(['id' => $params['id']]);
+            if($role){
+                $res = $this->role->update($role, $params);
+                if($res){
+                    return back()->with('success_message', 'Cập nhật chức vụ thành công!');
+                }
+            }
+        } else {
+            $res = $this->role->create($params);
+            if($res){
+                return back()->with('success_message', 'Tạo chức vụ thành công!');
+            }
+        }
+        return back()->with('error_message', 'Có lỗi xảy ra!');
+    }
+
+    public function remove(Request $request){
+        $id = $request->input('id');
+        $resR = $this->role->remove($id);
+        $res['success'] = 0;
+        if($resR){
+            $res['success'] = 1;
+        }
+        return response()->json($res);
+    }
     
 }

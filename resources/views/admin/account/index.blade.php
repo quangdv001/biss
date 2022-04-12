@@ -20,7 +20,7 @@ Biss
             <div class="d-flex align-items-baseline flex-wrap mr-5">
                 <!--begin::Page Title-->
                 <h5 class="text-dark font-weight-bold my-1 mr-5">
-                    Chức vụ </h5>
+                    Tài khoản </h5>
                 <!--end::Page Title-->
 
                 <!--begin::Breadcrumb-->
@@ -31,7 +31,7 @@ Biss
                     </li>
                     <li class="breadcrumb-item">
                         <a href="" class="text-muted">
-                            Chức vụ </a>
+                            Tài khoản </a>
                     </li>
                 </ul>
                 <!--end::Breadcrumb-->
@@ -50,8 +50,8 @@ Biss
         <div class="card-header flex-wrap py-5">
             <div class="card-title">
                 <h3 class="card-label">
-                    Chức vụ
-                    <div class="text-muted pt-2 font-size-sm">Chức vụ thành viên</div>
+                    Tài khoản
+                    <div class="text-muted pt-2 font-size-sm">Tài khoản thành viên</div>
                 </h3>
             </div>
             <div class="card-toolbar">
@@ -70,7 +70,7 @@ Biss
                                     fill="#000000" opacity="0.3" />
                             </g>
                         </svg>
-                        <!--end::Svg Icon--></span> Thêm chức vụ
+                        <!--end::Svg Icon--></span> Thêm thành viên
                 </a>
                 <!--end::Button-->
             </div>
@@ -81,8 +81,11 @@ Biss
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Tên chức vụ</th>
-                        <th>Mã chức vụ</th>
+                        <th>Tài khoản</th>
+                        <th>MNS</th>
+                        <th>Họ tên</th>
+                        <th>Thông tin cá nhân</th>
+                        <th>Trạng thái</th>
                         <th>Hành động</th>
                     </tr>
                 </thead>
@@ -92,8 +95,18 @@ Biss
                     @foreach($data as $v)
                     <tr>
                         <td>{{ $v->id }}</td>
+                        <td>{{ $v->username }}</td>
+                        <td>{{ $v->mns }}</td>
                         <td>{{ $v->name }}</td>
-                        <td>{{ $v->slug }}</td>
+                        <td>
+                            SĐT: {{ $v->phone }} <br>
+                            Email: {{ $v->email }} <br>
+                            Ngày sinh: {{ $v->birthday ? date('Y/m/d', $v->birthday) : '' }} <br>
+                            Địa chỉ: {{ $v->address }}
+                        </td>
+                        <td>
+                            <span class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoạt động' : 'khóa' }}</span>
+                        </td>
                         <td nowrap>
                             <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Edit details" data-id="{{ $v->id }}">
                                 <i class="la la-edit"></i>

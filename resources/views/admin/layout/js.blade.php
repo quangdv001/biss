@@ -2,7 +2,6 @@
     var HOST_URL = "https://preview.keenthemes.com/metronic/theme/html/tools/preview";
 
 </script>
-<!--begin::Global Config(global config for global JS scripts)-->
 <script>
     var KTAppSettings = {
         "breakpoints": {
@@ -64,21 +63,12 @@
     };
 
 </script>
-<!--end::Global Config-->
-
-<!--begin::Global Theme Bundle(used by all pages)-->
 <script src="/assets/admin/themes/assets/plugins/global/plugins.bundle.js"></script>
 <script src="/assets/admin/themes/assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
 <script src="/assets/admin/themes/assets/js/scripts.bundle.js"></script>
-<!--end::Global Theme Bundle-->
-
-<!--begin::Page Vendors(used by this page)-->
 <script src="/assets/admin/themes/assets/plugins/custom/fullcalendar/fullcalendar.bundle.js"></script>
-<!--end::Page Vendors-->
-
-<!--begin::Page Scripts(used by this page)-->
 <script src="/assets/admin/themes/assets/js/pages/widgets.js"></script>
-<!--end::Page Scripts-->
 
+@yield('lib_js')
 <script src="/js/init.js"></script>
 @yield('custom_js')
