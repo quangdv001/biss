@@ -20,7 +20,8 @@ class AdminProfileController extends Controller
     }
 
     public function postIndex(Request $request){
-        $params = $request->only('name', 'address', 'phone', 'email');
+        $params = $request->only('name', 'address', 'phone', 'email', 'birthday');
+        $params['birthday'] = $params['birthday'] ? strtotime($params['birthday']) : null;
         $admin = auth('admin')->user();
         $resU = $this->admin->update($admin, $params);
         if($resU){

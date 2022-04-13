@@ -48,6 +48,21 @@ class AdminAccountController extends Controller
         return back()->with('error_message', 'Có lỗi xảy ra!');
     }
 
+    public function changePass(Request $request){
+        $params = $request->only('id', 'password');
+        if(isset($params['id'])){
+            $params['password'] = Hash::make($params['password']);
+            $admin = $this->admin->first(['id' => $params['id']]);
+            if($admin){
+                $res = $this->admin->update($admin, $params);
+                if($res){
+                    return back()->with('success_message', 'Cập nhật mật khẩu thành công!');
+                }
+            }
+        }
+        return back()->with('error_message', 'Có lỗi xảy ra!');
+    }
+
     public function remove(Request $request){
         $id = $request->input('id');
         $resR = $this->admin->remove($id);

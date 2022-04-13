@@ -20,5 +20,8 @@ Route::middleware(['auth:admin'])->group(function () {
     
     Route::get('account', 'AdminAccountController@index')->name('account.index');
     Route::post('account/create', 'AdminAccountController@create')->name('account.create');
+    Route::post('account/changePass', 'AdminAccountController@changePass')->name('account.changePass');
     Route::post('account/remove', 'AdminAccountController@remove')->name('account.remove');
+
+    Route::get('project', 'AdminProjectController@index')->name('project.index');
 });

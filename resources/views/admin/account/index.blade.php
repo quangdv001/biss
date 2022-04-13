@@ -111,10 +111,13 @@ Biss
                             <span class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoạt động' : 'khóa' }}</span>
                         </td>
                         <td nowrap>
-                            <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Edit details" data-id="{{ $v->id }}">
+                            <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
                                 <i class="la la-edit"></i>
                             </a>
-                            <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Delete" data-id="{{ $v->id }}">
+                            <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-pass" title="Đổi mật khẩu" data-id="{{ $v->id }}">
+                                <i class="la la-lock"></i>
+                            </a>
+                            <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Xóa thành viên" data-id="{{ $v->id }}">
                                 <i class="la la-trash"></i>
                             </a>
                         </td>
@@ -313,6 +316,40 @@ Biss
         </div>
     </div>
 </div>
+<!-- Modal Password-->
+<div class="modal fade" id="modalPass" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đổi mật khẩu</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <!--begin::Form-->
+            <form method="post" action="{{ route('admin.account.changePass') }}">
+                @csrf
+                <div class="modal-body">
+                    <input type="hidden" name="id">
+                    <div class="form-group">
+                        <label>Tài khoản <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="Tên chức vụ" name="username" readonly/>
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu mới <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="Mật khẩu mới" name="password" required/>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+            <!--end::Form-->
+        </div>
+    </div>
+</div>
 @endsection
 @section('custom_js')
 <script>
@@ -353,6 +390,15 @@ Biss
         $('#modalEdit select').val(roles).change();
         $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
         $('#modalEdit').modal('show');
+    });
+
+    $('.btn-pass').click(function(){
+        let id = $(this).data('id');
+        let admin = data[id];
+        $('#modalPass input[name="username"]').val(admin.username);
+        $('#modalPass input[name="password"]').val('');
+        $('#modalPass input[name="id"]').val(admin.id);
+        $('#modalPass').modal('show');
     });
 
     $('.btn-remove').click(function(){

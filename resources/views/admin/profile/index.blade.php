@@ -80,6 +80,10 @@ Thông tin cá nhân
                             <span class="font-weight-bold mr-2">SĐT:</span>
                             <span class="text-muted">{{ auth('admin')->user()->phone }}</span>
                         </div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="font-weight-bold mr-2">Ngày sinh:</span>
+                            <span class="text-muted">{{ auth('admin')->user()->birthday ? date('d/m/Y', auth('admin')->user()->birthday) : '' }}</span>
+                        </div>
                         <div class="d-flex align-items-center justify-content-between">
                             <span class="font-weight-bold mr-2">Địa chỉ:</span>
                             <span class="text-muted">{{ auth('admin')->user()->address }}</span>
@@ -206,6 +210,13 @@ Thông tin cá nhân
                             <div class="col-lg-9 col-xl-6">
                                 <input class="form-control form-control-lg form-control-solid" name="name"
                                     type="text" value="{{ auth('admin')->user()->name }}" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-xl-3 col-lg-3 col-form-label">Ngày sinh</label>
+                            <div class="col-lg-9 col-xl-6">
+                                <input class="form-control form-control-lg form-control-solid" name="birthday"
+                                    type="date" value="{{ auth('admin')->user()->birthday ? date('Y-m-d', auth('admin')->user()->birthday) : '' }}" />
                             </div>
                         </div>
                         <div class="form-group row">
