@@ -16,7 +16,8 @@ class CreateAdminTicketTable extends Migration
         Schema::create('admin_ticket', function (Blueprint $table) {
             $table->unsignedBigInteger('admin_id');
             $table->unsignedBigInteger('ticket_id');
-            $table->unique('admin_id', 'ticket_id');
+            $table->index('admin_id');
+            $table->unique(['admin_id', 'ticket_id']);
             $table->foreign('admin_id')->references('id')->on('admin')
                 ->onDelete('cascade');
             $table->foreign('ticket_id')->references('id')->on('ticket')

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Admin extends Authenticatable
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'admin';
     protected $fillable = [
@@ -27,4 +27,18 @@ class Admin extends Authenticatable
         'remember_token',
     ];
     protected $dates = ['created_at', 'updated_at'];
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function hasRole($role)
+    {
+        if (is_string($role)) {
+            return $this->roles->contains('name', $role);
+        }
+
+        return false;
+    }
 }

@@ -8,6 +8,7 @@ Biss
 @endsection
 @section('lib_js')
 <script src="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.js"></script>
+<script src="/assets/admin/themes/assets/js/pages/crud/forms/widgets/bootstrap-switch.js"></script>
 @endsection
 @section('content')
 <!--begin::Subheader-->
@@ -85,6 +86,7 @@ Biss
                         <th>MNS</th>
                         <th>Họ tên</th>
                         <th>Thông tin cá nhân</th>
+                        <th>Chức vụ</th>
                         <th>Trạng thái</th>
                         <th>Hành động</th>
                     </tr>
@@ -101,9 +103,10 @@ Biss
                         <td>
                             SĐT: {{ $v->phone }} <br>
                             Email: {{ $v->email }} <br>
-                            Ngày sinh: {{ $v->birthday ? date('Y/m/d', $v->birthday) : '' }} <br>
+                            Ngày sinh: {{ $v->birthday ? date('d/m/Y', $v->birthday) : '' }} <br>
                             Địa chỉ: {{ $v->address }}
                         </td>
+                        <td>{{ !empty($v->roles) ? implode(', ', $v->roles->pluck('name')->toArray()) : '' }}</td>
                         <td>
                             <span class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoạt động' : 'khóa' }}</span>
                         </td>
@@ -129,7 +132,7 @@ Biss
 <!--end::Content-->
 <!-- Modal Create-->
 <div class="modal fade" id="modalCreate" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-    <div class="modal-dialog modal modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Thêm chức vụ</h5>
@@ -138,16 +141,76 @@ Biss
                 </button>
             </div>
             <!--begin::Form-->
-            <form method="post" action="{{ route('admin.role.create') }}">
+            <form method="post" action="{{ route('admin.account.create') }}">
                 @csrf
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Tên chức vụ <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" placeholder="Tên chức vụ" name="name" required/>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Tài khoản</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text"><i class="la la-user"></i></span></div>
+                                <input type="text" class="form-control" name="username" placeholder="Tài khoản đăng nhập" required/>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Mật khẩu</label>
+                            <input type="text" class="form-control" name="password" placeholder="Mật khẩu" required/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Mã nhân sự</label>
+                            <input type="text" class="form-control" name="mns" placeholder="Mã nhân sự"/>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Mã chức vụ <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" placeholder="Mã chức vụ" name="slug" required/>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Họ tên</label>
+                            <input type="text" class="form-control" name="name" placeholder="Họ và tên"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Email:</label>
+                            <div class="input-group">
+                                <input type="email" class="form-control" name="email" placeholder="Email"/>
+                                <div class="input-group-append"><span class="input-group-text"><i class="la la-mail-bulk"></i></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>SĐT:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="phone" placeholder="SĐT"/>
+                                <div class="input-group-append"><span class="input-group-text"><i class="la la-mobile"></i></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Sinh nhật:</label>
+                            <input type="date" class="form-control" name="birthday" placeholder="Sinh nhật"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Địa chỉ:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="address" placeholder="Địa chỉ"/>
+                                <div class="input-group-append"><span class="input-group-text"><i class="la la-map-marker"></i></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Khóa" data-on-color="primary"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-lg-3 col-sm-12">Chức vụ:</label>
+                        <div class="col-lg-12">
+                            <select class="form-control select2" name="roles[]" multiple="multiple" style="width: 100%">
+                                @if(!empty($roles))
+                                @foreach($roles as $v)
+                                <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                @endforeach
+                                @endif
+                            </select>
+                        </div>
                     </div>
 
                 </div>
@@ -162,7 +225,7 @@ Biss
 </div>
 <!-- Modal Edit-->
 <div class="modal fade" id="modalEdit" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-    <div class="modal-dialog modal modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Sửa chức vụ</h5>
@@ -171,17 +234,73 @@ Biss
                 </button>
             </div>
             <!--begin::Form-->
-            <form method="post" action="{{ route('admin.role.create') }}">
+            <form method="post" action="{{ route('admin.account.create') }}">
                 @csrf
                 <div class="modal-body">
                     <input type="hidden" name="id">
-                    <div class="form-group">
-                        <label>Tên chức vụ <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" placeholder="Tên chức vụ" name="name" required/>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Tài khoản</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text"><i class="la la-user"></i></span></div>
+                                <input type="text" class="form-control" name="username" placeholder="Tài khoản đăng nhập" required/>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Mã nhân sự</label>
+                            <input type="text" class="form-control" name="mns" placeholder="Mã nhân sự"/>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Mã chức vụ <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" placeholder="Mã chức vụ" name="slug" required/>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Họ tên</label>
+                            <input type="text" class="form-control" name="name" placeholder="Họ và tên"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Email:</label>
+                            <div class="input-group">
+                                <input type="email" class="form-control" name="email" placeholder="Email"/>
+                                <div class="input-group-append"><span class="input-group-text"><i class="la la-mail-bulk"></i></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>SĐT:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="phone" placeholder="SĐT"/>
+                                <div class="input-group-append"><span class="input-group-text"><i class="la la-mobile"></i></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Sinh nhật:</label>
+                            <input type="date" class="form-control" name="birthday" placeholder="Sinh nhật"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Địa chỉ:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="address" placeholder="Địa chỉ"/>
+                                <div class="input-group-append"><span class="input-group-text"><i class="la la-map-marker"></i></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoạt động" data-off-text="Khóa" data-on-color="primary"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-lg-3 col-sm-12">Chức vụ:</label>
+                        <div class="col-lg-12">
+                            <select class="form-control select2" name="roles[]" multiple="multiple" style="width: 100%">
+                                @if(!empty($roles))
+                                @foreach($roles as $v)
+                                <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                @endforeach
+                                @endif
+                            </select>
+                        </div>
                     </div>
 
                 </div>
@@ -202,13 +321,37 @@ Biss
         paging: true,
     });
 
+    $('.select2').select2({
+        placeholder: 'Chọn chức vụ',
+    });
+
     var data = @json($data->keyBy('id'));
     $('.btn-edit').click(function(){
         let id = $(this).data('id');
-        let role = data[id];
-        $('#modalEdit input[name="name"]').val(role.name);
-        $('#modalEdit input[name="slug"]').val(role.slug);
-        $('#modalEdit input[name="id"]').val(role.id);
+        let admin = data[id];
+        $('#modalEdit input[name="username"]').val(admin.username);
+        $('#modalEdit input[name="mns"]').val(admin.mns);
+        $('#modalEdit input[name="name"]').val(admin.name);
+        $('#modalEdit input[name="email"]').val(admin.email);
+        $('#modalEdit input[name="phone"]').val(admin.phone);
+        $('#modalEdit input[name="address"]').val(admin.address);
+        let timestamp = admin.birthday ? admin.birthday*1000 : null;
+        if(timestamp){
+            let tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            let date = new Date(timestamp - tzoffset).toISOString().split('T')[0];
+            $('#modalEdit input[name="birthday"]').val(date);
+        } else {
+            $('#modalEdit input[name="birthday"]').val('');
+        }
+        $('#modalEdit input[name="id"]').val(admin.id);
+        let roles = []
+        if(admin.roles.length > 0){
+            $.each(admin.roles, function(i, v){
+                roles.push(v.id);
+            });
+        }
+        $('#modalEdit select').val(roles).change();
+        $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
         $('#modalEdit').modal('show');
     });
 
@@ -226,7 +369,7 @@ Biss
                 if(!init.conf.ajax_sending){
                     $.ajax({
                         type: 'POST',
-                        url: "{{ route('admin.role.remove') }}",
+                        url: "{{ route('admin.account.remove') }}",
                         data: {id},
                         beforeSend: function(){
                             init.conf.ajax_sending = true;

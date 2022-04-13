@@ -26,7 +26,6 @@ class CreateAdminTable extends Migration
             $table->integer('birthday')->nullable();
             $table->rememberToken();
             $table->timestamps();
-            $table->softDeletes($column = 'deleted_at', $precision = 0);
         });
     }
 

@@ -39,6 +39,16 @@ class ProjectRepo
         }
     }
 
+    public function remove($id)
+    {
+        try {
+            $this->repo->destroy($id);
+            return true;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
     public function first($condition = [], $order = [], $with = [])
     {
         $query = $this->repo;

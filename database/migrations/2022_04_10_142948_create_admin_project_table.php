@@ -16,7 +16,8 @@ class CreateAdminProjectTable extends Migration
         Schema::create('admin_project', function (Blueprint $table) {
             $table->unsignedBigInteger('admin_id');
             $table->unsignedBigInteger('project_id');
-            $table->unique('admin_id', 'project_id');
+            $table->index('admin_id');
+            $table->unique(['admin_id', 'project_id']);
             $table->foreign('admin_id')->references('id')->on('admin')
                 ->onDelete('cascade');
             $table->foreign('project_id')->references('id')->on('project')
