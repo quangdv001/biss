@@ -16,7 +16,18 @@ class CreateProjectTable extends Migration
         Schema::create('project', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->longText('description');
+            $table->longText('description')->nullable();
+            $table->longText('note')->nullable();
+            $table->unsignedBigInteger('planer_id')->nullable();
+            $table->unsignedBigInteger('executive_id')->nullable();
+            $table->string('package')->nullable();
+            $table->string('payment_month')->nullable();
+            $table->string('fanpage')->nullable();
+            $table->string('website')->nullable();
+            $table->integer('accept_time')->nullable();
+            $table->integer('expired_time')->nullable();
+            $table->integer('created_time')->nullable();
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }
