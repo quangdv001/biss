@@ -15,4 +15,9 @@ class Group extends Model
         'project_id',
     ];
     protected $dates = ['created_at', 'updated_at'];
+
+    public function admin()
+    {
+        return $this->belongsToMany(Admin::class);
+    }
 }

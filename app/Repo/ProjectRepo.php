@@ -109,6 +109,8 @@ class ProjectRepo
             foreach ($condition as $key => $value) {
                 if (is_array($value)) {
                     $query = $query->whereIn($key, $value);
+                } elseif ($key == 'name') {
+                    $query = $query->where($key, 'like', '%' . $value . '%');
                 } else {
                     $query = $query->where($key, $value);
                 }
