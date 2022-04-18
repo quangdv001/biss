@@ -20,4 +20,14 @@ class Group extends Model
     {
         return $this->belongsToMany(Admin::class);
     }
+
+    public function ticket()
+    {
+        return $this->hasMany(Ticket::class,'group_id','id');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class,'project_id','id');
+    }
 }

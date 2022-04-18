@@ -6,30 +6,33 @@ use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
 use App\Repo\GroupRepo;
 use App\Repo\ProjectRepo;
+use App\Repo\TicketRepo;
 use Illuminate\Http\Request;
 
-class AdminGroupController extends Controller
+class AdminTicketController extends Controller
 {
     private $projectRepo;
     private $groupRepo;
+    private $ticketRepo;
     private $adminRepo;
 
-    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo, AdminRepo $adminRepo)
+    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo)
     {
         $this->projectRepo = $projectRepo;
         $this->groupRepo = $groupRepo;
+        $this->ticketRepo = $ticketRepo;
         $this->adminRepo = $adminRepo;
     }
 
     public function index(Request $request){
-        $project_id = $request->only('project_id');
-        $data = $this->projectRepo->first(['id' => $project_id]);
+        $group_id = $request->get('group_id');
+        $data = $this->groupRepo->first(['id'=>$group_id]);
         if(empty($data)){
-            return back()->with('success_message', 'Không tìm thấy dự án!');
+            return back()->with('success_message', 'Không tìm thấy nhóm công việc!');
         }
-        $data->load('group.admin','admin');
+        $data->load('ticket.admin','admin','project');
         $admins = $data->admin ?? [];
-        return view('admin.group.index', compact('data', 'admins'));
+        return view('admin.ticket.index', compact('data', 'admins'));
     }
 
     public function create(Request $request){

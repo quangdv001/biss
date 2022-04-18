@@ -118,7 +118,7 @@
                         @foreach($data as $v)
                             <tr>
                                 <th>{{$v->id}}</th>
-                                <th>{{$v->name}}</th>
+                                <th><a href="{{route('admin.group.index',['project_id'=>$v->id])}}">{{$v->name}}</a></th>
                                 <th title="{{$v->description}}"><span><i class="fab fa-stack-exchange"></i></span></th>
                                 <th title="{{$v->note}}"><span><i class="fab fa-stack-exchange"></i></span></th>
                                 <th>{{$v->planer->username ?? ''}}</th>
@@ -132,9 +132,6 @@
                                 <th class="text-nowrap">{{!empty($v->expired_time)?date('d/m/Y',$v->expired_time):''}}</th>
                                 <th>{{$v->status}}</th>
                                 <th class="text-nowrap">
-                                    <a href="{{route('admin.group.index',['id'=>$v->id])}}" class="btn btn-sm btn-clean btn-icon" title="Chi tiết dự án" data-id="{{$v->id}}">
-                                        <i class="flaticon-settings"></i>
-                                    </a>
                                     <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{$v->id}}">
                                         <i class="la la-edit"></i>
                                     </a>

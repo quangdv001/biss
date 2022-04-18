@@ -31,4 +31,5 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('group/create', 'AdminGroupController@create')->name('group.create');
     Route::post('group/remove', 'AdminGroupController@remove')->name('group.remove');
 
+    Route::get('ticket', 'AdminTicketController@index')->name('ticket.index');
 });

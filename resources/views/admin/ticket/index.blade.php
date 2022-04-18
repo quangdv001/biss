@@ -1,6 +1,6 @@
 @extends('admin.layout.main')
 @section('title')
-    Chi tiết dự án
+    Chi tiết nhóm công việc
 @endsection
 @section('lib_js')
 <script src="/assets/admin/themes/assets/js/pages/widgets.js"></script>
@@ -12,25 +12,24 @@
         <div class=" w-100  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
             <!--begin::Info-->
             <div class="d-flex align-items-center flex-wrap mr-1">
-                <!--begin::Mobile Toggle-->
-                <button class="burger-icon burger-icon-left mr-4 d-inline-block d-lg-none" id="kt_subheader_mobile_toggle">
-                    <span></span>
-                </button>
-                <!--end::Mobile Toggle-->
 
                 <!--begin::Page Heading-->
                 <div class="d-flex align-items-baseline flex-wrap mr-5">
                     <!--begin::Page Title-->
-                    <h5 class="text-dark font-weight-bold my-1 mr-5"> Dự án </h5>
+                    <h5 class="text-dark font-weight-bold my-1 mr-5">
+                        Dự án </h5>
                     <!--end::Page Title-->
 
                     <!--begin::Breadcrumb-->
                     <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
                         <li class="breadcrumb-item">
-                            <a href="{{route('admin.project.index')}}" class="text-muted"> Danh sách </a>
+                            <a href="{{route('admin.project.index')}}" class="text-muted">Danh sách </a>
                         </li>
                         <li class="breadcrumb-item">
-                            <span class="text-muted text-capitalize">{{$data->name}}</span>
+                            <a href="{{route('admin.group.index',['project_id'=> $data->project_id])}}" class="text-muted text-capitalize"> {{$data->project->name}} </a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <span class="text-muted">Chi tiết nhóm công việc</span>
                         </li>
                     </ul>
                     <!--end::Breadcrumb-->
@@ -50,57 +49,67 @@
                 <!--begin::Profile Card-->
                 <div class="card card-custom card-stretch gutter-b">
                     <!--begin::Header-->
-                    {{--<div class="card-header border-0">--}}
-                        {{--<h3 class="card-title font-weight-bolder text-dark text-capitalize">{{$data->name}}</h3>--}}
-                        {{--<div class="card-toolbar">--}}
-                            {{--<a href="#" class="btn btn-primary btn-sm font-size-sm font-weight-bolder" data-toggle="modal" data-target="#modalCreate">Thêm nhóm</a>--}}
-                        {{--</div>--}}
-                    {{--</div>--}}
+                    <div class="card-header border-0">
+                        <h3 class="card-title font-weight-bolder text-dark text-capitalize">{{$data->name}}</h3>
+                        <div class="card-toolbar">
+                            <a href="#" class="btn btn-primary btn-sm font-size-sm font-weight-bolder" data-toggle="modal" data-target="#modalCreate">Thêm ticket</a>
+                        </div>
+                    </div>
                     <!--end::Header-->
 
                     <!--begin::Body-->
-                    <div class="card-body pt-5">
-                        <div class="navi navi-bold navi-hover navi-active navi-link-rounded">
-                            <div class="navi-item mb-2">
-                                <a href="javascript:void(0);" class="navi-link py-4 active">
-                                    <span class="font-size-lg">
-                                    Tổng quan dự án
-                                </span>
-                                </a>
-                            </div>
-                        </div>
-
-
-                        <div class="accordion accordion-solid accordion-toggle-plus mt-3" id="accordionExample8">
-                            <div class="card">
-                                <div class="card-header" id="headingTwo8">
-                                    <div class="card-title collapsed" data-toggle="collapse" data-target="#collapseTwo8">
-                                        <div class="font-size-lg">Nhóm công việc</div>
+                    <div class="card-body pt-2">
+                        <!--begin::Item-->
+                        @if(!empty($data->ticket))
+                            @foreach($data->ticket as $ticket)
+                                <div class="d-flex align-items-center mb-3">
+                                    <!--begin::Text-->
+                                    <div class="d-flex flex-column flex-grow-1">
+                                        <a href="#" class="text-dark-75 text-hover-primary font-weight-bold font-size-lg mb-1 text-capitalize">
+                                            {{$ticket->name}}
+                                        </a>
                                     </div>
-                                </div>
-                                <div id="collapseTwo8" class="collapse" data-parent="#accordionExample8">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="d-flex flex-column flex-grow-1">
-                                                <a href="javascript:void(0)" class="label label-lg font-weight-bolder label-rounded label-success label-inline" data-toggle="modal" data-target="#modalCreate">Tạo nhóm</a>
-                                            </div>
-                                        </div>
-                                        @if(!empty($data->group))
-                                            @foreach($data->group as $group)
-                                            <div class="d-flex align-items-center mb-4">
-                                                <span class="bullet bullet-bar bg-warning align-self-stretch mr-2"></span>
-                                                <div class="d-flex flex-column flex-grow-1">
-                                                    <a href="#" class="text-dark-75 text-hover-primary font-weight-bold font-size-lg text-capitalize">
-                                                        {{$group->name}}
+                                    <!--end::Text-->
+
+                                    <!--begin::Dropdown-->
+                                    <div class="dropdown dropdown-inline ml-2" data-toggle="tooltip" title="" data-placement="left">
+                                        <a href="#" class="btn btn-hover-light-primary btn-sm btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="ki ki-bold-more-hor"></i>
+                                        </a>
+                                        <div class="dropdown-menu p-0 m-0 dropdown-menu-md dropdown-menu-right" style="">
+                                            <!--begin::Navigation-->
+                                            <ul class="navi navi-hover">
+                                                <li class="navi-item">
+                                                    <a href="#" class="navi-link">
+                                                        <span class="navi-icon"><i class="flaticon-settings"></i></span>
+                                                        <span class="navi-text">Chi tiết</span>
                                                     </a>
-                                                </div>
-                                            </div>
-                                            @endforeach
-                                        @endif
+                                                </li>
+                                            </ul>
+                                            <ul class="navi navi-hover">
+                                                <li class="navi-item">
+                                                    <a href="#" class="navi-link btn-edit" data-id="{{$ticket->id}}">
+                                                        <span class="navi-icon"><i class="la la-edit"></i></span>
+                                                        <span class="navi-text">Chỉnh sửa</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <ul class="navi navi-hover">
+                                                <li class="navi-item">
+                                                    <a href="#" class="navi-link btn-remove" data-id="{{$ticket->id}}">
+                                                        <span class="navi-icon"><i class="la la-trash"></i></span>
+                                                        <span class="navi-text">Xóa</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <!--end::Navigation-->
+                                        </div>
                                     </div>
+                                    <!--end::Dropdown-->
                                 </div>
-                            </div>
-                        </div>
+                            @endforeach
+                        @endif
+                        <!--end:Item-->
 
                     </div>
                     <!--end::Body-->
