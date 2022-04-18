@@ -90,7 +90,7 @@
                                             <div class="d-flex align-items-center mb-4">
                                                 <span class="bullet bullet-bar bg-warning align-self-stretch mr-2"></span>
                                                 <div class="d-flex flex-column flex-grow-1">
-                                                    <a href="#" class="text-dark-75 text-hover-primary font-weight-bold font-size-lg text-capitalize">
+                                                    <a href="{{route('admin.ticket.index',['group_id'=>$group->id])}}" class="text-dark-75 text-hover-primary font-weight-bold font-size-lg text-capitalize">
                                                         {{$group->name}}
                                                     </a>
                                                 </div>

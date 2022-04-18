@@ -24,4 +24,19 @@ class Ticket extends Model
         'group_id',
     ];
     protected $dates = ['created_at', 'updated_at'];
+
+    public function admin()
+    {
+        return $this->belongsToMany(Admin::class);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class,'group_id','id');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class,'project_id','id');
+    }
 }

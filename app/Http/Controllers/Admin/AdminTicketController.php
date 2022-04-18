@@ -25,32 +25,40 @@ class AdminTicketController extends Controller
     }
 
     public function index(Request $request){
-        $group_id = $request->get('group_id');
-        $data = $this->groupRepo->first(['id'=>$group_id]);
-        if(empty($data)){
-            return back()->with('success_message', 'Không tìm thấy nhóm công việc!');
+        $params = $request->only('group_id','');
+        $start_time = $request->start_time ? strtotime($request->start_time) : null;
+        $end_time = $request->end_time ? strtotime($request->end_time) : null;
+        if(!empty($start_time) && !empty($end_time)){
+            $params['created_time'] = [$start_time, strtotime('tomorrow', $end_time)];
         }
-        $data->load('ticket.admin','admin','project');
-        $admins = $data->admin ?? [];
-        return view('admin.ticket.index', compact('data', 'admins'));
+        $name = $request->get('name', '');
+        if(!empty($name)){
+            $params['name'] = $name;
+        }
+        $data = $this->ticketRepo->paginate($params);
+        $data->load('admin');
+        return view('admin.ticket.index', compact('data'));
     }
 
     public function create(Request $request){
-        $params = $request->only('id', 'project_id', 'name');
+        $admin = auth('admin')->user();
+        $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'status', 'deadline_time', 'complete_time', 'project_id', 'group_id');
         if(isset($params['id'])){
-            $group = $this->groupRepo->first(['id' => $params['id']]);
-            if($group){
-                $res = $this->groupRepo->update($group, $params);
+            $ticket = $this->ticketRepo->first(['id' => $params['id']]);
+            if($ticket){
+                $res = $this->ticketRepo->update($ticket, $params);
                 if($res){
-                    $res->admin()->sync($request->get('admin_group',[]));
-                    return back()->with('success_message', 'Cập nhật nhóm thành công!');
+                    $res->admin()->sync($request->get('admin_ticket',[]));
+                    return back()->with('success_message', 'Cập nhật ticket thành công!');
                 }
             }
         } else {
-            $res = $this->groupRepo->create($params);
+            $params['created_time'] = time();
+            $params['admin_id_c'] = $admin->id;
+            $res = $this->ticketRepo->create($params);
             if($res){
-                $res->admin()->sync($request->get('admin_group',[]));
-                return back()->with('success_message', 'Tạo nhóm thành công!');
+                $res->admin()->sync($request->get('admin_ticket',[]));
+                return back()->with('success_message', 'Tạo ticket thành công!');
             }
         }
         return back()->with('error_message', 'Có lỗi xảy ra!');
@@ -58,7 +66,7 @@ class AdminTicketController extends Controller
 
     public function remove(Request $request){
         $id = $request->input('id');
-        $resR = $this->groupRepo->remove($id);
+        $resR = $this->ticketRepo->remove($id);
         $res['success'] = 0;
         if($resR){
             $res['success'] = 1;
