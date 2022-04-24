@@ -3,8 +3,8 @@
 Thông tin cá nhân
 @endsection
 @section('lib_js')
-<script src="assets/js/pages/widgets.js"></script>
-<script src="assets/js/pages/custom/profile/profile.js"></script>
+<script src="/assets/admin/themes/assets/js/pages/widgets.js"></script>
+<script src="/assets/admin/themes/assets/js/pages/custom/profile/profile.js"></script>
 @endsection
 @section('content')
 <!--begin::Subheader-->
