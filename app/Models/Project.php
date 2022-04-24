@@ -16,4 +16,24 @@ class Project extends Model
         'project_id',
     ];
     protected $dates = ['created_at', 'updated_at'];
+
+    public function admin()
+    {
+        return $this->belongsToMany(Admin::class);
+    }
+
+    public function planer()
+    {
+        return $this->belongsTo(Admin::class,'planer_id','id');
+    }
+
+    public function executive()
+    {
+        return $this->belongsTo(Admin::class,'executive_id','id');
+    }
+
+    public function group()
+    {
+        return $this->hasMany(Group::class,'project_id','id');
+    }
 }

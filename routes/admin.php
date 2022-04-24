@@ -24,4 +24,12 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('account/remove', 'AdminAccountController@remove')->name('account.remove');
 
     Route::get('project', 'AdminProjectController@index')->name('project.index');
+    Route::post('project/create', 'AdminProjectController@create')->name('project.create');
+    Route::post('project/remove', 'AdminProjectController@remove')->name('project.remove');
+
+    Route::get('group', 'AdminGroupController@index')->name('group.index');
+    Route::post('group/create', 'AdminGroupController@create')->name('group.create');
+    Route::post('group/remove', 'AdminGroupController@remove')->name('group.remove');
+
+    Route::get('ticket', 'AdminTicketController@index')->name('ticket.index');
 });

@@ -109,6 +109,10 @@ class TicketRepo
             foreach ($condition as $key => $value) {
                 if (is_array($value)) {
                     $query = $query->whereIn($key, $value);
+                } elseif ($key == 'name') {
+                    $query = $query->where($key, 'like', '%' . $value . '%');
+                } elseif ($key == 'created_time') {
+                    $query = $query->whereBetween($key, $value);
                 } else {
                     $query = $query->where($key, $value);
                 }
