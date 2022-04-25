@@ -1,13 +1,14 @@
 <?php
 namespace App\Repo;
 
-use App\Models\Project;
+use App\Models\Group;
+use App\Models\Phase;
 use Exception;
 
-class ProjectRepo
+class PhaseRepo
 {
     private $repo;
-    public function __construct(Project $repo)
+    public function __construct(Phase $repo)
     {
         $this->repo = $repo;
     }
@@ -15,7 +16,7 @@ class ProjectRepo
     public function create($data)
     {
         try {
-            $repo = new Project();
+            $repo = new Phase();
             foreach ($data as $key => $value) {
                 $repo->$key = $value;
             }
@@ -109,8 +110,6 @@ class ProjectRepo
             foreach ($condition as $key => $value) {
                 if (is_array($value)) {
                     $query = $query->whereIn($key, $value);
-                } elseif ($key == 'name') {
-                    $query = $query->where($key, 'like', '%' . $value . '%');
                 } else {
                     $query = $query->where($key, $value);
                 }
@@ -149,21 +148,6 @@ class ProjectRepo
             $data = $query->pluck($field);
         }
         return $data;
-    }
-
-    public function search($params, $limit, $userId){
-        $query = $this->repo;
-        if(!empty($params['name'])){
-            $query = $query->where('name', 'like', '%' . $params['name'] . '%');
-        }
-        $query = $query->whereHas('admin', function ($query) use ($userId) {
-            $query->where('admin_id','=', $userId);
-        });
-        $query = $query->with(['planer', 'executive', 'admin']);
-        $query = $query->orderBy('id', 'DESC');
-        $query = $query->paginate($limit);
-        return $query;
-
     }
 
 }
