@@ -109,6 +109,8 @@ class ProjectRepo
             foreach ($condition as $key => $value) {
                 if (is_array($value)) {
                     $query = $query->whereIn($key, $value);
+                } elseif ($key == 'name') {
+                    $query = $query->where($key, 'like', '%' . $value . '%');
                 } else {
                     $query = $query->where($key, $value);
                 }
@@ -147,6 +149,21 @@ class ProjectRepo
             $data = $query->pluck($field);
         }
         return $data;
+    }
+
+    public function search($params, $limit, $userId){
+        $query = $this->repo;
+        if(!empty($params['name'])){
+            $query = $query->where('name', 'like', '%' . $params['name'] . '%');
+        }
+        $query = $query->whereHas('admin', function ($query) use ($userId) {
+            $query->where('admin_id','=', $userId);
+        });
+        $query = $query->with(['planer', 'executive', 'admin']);
+        $query = $query->orderBy('id', 'DESC');
+        $query = $query->paginate($limit);
+        return $query;
+
     }
 
 }

@@ -81,7 +81,7 @@ Biss
             <table class="table table-separate table-head-custom table-checkable" id="kt_datatable">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#</th>
                         <th>Tài khoản</th>
                         <th>MNS</th>
                         <th>Họ tên</th>

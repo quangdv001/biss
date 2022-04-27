@@ -1,13 +1,14 @@
 <?php
 namespace App\Repo;
 
-use App\Models\Ticket;
+use App\Models\Group;
+use App\Models\Phase;
 use Exception;
 
-class TicketRepo
+class PhaseRepo
 {
     private $repo;
-    public function __construct(Ticket $repo)
+    public function __construct(Phase $repo)
     {
         $this->repo = $repo;
     }
@@ -15,7 +16,7 @@ class TicketRepo
     public function create($data)
     {
         try {
-            $repo = new Ticket();
+            $repo = new Phase();
             foreach ($data as $key => $value) {
                 $repo->$key = $value;
             }
@@ -109,10 +110,6 @@ class TicketRepo
             foreach ($condition as $key => $value) {
                 if (is_array($value)) {
                     $query = $query->whereIn($key, $value);
-                } elseif ($key == 'name') {
-                    $query = $query->where($key, 'like', '%' . $value . '%');
-                } elseif ($key == 'created_time') {
-                    $query = $query->whereBetween($key, $value);
                 } else {
                     $query = $query->where($key, $value);
                 }
