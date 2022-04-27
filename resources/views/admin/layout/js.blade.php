@@ -72,3 +72,4 @@
 @yield('lib_js')
 <script src="/js/init.js"></script>
 @yield('custom_js')
+@stack('custom_js')

@@ -25,6 +25,7 @@ class AdminGroupController extends Controller
     }
 
     public function index(Request $request, $id, $pid = 0){ 
+        $gid = 0;
         $project = $this->projectRepo->first(['id' => $id], [], ['group.admin','admin']);
         if(empty($project)){
             return back()->with('success_message', 'Không tìm thấy dự án!');
@@ -32,7 +33,7 @@ class AdminGroupController extends Controller
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
         $admins = $project->admin ?? [];
-        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id'));
+        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid'));
     }
 
     public function create(Request $request){
@@ -62,6 +63,12 @@ class AdminGroupController extends Controller
         $params['end_time'] = $params['end_time'] ? strtotime($params['end_time']) + 86399 : null;
         $res = $this->phase->create($params);
         if($res){
+            $project = $this->projectRepo->first(['id' => $res->project_id]);
+            if($project){
+                $paramsP['accept_time'] = $res->start_time;
+                $paramsP['expired_time'] = $res->end_time;
+                $this->projectRepo->update($project, $paramsP);
+            }
             return back()->with('success_message', 'Tạo phase thành công!');
         }
         return back()->with('error_message', 'Có lỗi xảy ra!');
