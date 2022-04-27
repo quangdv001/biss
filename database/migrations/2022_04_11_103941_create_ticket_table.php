@@ -26,9 +26,12 @@ class CreateTicketTable extends Migration
             $table->unsignedBigInteger('admin_id_c');
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('group_id');
+            $table->unsignedBigInteger('phase_id');
             $table->foreign('project_id')->references('id')->on('project')
                 ->onDelete('cascade');
             $table->foreign('group_id')->references('id')->on('group')
+                ->onDelete('cascade');
+            $table->foreign('phase_id')->references('id')->on('phase')
                 ->onDelete('cascade');
             $table->timestamps();
         });
