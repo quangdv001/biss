@@ -86,4 +86,6 @@ class AdminProjectController extends Controller
         }
         return response()->json($res);
     }
+
+
 }

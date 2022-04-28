@@ -17,4 +17,8 @@ class Phase extends Model
     ];
     protected $dates = ['created_at', 'updated_at'];
 
+    public function ticket()
+    {
+        return $this->hasMany(Ticket::class, 'phase_id', 'id');
+    }
 }

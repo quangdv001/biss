@@ -26,13 +26,60 @@ class AdminGroupController extends Controller
 
     public function index(Request $request, $id, $pid = 0){ 
         $gid = 0;
-        $project = $this->projectRepo->first(['id' => $id], [], ['group.admin','admin']);
+        $project = $this->projectRepo->first(['id' => $id], [], ['group.admin', 'admin', 'ticket', 'phase.ticket']);
         if(empty($project)){
             return back()->with('success_message', 'Không tìm thấy dự án!');
         }
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
         $admins = $project->admin ?? [];
+        $phaseByProject = $project->phase->keyBy('id');
+        $groupByProject = $project->group->keyBy('id');
+        $dataReport = $project->ticket->groupBy(['phase_id', function ($item) {
+            return $item['group_id'];
+        }], true)->map(function ($groups, $phase_id) use ($phaseByProject, $groupByProject) {
+            $groups = $groups->map(function ($tickets, $group_id) use ($groupByProject) {
+                $dataG['group'] = @$groupByProject[$group_id]['name'];
+                $dataG['report']['total'] = count($tickets);
+                $dataG['report']['new'] = 0;
+                $dataG['report']['expired'] = 0;
+                $dataG['report']['done'] = 0;
+                $dataG['report']['done_on_time'] = 0;
+                $dataG['report']['done_out_time'] = 0;
+                $dataG['report']['percent'] = 0;
+                if (!empty($tickets)) {
+                    foreach ($tickets as $ticket) {
+                        if ($ticket['status'] == 0) {
+                            if (time() > $ticket['deadline_time']) {
+                                $dataG['report']['expired'] += 1;
+                            } else {
+                                $dataG['report']['new'] += 1;
+                            }
+                        }
+                        if ($ticket['status'] == 1) {
+                            $dataG['report']['done'] += 1;
+                            if ($ticket['complete_time'] <= $ticket['deadline_time']) {
+                                $dataG['report']['done_on_time'] += 1;
+                            } else {
+                                $dataG['report']['done_out_time'] += 1;
+                            }
+                        }
+                    }
+                }
+                $dataG['report']['percent'] = !empty($dataG['report']['total']) ? round($dataG['report']['done'] / $dataG['report']['total'] * 100) : 0;
+                return $dataG;
+            })->all();
+            $dataP['phase'] = $phaseByProject[$phase_id]['name'] . ' (' . date('d/m', $phaseByProject[$phase_id]['start_time']) . ' - ' . date('d/m', $phaseByProject[$phase_id]['end_time']) . ')';
+            $dataP['groups'] = array_values($groups);
+            return $dataP;
+        })->all();
+        $dataReport = array_values($dataReport);
+        foreach ($phaseByProject as $phaseI){
+            $phaseByProject[$phaseI->id]['name'] = $phaseI->name;
+            $phaseByProject[$phaseI->id]['start_time'] = $phaseI->start_time;
+            $phaseByProject[$phaseI->id]['end_time'] = $phaseI->end_time;
+            $phaseByProject[$phaseI->id]['end_time'] = $phaseI->end_time;
+        }
         return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid'));
     }
 

@@ -36,4 +36,14 @@ class Project extends Model
     {
         return $this->hasMany(Group::class,'project_id','id');
     }
+
+    public function phase()
+    {
+        return $this->hasMany(Phase::class, 'project_id', 'id');
+    }
+
+    public function ticket()
+    {
+        return $this->hasMany(Ticket::class, 'project_id', 'id');
+    }
 }
