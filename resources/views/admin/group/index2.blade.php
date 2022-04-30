@@ -62,43 +62,104 @@
                 <!--begin::Body-->
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-12">
                             <!--begin::Card-->
                             <div class="card card-custom gutter-b">
                                 <div class="card-header">
                                     <div class="card-title">
                                         <h3 class="card-label">
-                                            Seo
+                                            Báo cáo nội dung công việc
                                         </h3>
                                     </div>
                                 </div>
                                 <div class="card-body">
                                     <!--begin::Chart-->
-                                    <div  class="d-flex justify-content-center chart_12"></div>
+                                    <table class="table text-center">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Nội dung công việc</th>
+                                            <th scope="col">Số lượng</th>
+                                            <th scope="col">Mới</th>
+                                            <th scope="col">Hết hạn</th>
+                                            <th scope="col">Hoàn thành</th>
+                                            <th scope="col">Hoàn thành đúng hạn</th>
+                                            <th scope="col">Hoàn thành trễ</th>
+                                            <th scope="col">Tiến độ</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @if(!empty($reportGroup))
+                                            @foreach($reportGroup as $k => $groupR)
+                                                <tr>
+                                                    <td scope="row">{{$k + 1}}</td>
+                                                    <td>{{$groupR['group']}}</td>
+                                                    <td>{{$groupR['report']['total']}}</td>
+                                                    <td>{{$groupR['report']['new']}}</td>
+                                                    <td>{{$groupR['report']['expired']}}</td>
+                                                    <td>{{$groupR['report']['done']}}</td>
+                                                    <td>{{$groupR['report']['done_on_time']}}</td>
+                                                    <td>{{$groupR['report']['done_out_time']}}</td>
+                                                    <td>{{$groupR['report']['percent']}} %</td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                        </tbody>
+                                    </table>
                                     <!--end::Chart-->
                                 </div>
                             </div>
                             <!--end::Card-->
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-12">
                             <!--begin::Card-->
                             <div class="card card-custom gutter-b">
                                 <div class="card-header">
                                     <div class="card-title">
                                         <h3 class="card-label">
-                                            Fanpage
+                                            Báo cáo thành viên
                                         </h3>
                                     </div>
                                 </div>
                                 <div class="card-body">
                                     <!--begin::Chart-->
-                                    <div  class="d-flex justify-content-center chart_13"></div>
+                                    <table class="table text-center">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Thành viên</th>
+                                            <th scope="col">Số lượng</th>
+                                            <th scope="col">Mới</th>
+                                            <th scope="col">Hết hạn</th>
+                                            <th scope="col">Hoàn thành</th>
+                                            <th scope="col">Hoàn thành đúng hạn</th>
+                                            <th scope="col">Hoàn thành trễ</th>
+                                            <th scope="col">Tiến độ</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @if(!empty($reportMember))
+                                            @foreach($reportMember as $k => $member)
+                                                <tr>
+                                                    <td scope="row">{{$k + 1}}</td>
+                                                    <td>{{$member['username']}}</td>
+                                                    <td>{{$member['report']['total']}}</td>
+                                                    <td>{{$member['report']['new']}}</td>
+                                                    <td>{{$member['report']['expired']}}</td>
+                                                    <td>{{$member['report']['done']}}</td>
+                                                    <td>{{$member['report']['done_on_time']}}</td>
+                                                    <td>{{$member['report']['done_out_time']}}</td>
+                                                    <td>{{$member['report']['percent']}} %</td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                        </tbody>
+                                    </table>
                                     <!--end::Chart-->
                                 </div>
                             </div>
                             <!--end::Card-->
                         </div>
-                        
                     </div>
                 </div>
                 <!--end::Body-->
@@ -229,9 +290,9 @@
 		var chart = new ApexCharts(document.querySelector(apexChart), options);
 		chart.render();
 	}
-
-    _demo12();
-    _demo13();
+    //
+    // _demo12();
+    // _demo13();
 
 </script>
 @endsection
