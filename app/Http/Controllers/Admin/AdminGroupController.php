@@ -46,29 +46,29 @@ class AdminGroupController extends Controller
             return $data;
         })->keyBy('id')->all();
         $reportGroup = $project->ticket->where('phase_id', $pid)->groupBy('group_id')->map(function ($tickets, $group_id) use ($groupByProject, &$reportMember) {
-            $dataG['group'] = @$groupByProject[$group_id]['name'];
-            $dataG['report']['total'] = count($tickets);
-            $dataG['report']['new'] = 0;
-            $dataG['report']['expired'] = 0;
-            $dataG['report']['done'] = 0;
-            $dataG['report']['done_on_time'] = 0;
-            $dataG['report']['done_out_time'] = 0;
-            $dataG['report']['percent'] = 0;
+            $data['group'] = @$groupByProject[$group_id]['name'];
+            $data['report']['total'] = count($tickets);
+            $data['report']['new'] = 0;
+            $data['report']['expired'] = 0;
+            $data['report']['done'] = 0;
+            $data['report']['done_on_time'] = 0;
+            $data['report']['done_out_time'] = 0;
+            $data['report']['percent'] = 0;
             if (!empty($tickets)) {
                 foreach ($tickets as $ticket) {
                     if ($ticket['status'] == 0 && empty($ticket['complete_time'])) {
                         if (time() > $ticket['deadline_time']) {
-                            $dataG['report']['expired'] += 1;
+                            $data['report']['expired'] += 1;
                         } else {
-                            $dataG['report']['new'] += 1;
+                            $data['report']['new'] += 1;
                         }
                     }
                     if ($ticket['status'] == 1 || !empty($ticket['complete_time'])) {
-                        $dataG['report']['done'] += 1;
+                        $data['report']['done'] += 1;
                         if ($ticket['complete_time'] <= $ticket['deadline_time']) {
-                            $dataG['report']['done_on_time'] += 1;
+                            $data['report']['done_on_time'] += 1;
                         } else {
-                            $dataG['report']['done_out_time'] += 1;
+                            $data['report']['done_out_time'] += 1;
                         }
                     }
                     if (!empty($ticket->admin)) {
@@ -93,8 +93,8 @@ class AdminGroupController extends Controller
                     }
                 }
             }
-            $dataG['report']['percent'] = !empty($dataG['report']['total']) ? round($dataG['report']['done'] / $dataG['report']['total'] * 100) : 0;
-            return $dataG;
+            $data['report']['percent'] = !empty($data['report']['total']) ? round($data['report']['done'] / $data['report']['total'] * 100) : 0;
+            return $data;
         })->values()->all();
         $reportMember = array_values($reportMember);
         return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember'));

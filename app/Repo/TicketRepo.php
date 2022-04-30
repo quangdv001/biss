@@ -153,4 +153,19 @@ class TicketRepo
         return $data;
     }
 
+    public function getTicketByAdmin($admin_id, $start_time, $end_time)
+    {
+        $query = $this->repo;
+        if(!empty($start_time) && !empty($end_time)){
+            $query = $query->whereBetween('created_time', [$start_time,$end_time]);
+        }
+        $query = $query->whereHas('admin', function ($query) use ($admin_id) {
+            $query->where('id', $admin_id);
+        });
+        $result = collect([]);
+        $query->chunkById(200, function ($data) use (&$result) {
+            $result = $result->merge($data->all());
+        });
+        return $result;
+    }
 }

@@ -166,4 +166,14 @@ class ProjectRepo
 
     }
 
+    public function getProjectByAdmin($admin_id)
+    {
+        $query = $this->repo;
+        $query = $query->whereHas('admin', function ($query) use ($admin_id) {
+            $query->where('id', $admin_id);
+        });
+        $data = $query->get();
+        return $data;
+    }
+
 }

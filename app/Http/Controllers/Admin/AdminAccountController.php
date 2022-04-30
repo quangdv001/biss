@@ -4,17 +4,23 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
+use App\Repo\ProjectRepo;
 use App\Repo\RoleRepo;
+use App\Repo\TicketRepo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AdminAccountController extends Controller
 {
     private $admin, $role;
-    public function __construct(AdminRepo $admin, RoleRepo $role)
+    private $ticketRepo;
+    private $projectRepo;
+    public function __construct(AdminRepo $admin, RoleRepo $role, TicketRepo $ticketRepo, ProjectRepo $projectRepo)
     {
         $this->admin = $admin;
         $this->role = $role;
+        $this->ticketRepo = $ticketRepo;
+        $this->projectRepo = $projectRepo;
     }
 
     public function index(){
@@ -71,5 +77,49 @@ class AdminAccountController extends Controller
             $res['success'] = 1;
         }
         return response()->json($res);
+    }
+
+    public function report(Request $request)
+    {
+        $id = $request->get('id', '');
+        $account = $this->admin->first(['id' => $id]);
+        if (empty($account)) {
+            return response(['success' => 0, 'message' => 'Không tìm thấy tài khoản!']);
+        }
+        $start_time =  strtotime($request->get('start_time',''));
+        $end_time =  strtotime($request->get('end_time',''));
+        $projectByAdmin = $this->projectRepo->getProjectByAdmin($id)->keyBy('id');
+        $data = $this->ticketRepo->getTicketByAdmin($id, $start_time, $end_time)->groupBy('project_id')->map(function ($tickets, $project_id) use ($projectByAdmin){
+            $data['project'] = @$projectByAdmin[$project_id]['name'];
+            $data['report']['total'] = count($tickets);
+            $data['report']['new'] = 0;
+            $data['report']['expired'] = 0;
+            $data['report']['done'] = 0;
+            $data['report']['done_on_time'] = 0;
+            $data['report']['done_out_time'] = 0;
+            $data['report']['percent'] = 0;
+            if (!empty($tickets)) {
+                foreach ($tickets as $ticket) {
+                    if ($ticket['status'] == 0 && empty($ticket['complete_time'])) {
+                        if (time() > $ticket['deadline_time']) {
+                            $data['report']['expired'] += 1;
+                        } else {
+                            $data['report']['new'] += 1;
+                        }
+                    }
+                    if ($ticket['status'] == 1 || !empty($ticket['complete_time'])) {
+                        $data['report']['done'] += 1;
+                        if ($ticket['complete_time'] <= $ticket['deadline_time']) {
+                            $data['report']['done_on_time'] += 1;
+                        } else {
+                            $data['report']['done_out_time'] += 1;
+                        }
+                    }
+                }
+            }
+            $data['report']['percent'] = !empty($data['report']['total']) ? round($data['report']['done'] / $data['report']['total'] * 100) : 0;
+            return $data;
+        })->values()->all();
+        return response(['success' => 1, 'data' => $data]);
     }
 }

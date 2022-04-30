@@ -120,6 +120,12 @@ Biss
                             <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Xóa thành viên" data-id="{{ $v->id }}">
                                 <i class="la la-trash"></i>
                             </a>
+                            {{--<a href="{{route('admin.account.report',['id' => $v->id])}}" class="btn btn-sm btn-clean btn-icon" title="Báo cáo thành viên" data-id="{{ $v->id }}">--}}
+                                {{--<i class="la la-signal"></i>--}}
+                            {{--</a>--}}
+                            <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-report" title="Báo cáo thành viên" data-id="{{ $v->id }}">
+                                <i class="la la-signal"></i>
+                            </a>
                         </td>
                         @endforeach
                         @endif
@@ -350,6 +356,71 @@ Biss
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalReport" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Báo cáo tài khoản <span class="username font-weight-bold text-primary"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id">
+               <div class="d-flex text-nowrap align-items-center justify-content-end mb-4">
+                   <div class="d-flex align-items-center">
+                       <div class="mr-2">Ngày bắt đầu: </div>
+                       <input type="date" class="form-control" name="start_time" onchange="reportMember()">
+                   </div>
+                   <div class="ml-4 d-flex align-items-center">
+                       <div class="mr-2">Ngày kết thúc: </div>
+                       <input type="date" class="form-control" name="end_time" onchange="reportMember()">
+                   </div>
+               </div>
+                <table class="table text-center">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Dự án</th>
+                        <th scope="col">Số lượng</th>
+                        <th scope="col">Mới</th>
+                        <th scope="col">Hết hạn</th>
+                        <th scope="col">Hoàn thành</th>
+                        <th scope="col">Hoàn thành đúng hạn</th>
+                        <th scope="col">Hoàn thành trễ</th>
+                        <th scope="col">Tiến độ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td scope="row">1</td>
+                        <td>guest</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0 %</td>
+                    </tr>
+                    <tr>
+                        <td scope="row">2</td>
+                        <td>account</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0 %</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('custom_js')
 <script>
@@ -439,5 +510,59 @@ Biss
             }
         });
     });
+
+    $('.btn-report').click(function(){
+        let id = $(this).data('id');
+        let admin = data[id];
+        $('#modalReport .username').html(admin.username);
+        $('#modalReport input[name="id"]').val(id);
+        $('#modalReport input[name="start_time"]').val('');
+        $('#modalReport input[name="end_time"]').val('');
+        reportMember();
+        $('#modalReport').modal('show');
+    });
+
+    function reportMember() {
+        let id = $('#modalReport input[name="id"]').val();
+        let start_time = $('#modalReport input[name="start_time"]').val();
+        let end_time = $('#modalReport input[name="end_time"]').val();
+        if(!init.conf.ajax_sending){
+            $.ajax({
+                type: 'GET',
+                url: "{{ route('admin.account.report') }}",
+                data: {id, start_time, end_time},
+                beforeSend: function(){
+                    init.conf.ajax_sending = true;
+                },
+                success: function(res){
+                    console.log(res);
+                    let html = '';
+                    if(res.success){
+                        if(res.data.length > 0){
+                            res.data.forEach(function ($project, $k) {
+                                html += `<tr>
+                                            <td scope="row">${($k+1)}</td>
+                                            <td>${$project.project}</td>
+                                            <td>${$project.report.total}</td>
+                                            <td>${$project.report.new}</td>
+                                            <td>${$project.report.expired}</td>
+                                            <td>${$project.report.done}</td>
+                                            <td>${$project.report.done_on_time}</td>
+                                            <td>${$project.report.done_out_time}</td>
+                                            <td>${$project.report.percent} %</td>
+                                        </tr>`
+                            });
+                        }
+                        $('#modalReport tbody').html(html)
+                    } else {
+                        init.showNoty('Có lỗi xảy ra!', 'error');
+                    }
+                },
+                complete: function(){
+                    init.conf.ajax_sending = false;
+                }
+            })
+        }
+    }
 </script>
 @endsection
