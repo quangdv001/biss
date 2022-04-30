@@ -26,6 +26,10 @@ class AdminAccountController extends Controller
     public function index(){
         $data = $this->admin->get([],['id' => 'DESC'], ['roles']);
         $roles = $this->role->get();
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return back()->with('error_message', 'Bạn không có quyền quản lý tài khoản!');
+        }
         return view('admin.account.index', compact('data', 'roles'));
     }
 
@@ -34,6 +38,10 @@ class AdminAccountController extends Controller
         $params['birthday'] = $params['birthday'] ? strtotime($params['birthday']) : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
         $roles = $request->input('roles', []);
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return back()->with('error_message', 'Bạn không có quyền quản lý tài khoản!');
+        }
         if(isset($params['id'])){
             $admin = $this->admin->first(['id' => $params['id']]);
             if($admin){
@@ -55,6 +63,10 @@ class AdminAccountController extends Controller
     }
 
     public function changePass(Request $request){
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return back()->with('error_message', 'Bạn không có quyền quản lý tài khoản!');
+        }
         $params = $request->only('id', 'password');
         if(isset($params['id'])){
             $params['password'] = Hash::make($params['password']);
@@ -70,6 +82,10 @@ class AdminAccountController extends Controller
     }
 
     public function remove(Request $request){
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return response(['success' => 0]);
+        }
         $id = $request->input('id');
         $resR = $this->admin->remove($id);
         $res['success'] = 0;
@@ -81,7 +97,12 @@ class AdminAccountController extends Controller
 
     public function report(Request $request)
     {
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return response(['success' => 0, 'message' => 'Bạn không có quyền quản lý tài khoản']);
+        }
         $id = $request->get('id', '');
+        $project_id = $request->get('project_id', 0);
         $account = $this->admin->first(['id' => $id]);
         if (empty($account)) {
             return response(['success' => 0, 'message' => 'Không tìm thấy tài khoản!']);
@@ -89,7 +110,7 @@ class AdminAccountController extends Controller
         $start_time =  strtotime($request->get('start_time',''));
         $end_time =  strtotime($request->get('end_time',''));
         $projectByAdmin = $this->projectRepo->getProjectByAdmin($id)->keyBy('id');
-        $data = $this->ticketRepo->getTicketByAdmin($id, $start_time, $end_time)->groupBy('project_id')->map(function ($tickets, $project_id) use ($projectByAdmin){
+        $data = $this->ticketRepo->getTicketByAdmin($id, $project_id, $start_time, $end_time)->groupBy('project_id')->map(function ($tickets, $project_id) use ($projectByAdmin){
             $data['project'] = @$projectByAdmin[$project_id]['name'];
             $data['report']['total'] = count($tickets);
             $data['report']['new'] = 0;
@@ -120,6 +141,6 @@ class AdminAccountController extends Controller
             $data['report']['percent'] = !empty($data['report']['total']) ? round($data['report']['done'] / $data['report']['total'] * 100) : 0;
             return $data;
         })->values()->all();
-        return response(['success' => 1, 'data' => $data]);
+        return response(['success' => 1, 'data' => $data, 'project' => array_values($projectByAdmin->all())]);
     }
 }

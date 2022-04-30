@@ -368,15 +368,22 @@ Biss
             </div>
             <div class="modal-body">
                 <input type="hidden" name="id">
-               <div class="d-flex text-nowrap align-items-center justify-content-end mb-4">
-                   <div class="d-flex align-items-center">
-                       <div class="mr-2">Ngày bắt đầu: </div>
-                       <input type="date" class="form-control" name="start_time" onchange="reportMember()">
-                   </div>
-                   <div class="ml-4 d-flex align-items-center">
-                       <div class="mr-2">Ngày kết thúc: </div>
-                       <input type="date" class="form-control" name="end_time" onchange="reportMember()">
-                   </div>
+               <div class="d-xl-flex text-nowrap align-items-center justify-content-between mb-4">
+                  <div class="d-xl-flex">
+                      <div class="ml-4 d-flex align-items-center mb-2">
+                          <div class="mr-2">Dự án: </div>
+                          <select name="project_id" class="select-project form-control"></select>
+                      </div>
+                      <div class="ml-4 d-flex align-items-center mb-2">
+                          <div class="mr-2">Ngày bắt đầu: </div>
+                          <input type="date" class="form-control" name="start_time">
+                      </div>
+                      <div class="ml-4 d-flex align-items-center mb-2">
+                          <div class="mr-2">Ngày kết thúc: </div>
+                          <input type="date" class="form-control" name="end_time">
+                      </div>
+                  </div>
+                   <a href="javascript:void(0)" class="btn btn-light-primary mb-2" onclick="reportMember()">Tìm kiếm</a>
                </div>
                 <table class="table text-center">
                     <thead>
@@ -392,30 +399,7 @@ Biss
                         <th scope="col">Tiến độ</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr>
-                        <td scope="row">1</td>
-                        <td>guest</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0 %</td>
-                    </tr>
-                    <tr>
-                        <td scope="row">2</td>
-                        <td>account</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0 %</td>
-                    </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -516,8 +500,7 @@ Biss
         let admin = data[id];
         $('#modalReport .username').html(admin.username);
         $('#modalReport input[name="id"]').val(id);
-        $('#modalReport input[name="start_time"]').val('');
-        $('#modalReport input[name="end_time"]').val('');
+        $('#modalReport select[name="project_id"]').val(0).trigger('change');
         reportMember();
         $('#modalReport').modal('show');
     });
@@ -526,17 +509,18 @@ Biss
         let id = $('#modalReport input[name="id"]').val();
         let start_time = $('#modalReport input[name="start_time"]').val();
         let end_time = $('#modalReport input[name="end_time"]').val();
+        let project_id = $('#modalReport select[name="project_id"]').val() ?? 0;
         if(!init.conf.ajax_sending){
             $.ajax({
                 type: 'GET',
                 url: "{{ route('admin.account.report') }}",
-                data: {id, start_time, end_time},
+                data: {id, start_time, end_time, project_id},
                 beforeSend: function(){
                     init.conf.ajax_sending = true;
                 },
                 success: function(res){
-                    console.log(res);
-                    let html = '';
+                    console.log(project_id);
+                    let html = '', htmlSelect = '';
                     if(res.success){
                         if(res.data.length > 0){
                             res.data.forEach(function ($project, $k) {
@@ -553,7 +537,22 @@ Biss
                                         </tr>`
                             });
                         }
-                        $('#modalReport tbody').html(html)
+                        $('#modalReport tbody').html(html);
+
+                        if ($('.select-project').hasClass("select2-hidden-accessible")) {
+                            $('.select-project').select2('destroy');
+                        }
+                        if(res.project.length > 0){
+                            htmlSelect += `<option value="0" ${project_id == 0? 'selected' : ''}>Tất cả dự án</option>`
+                            res.project.forEach(function ($project, $k) {
+                                htmlSelect += `<option value="${$project.id}" ${project_id == $project.id? 'selected' : ''}>${$project.name}</option>`
+                            });
+                        }
+                        $('.select-project').html(htmlSelect);
+                        $('.select-project').select2({
+                            placeholder: 'Chọn dự án',
+                            minimumResultsForSearch:-1,
+                        });
                     } else {
                         init.showNoty('Có lỗi xảy ra!', 'error');
                     }

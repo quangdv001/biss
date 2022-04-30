@@ -52,7 +52,7 @@
                             </div>
                         </div>
                         <div>
-                            <a href="javascript:void(0);" data-toggle="modal"
+                            <a href="javascript:void(0);" data-toggle="modal" class="{{$isAdmin?'':'d-none'}}"
                             data-target="#modalCreatePhase"><span class="svg-icon"><!--begin::Svg Icon | path:C:\wamp64\www\keenthemes\themes\metronic\theme\html\demo8\dist/../src/media/svg/icons\Code\Plus.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
                                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                                     <rect x="0" y="0" width="24" height="24"/>
@@ -80,7 +80,7 @@
                             </span>
                         </div>
                         <div>
-                            <a href="javascript:void(0);" data-toggle="modal"
+                            <a href="javascript:void(0);" data-toggle="modal" class="{{$isAdmin?'':'d-none'}}"
                             data-target="#modalCreateGroup"><span class="svg-icon"><!--begin::Svg Icon | path:C:\wamp64\www\keenthemes\themes\metronic\theme\html\demo8\dist/../src/media/svg/icons\Code\Plus.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
                                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                                     <rect x="0" y="0" width="24" height="24"/>
@@ -109,7 +109,7 @@
                                 {{$group->name}}
                             </span>
                         </a>
-                        <div>
+                        <div class="{{$isAdmin?'':'d-none'}}">
                             <a href="javascript:void(0);" class="mr-2 btn-edit-group" data-id="{{ $group->id }}">
                                 <i class="la la-edit"></i>
                             </a>

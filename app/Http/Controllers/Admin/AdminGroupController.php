@@ -24,15 +24,20 @@ class AdminGroupController extends Controller
         $this->phase = $phase;
     }
 
-    public function index(Request $request, $id, $pid = 0){ 
+    public function index(Request $request, $id, $pid = 0){
+        $user = auth('admin')->user();
+        $isAdmin = ($user->hasRole('super_admin') || $user->hasRole('account'));
         $gid = 0;
         $project = $this->projectRepo->first(['id' => $id], [], ['group.admin', 'admin', 'ticket.admin']);
         if(empty($project)){
-            return back()->with('success_message', 'Không tìm thấy dự án!');
+            return back()->with('error_message', 'Không tìm thấy dự án!');
         }
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
         $admins = $project->admin ?? [];
+        if (!$isAdmin && !in_array($user->id, $project->admin->pluck('id')->all())) {
+            return back()->with('error_message', 'Bạn không có quyền vào dự án!');
+        }
         $groupByProject = $project->group->keyBy('id');
         $reportMember = $project->admin->map(function ($member){
             $data = $member->toArray();
@@ -97,10 +102,23 @@ class AdminGroupController extends Controller
             return $data;
         })->values()->all();
         $reportMember = array_values($reportMember);
-        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember'));
+
+        if(!$isAdmin){
+            $project->load(['group' =>function($query) use ($user){
+                $query->whereHas('admin', function ($query) use ($user) {
+                    $query->where('admin_id','=', $user->id);
+                });
+            }]);
+        }
+
+        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin'));
     }
 
     public function create(Request $request){
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return back()->with('error_message', 'Bạn không có quyền quản lý nhóm!');
+        }
         $params = $request->only('id', 'project_id', 'name');
         if(isset($params['id'])){
             $group = $this->groupRepo->first(['id' => $params['id']]);
@@ -122,6 +140,10 @@ class AdminGroupController extends Controller
     }
 
     public function createPhase(Request $request){
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return back()->with('error_message', 'Bạn không có quyền quản lý phase!');
+        }
         $params = $request->only('project_id', 'start_time', 'end_time', 'name');
         $params['start_time'] = $params['start_time'] ? strtotime($params['start_time']) : null;
         $params['end_time'] = $params['end_time'] ? strtotime($params['end_time']) + 86399 : null;
@@ -139,6 +161,10 @@ class AdminGroupController extends Controller
     }
 
     public function remove(Request $request){
+        $user = auth('admin')->user();
+        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+            return response(['success' => 0]);
+        }
         $id = $request->input('id');
         $resR = $this->groupRepo->remove($id);
         $res['success'] = 0;

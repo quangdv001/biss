@@ -59,7 +59,7 @@
                         <span class="text-muted font-weight-bold font-size-sm mt-1">Danh sách công việc</span>
                     </div>
                     <div class="card-toolbar">
-                        <button type="button" class="btn btn-success mr-2" data-toggle="modal"
+                        <button type="button" class="btn btn-success mr-2 {{$isAdmin || $isSeo ? '' :'d-none'}}" data-toggle="modal"
                         data-target="#modalCreate">Thêm công việc</button>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                                 <th>Hoàn thành</th>
                                 <th>Người xử lý</th>
                                 <th>Trạng thái</th>
-                                <th>Hành động</th>
+                                <th class="{{$isAdmin || $isSeo ? '' :'d-none'}}">Hành động</th>
                             </tr>
                         </thead>
 
@@ -106,7 +106,7 @@
                                     <span
                                         class="label label-lg font-weight-bold label-light-{{ ($v->status && ($v->complete_time <= $v->deadline_time)) || ($v->status == 0 && $time < $v->deadline_time)  ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoàn thành' : 'Mới' }}</span>
                                 </td>
-                                <td nowrap>
+                                <td nowrap class="{{$isAdmin || $isSeo ? '' :'d-none'}}">
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit"
                                         title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>

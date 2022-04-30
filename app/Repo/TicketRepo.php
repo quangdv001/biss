@@ -75,7 +75,7 @@ class TicketRepo
         return $data;
     }
 
-    public function get($condition = [], $order = [], $with = [])
+    public function get($condition = [], $order = [], $with = [], $user_id = 0)
     {
         $query = $this->repo;
         if(!empty($condition)){
@@ -86,6 +86,11 @@ class TicketRepo
                     $query = $query->where($key, $value);
                 }
             }
+        }
+        if(!empty($user_id)){
+            $query = $query->whereHas('admin', function ($query) use ($user_id) {
+                $query->where('admin_id','=', $user_id);
+            });
         }
 
         if (!empty($with)) {
@@ -153,11 +158,14 @@ class TicketRepo
         return $data;
     }
 
-    public function getTicketByAdmin($admin_id, $start_time, $end_time)
+    public function getTicketByAdmin($admin_id, $project_id, $start_time, $end_time)
     {
         $query = $this->repo;
-        if(!empty($start_time) && !empty($end_time)){
-            $query = $query->whereBetween('created_time', [$start_time,$end_time]);
+        if (!empty($start_time) && !empty($end_time)) {
+            $query = $query->whereBetween('created_time', [$start_time, $end_time]);
+        }
+        if (!empty($project_id)) {
+            $query = $query->where('project_id', $project_id);
         }
         $query = $query->whereHas('admin', function ($query) use ($admin_id) {
             $query->where('id', $admin_id);

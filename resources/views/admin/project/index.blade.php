@@ -53,7 +53,7 @@ Danh sách dự án
             </div>
             <div class="card-toolbar">
                 <!--begin::Button-->
-                <a href="javascript:void(0);" class="btn btn-primary font-weight-bolder" data-toggle="modal"
+                <a href="javascript:void(0);" class="btn btn-primary font-weight-bolder {{$isAdmin?'':'d-none'}}" data-toggle="modal"
                     data-target="#modalCreate">
                     <span class="svg-icon svg-icon-md">
                         <!--begin::Svg Icon | path:/assets/admin/themes/assets/media/svg/icons/Design/Flatten.svg--><svg
@@ -131,7 +131,7 @@ Danh sách dự án
                                 <th scope="col">Website</th>
                                 <th scope="col">Mô tả</th>
                                 <th scope="col">Ghi chú</th>
-                                <th>Hành động</th>
+                                <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,7 +150,7 @@ Danh sách dự án
                                 <td>@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</td>
                                 <td>{{ $v->description }}</td>
                                 <td>{{ $v->note }}</td>
-                                <td nowrap>
+                                <td nowrap class="{{$isAdmin?'':'d-none'}}">
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
                                     </a>

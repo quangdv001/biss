@@ -28,7 +28,17 @@ class AdminTicketController extends Controller
     }
 
     public function index(Request $request, $gid, $pid = 0){
+        $user = auth('admin')->user();
+        $isAdmin = $user->hasRole('super_admin') || $user->hasRole('account');
+        $isSeo = $user->hasRole('seo');
         $group = $this->groupRepo->first(['id' => $gid]);
+        if(empty($group)){
+            return back()->with('success_message', 'Không tìm thấy nhóm!');
+        }
+        $group->load('admin');
+        if (!$isAdmin && !in_array($user->id, $group->admin->pluck('id')->all())) {
+            return back()->with('error_message', 'Bạn không có quyền vào nhóm!');
+        }
         $id = $group->project_id;
         $project = $this->projectRepo->first(['id' => $id], [], ['group.admin','admin']);
         if(empty($project)){
@@ -41,8 +51,12 @@ class AdminTicketController extends Controller
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
-        $data = $this->ticketRepo->get($params, [], ['admin']);
-        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group'));
+        if(!$isAdmin){
+            $data = $this->ticketRepo->get($params, [], ['admin'], $user->id);
+        }else{
+            $data = $this->ticketRepo->get($params, [], ['admin']);
+        }
+        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'isSeo'));
     }
 
     public function create(Request $request){
