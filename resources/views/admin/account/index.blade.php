@@ -368,23 +368,23 @@ Biss
             </div>
             <div class="modal-body">
                 <input type="hidden" name="id">
-               <div class="d-xl-flex text-nowrap align-items-center justify-content-between mb-4">
-                  <div class="d-xl-flex">
-                      <div class="ml-4 d-flex align-items-center mb-2">
-                          <div class="mr-2">Dự án: </div>
-                          <select name="project_id" class="select-project form-control"></select>
-                      </div>
-                      <div class="ml-4 d-flex align-items-center mb-2">
-                          <div class="mr-2">Ngày bắt đầu: </div>
-                          <input type="date" class="form-control" name="start_time">
-                      </div>
-                      <div class="ml-4 d-flex align-items-center mb-2">
-                          <div class="mr-2">Ngày kết thúc: </div>
-                          <input type="date" class="form-control" name="end_time">
-                      </div>
-                  </div>
-                   <a href="javascript:void(0)" class="btn btn-light-primary mb-2" onclick="reportMember()">Tìm kiếm</a>
-               </div>
+                <div class="row text-nowrap mb-4">
+                        <div class="col-md-3 d-flex align-items-center mb-2">
+                            <div class="mr-2">Dự án: </div>
+                            <select name="project_id" class="select-project form-control"></select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-center mb-2">
+                            <div class="mr-2">Ngày bắt đầu: </div>
+                            <input type="date" class="form-control" name="start_time">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-center mb-2">
+                            <div class="mr-2">Ngày kết thúc: </div>
+                            <input type="date" class="form-control" name="end_time">
+                        </div>
+                        <div class="col-md-3">
+                            <a href="javascript:void(0)" class="btn btn-light-primary mb-2" onclick="reportMember()">Tìm kiếm</a>
+                        </div>
+                </div>
                 <table class="table text-center">
                     <thead>
                     <tr>
