@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('admin.home.index');
 });
 
 Route::namespace('Admin')->name('admin.')->prefix('admin')->group(function () {
