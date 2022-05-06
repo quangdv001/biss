@@ -145,6 +145,7 @@
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is('admin.home.index')) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.home.index') }}" class="menu-link"><span class="menu-text">Dashboard</span></a>
                 </li>
+                @if(auth('admin')->user()->hasRole('super_admin'))
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is(['admin.role.*', 'admin.account.*'])) menu-item-open menu-item-here @endif" data-menu-toggle="click"
                     aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
                             class="menu-text">Admin</span><span class="menu-desc"></span><i
@@ -197,6 +198,7 @@
                         </ul>
                     </div>
                 </li>
+                @endif
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is(['admin.project.*', 'admin.group.*', 'admin.ticket.*'])) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.project.index') }}" class="menu-link"><span class="menu-text">Dự án</span></a>
                 </li>
