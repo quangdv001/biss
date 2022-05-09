@@ -75,7 +75,7 @@ class TicketRepo
         return $data;
     }
 
-    public function get($condition = [], $order = [], $with = [], $user_id = 0)
+    public function get($condition = [], $order = [], $with = [])
     {
         $query = $this->repo;
         if(!empty($condition)){
@@ -86,11 +86,6 @@ class TicketRepo
                     $query = $query->where($key, $value);
                 }
             }
-        }
-        if(!empty($user_id)){
-            $query = $query->whereHas('admin', function ($query) use ($user_id) {
-                $query->where('admin_id','=', $user_id);
-            });
         }
 
         if (!empty($with)) {

@@ -16,7 +16,7 @@ class AdminRoleController extends Controller
 
     public function index(){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý chức vụ!');
         }
         $data = $this->role->get();
@@ -25,7 +25,7 @@ class AdminRoleController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý chức vụ!');
         }
         $params = $request->only('id', 'name', 'slug');
@@ -48,7 +48,7 @@ class AdminRoleController extends Controller
 
     public function remove(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return response(['success' => 0]);
         }
         $id = $request->input('id');

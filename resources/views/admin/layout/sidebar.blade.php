@@ -148,19 +148,11 @@
                     <div class="form-group row">
                         <div class="col-lg-12">
                             <label>Tên nhóm công việc</label>
-                            <input type="text" class="form-control" name="name"
-                                placeholder="Tên nhóm công việc" />
+                            <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" />
                         </div>
                         <div class="col-lg-12 mt-3">
-                            <label>Nhân sự:</label>
-                            <select class="form-control select2" name="admin_group[]" multiple="multiple"
-                                style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
+                            <label>Khối lượng công việc</label>
+                            <input type="number" class="form-control" name="qty" placeholder="Khối lượng công việc" value="1" min="1"/>
                         </div>
                     </div>
                 </div>
@@ -233,15 +225,8 @@
                             <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" />
                         </div>
                         <div class="col-lg-12 mt-3">
-                            <label>Nhân sự:</label>
-                            <select class="form-control select2" name="admin_group[]" multiple="multiple"
-                                style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
+                            <label>Khối lượng công việc</label>
+                            <input type="number" class="form-control" name="qty" placeholder="Khối lượng công việc" min="1"/>
                         </div>
                     </div>
                 </div>
@@ -266,17 +251,17 @@
 
     $('.btn-edit-group').click(function () {
         let id = $(this).data('id');
-        console.log(id);
         let g = group[id];
         $('#modalEditGroup input[name="id"]').val(g.id);
         $('#modalEditGroup input[name="name"]').val(g.name);
-        let admin = [];
-        if (g.admin.length > 0) {
-            $.each(g.admin, function (i, v) {
-                admin.push(v.id);
-            });
-        }
-        $('#modalEditGroup select[name="admin_group[]"]').val(admin).trigger('change');
+        $('#modalEditGroup input[name="qty"]').val(g.qty);
+        // let admin = [];
+        // if (g.admin.length > 0) {
+        //     $.each(g.admin, function (i, v) {
+        //         admin.push(v.id);
+        //     });
+        // }
+        // $('#modalEditGroup select[name="admin_group[]"]').val(admin).trigger('change');
         // $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
         $('#modalEditGroup').modal('show');
     });

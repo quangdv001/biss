@@ -26,7 +26,7 @@ class AdminGroupController extends Controller
 
     public function index(Request $request, $id, $pid = 0){
         $user = auth('admin')->user();
-        $isAdmin = ($user->hasRole('super_admin') || $user->hasRole('account'));
+        $isAdmin = $user->hasRole(['super_admin', 'account']);
         $gid = 0;
         $project = $this->projectRepo->first(['id' => $id], [], ['group.admin', 'admin', 'ticket.admin']);
         if(empty($project)){
@@ -61,14 +61,14 @@ class AdminGroupController extends Controller
             $data['report']['percent'] = 0;
             if (!empty($tickets)) {
                 foreach ($tickets as $ticket) {
-                    if ($ticket['status'] == 0 && empty($ticket['complete_time'])) {
+                    if ($ticket['status'] == 0) {
                         if (time() > $ticket['deadline_time']) {
                             $data['report']['expired'] += 1;
                         } else {
                             $data['report']['new'] += 1;
                         }
                     }
-                    if ($ticket['status'] == 1 || !empty($ticket['complete_time'])) {
+                    if ($ticket['status'] == 1) {
                         $data['report']['done'] += 1;
                         if ($ticket['complete_time'] <= $ticket['deadline_time']) {
                             $data['report']['done_on_time'] += 1;
@@ -79,14 +79,14 @@ class AdminGroupController extends Controller
                     if (!empty($ticket->admin)) {
                         foreach ($ticket->admin as $member) {
                             $reportMember[$member->id]['report']['total'] += count($tickets);
-                            if ($ticket['status'] == 0 && empty($ticket['complete_time'])) {
+                            if ($ticket['status'] == 0) {
                                 if (time() > $ticket['deadline_time']) {
                                     $reportMember[$member->id]['report']['expired'] += 1;
                                 } else {
                                     $reportMember[$member->id]['report']['new'] += 1;
                                 }
                             }
-                            if ($ticket['status'] == 1 || !empty($ticket['complete_time'])) {
+                            if ($ticket['status'] == 1) {
                                 $reportMember[$member->id]['report']['done'] += 1;
                                 if ($ticket['complete_time'] <= $ticket['deadline_time']) {
                                     $reportMember[$member->id]['report']['done_on_time'] += 1;
@@ -103,20 +103,12 @@ class AdminGroupController extends Controller
         })->values()->all();
         $reportMember = array_values($reportMember);
 
-        if(!$isAdmin){
-            $project->load(['group' =>function($query) use ($user){
-                $query->whereHas('admin', function ($query) use ($user) {
-                    $query->where('admin_id','=', $user->id);
-                });
-            }]);
-        }
-
         return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin'));
     }
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý nhóm!');
         }
         $params = $request->only('id', 'project_id', 'name');
@@ -125,14 +117,12 @@ class AdminGroupController extends Controller
             if($group){
                 $res = $this->groupRepo->update($group, $params);
                 if($res){
-                    $res->admin()->sync($request->get('admin_group',[]));
                     return back()->with('success_message', 'Cập nhật nhóm thành công!');
                 }
             }
         } else {
             $res = $this->groupRepo->create($params);
             if($res){
-                $res->admin()->sync($request->get('admin_group',[]));
                 return back()->with('success_message', 'Tạo nhóm thành công!');
             }
         }
@@ -141,7 +131,7 @@ class AdminGroupController extends Controller
 
     public function createPhase(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý phase!');
         }
         $params = $request->only('project_id', 'start_time', 'end_time', 'name');
@@ -162,7 +152,7 @@ class AdminGroupController extends Controller
 
     public function remove(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return response(['success' => 0]);
         }
         $id = $request->input('id');

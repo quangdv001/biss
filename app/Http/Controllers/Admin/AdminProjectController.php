@@ -30,7 +30,7 @@ class AdminProjectController extends Controller
             $condition['name'] = $name;
         }
         $user = auth('admin')->user();
-        $isAdmin = ($user->hasRole('super_admin') || $user->hasRole('account')) ? true : false;
+        $isAdmin = $user->hasRole(['super_admin', 'account']);
         if($isAdmin){
             $data = $this->projectRepo->paginate($condition, $limit, ['id' => 'DESC'], ['planer', 'executive', 'admin']);
         } else {
@@ -42,7 +42,7 @@ class AdminProjectController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
         $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'accept_time', 'expired_time', 'created_time', 'status');
@@ -83,7 +83,7 @@ class AdminProjectController extends Controller
 
     public function remove(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return response(['success' => 0]);
         }
         $id = $request->input('id');

@@ -19,6 +19,8 @@ class Ticket extends Model
         'created_time',
         'deadline_time',
         'complete_time',
+        'qty',
+        'priority',
         'admin_id_c',
         'project_id',
         'group_id',
@@ -28,6 +30,11 @@ class Ticket extends Model
     public function admin()
     {
         return $this->belongsToMany(Admin::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(Admin::class,'admin_id_c');
     }
 
     public function group()

@@ -27,7 +27,7 @@ class AdminAccountController extends Controller
         $data = $this->admin->get([],['id' => 'DESC'], ['roles']);
         $roles = $this->role->get();
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if (!$user->hasRole(['super_admin', 'account'])) {
             return back()->with('error_message', 'Bạn không có quyền quản lý tài khoản!');
         }
         return view('admin.account.index', compact('data', 'roles'));
@@ -39,7 +39,7 @@ class AdminAccountController extends Controller
         $params['status'] = isset($params['status']) ? 1 : 0;
         $roles = $request->input('roles', []);
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý tài khoản!');
         }
         if(isset($params['id'])){
@@ -64,7 +64,7 @@ class AdminAccountController extends Controller
 
     public function changePass(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý tài khoản!');
         }
         $params = $request->only('id', 'password');
@@ -83,7 +83,7 @@ class AdminAccountController extends Controller
 
     public function remove(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return response(['success' => 0]);
         }
         $id = $request->input('id');
@@ -98,7 +98,7 @@ class AdminAccountController extends Controller
     public function report(Request $request)
     {
         $user = auth('admin')->user();
-        if(!$user->hasRole('super_admin') && !$user->hasRole('account')){
+        if(!$user->hasRole(['super_admin', 'account'])){
             return response(['success' => 0, 'message' => 'Bạn không có quyền quản lý tài khoản']);
         }
         $id = $request->get('id', '');

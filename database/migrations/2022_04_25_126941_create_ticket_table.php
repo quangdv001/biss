@@ -21,6 +21,8 @@ class CreateTicketTable extends Migration
             $table->longText('output')->nullable();
             $table->tinyInteger('status')->default(0);
             $table->integer('created_time');
+            $table->integer('qty');
+            $table->integer('priority');
             $table->integer('deadline_time')->nullable();
             $table->integer('complete_time')->nullable();
             $table->unsignedBigInteger('admin_id_c');
