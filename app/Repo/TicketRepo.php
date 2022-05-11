@@ -153,7 +153,7 @@ class TicketRepo
         return $data;
     }
 
-    public function getTicketByAdmin($admin_id, $project_id, $start_time, $end_time)
+    public function getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time)
     {
         $query = $this->repo;
         if (!empty($start_time) && !empty($end_time)) {
@@ -162,8 +162,9 @@ class TicketRepo
         if (!empty($project_id)) {
             $query = $query->where('project_id', $project_id);
         }
-        $query = $query->whereHas('admin', function ($query) use ($admin_id) {
-            $query->where('id', $admin_id);
+        $query = $query->with('admin');
+        $query = $query->whereHas('admin', function ($query) use ($admin_ids) {
+            $query->whereIn('id', $admin_ids);
         });
         $result = collect([]);
         $query->chunkById(200, function ($data) use (&$result) {

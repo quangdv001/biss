@@ -120,9 +120,6 @@ Biss
                             <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Xóa thành viên" data-id="{{ $v->id }}">
                                 <i class="la la-trash"></i>
                             </a>
-                            {{--<a href="{{route('admin.account.report',['id' => $v->id])}}" class="btn btn-sm btn-clean btn-icon" title="Báo cáo thành viên" data-id="{{ $v->id }}">--}}
-                                {{--<i class="la la-signal"></i>--}}
-                            {{--</a>--}}
                             <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-report" title="Báo cáo thành viên" data-id="{{ $v->id }}">
                                 <i class="la la-signal"></i>
                             </a>
@@ -519,7 +516,6 @@ Biss
                     init.conf.ajax_sending = true;
                 },
                 success: function(res){
-                    console.log(project_id);
                     let html = '', htmlSelect = '';
                     if(res.success){
                         if(res.data.length > 0){
@@ -534,7 +530,7 @@ Biss
                                             <td>${$project.report.done_on_time}</td>
                                             <td>${$project.report.done_out_time}</td>
                                             <td>${$project.report.percent} %</td>
-                                        </tr>`
+                                        </tr>`;
                             });
                         }
                         $('#modalReport tbody').html(html);

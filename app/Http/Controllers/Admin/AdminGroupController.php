@@ -28,17 +28,23 @@ class AdminGroupController extends Controller
         $user = auth('admin')->user();
         $isAdmin = $user->hasRole(['super_admin', 'account']);
         $gid = 0;
-        $project = $this->projectRepo->first(['id' => $id], [], ['group.admin', 'admin', 'ticket.admin']);
+        $project = $this->projectRepo->first(['id' => $id], [], ['group', 'admin', 'ticket.admin']);
+
         if(empty($project)){
             return back()->with('error_message', 'Không tìm thấy dự án!');
         }
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
+        $group = $project->group;
+        $group->load(['phaseGroup' => function($query) use($pid){
+            $query->where('phase_id',$pid);
+        }])->map(function ($gr){
+            $gr->phase_qty = $gr->phaseGroup->sum('qty');
+        })->keyBy('id');
         $admins = $project->admin ?? [];
         if (!$isAdmin && !in_array($user->id, $project->admin->pluck('id')->all())) {
             return back()->with('error_message', 'Bạn không có quyền vào dự án!');
         }
-        $groupByProject = $project->group->keyBy('id');
         $reportMember = $project->admin->map(function ($member){
             $data = $member->toArray();
             $data['report']['total'] = 0;
@@ -50,9 +56,9 @@ class AdminGroupController extends Controller
             $data['report']['percent'] = 0;
             return $data;
         })->keyBy('id')->all();
-        $reportGroup = $project->ticket->where('phase_id', $pid)->groupBy('group_id')->map(function ($tickets, $group_id) use ($groupByProject, &$reportMember) {
-            $data['group'] = @$groupByProject[$group_id]['name'];
-            $data['report']['total'] = count($tickets);
+        $reportGroup = $project->ticket->where('phase_id', $pid)->groupBy('group_id')->map(function ($tickets, $group_id) use ($group, &$reportMember) {
+            $data['group'] = @$group[$group_id]['name'];
+            $data['report']['total'] = 0;
             $data['report']['new'] = 0;
             $data['report']['expired'] = 0;
             $data['report']['done'] = 0;
@@ -61,44 +67,47 @@ class AdminGroupController extends Controller
             $data['report']['percent'] = 0;
             if (!empty($tickets)) {
                 foreach ($tickets as $ticket) {
+                    $qty = $ticket['qty'] ?? 1;
+                    $data['report']['total'] += $qty;
                     if ($ticket['status'] == 0) {
                         if (time() > $ticket['deadline_time']) {
-                            $data['report']['expired'] += 1;
+                            $data['report']['expired'] += $qty;
                         } else {
-                            $data['report']['new'] += 1;
+                            $data['report']['new'] += $qty;
                         }
                     }
                     if ($ticket['status'] == 1) {
-                        $data['report']['done'] += 1;
+                        $data['report']['done'] += $qty;
                         if ($ticket['complete_time'] <= $ticket['deadline_time']) {
-                            $data['report']['done_on_time'] += 1;
+                            $data['report']['done_on_time'] += $qty;
                         } else {
-                            $data['report']['done_out_time'] += 1;
+                            $data['report']['done_out_time'] += $qty;
                         }
                     }
                     if (!empty($ticket->admin)) {
                         foreach ($ticket->admin as $member) {
-                            $reportMember[$member->id]['report']['total'] += count($tickets);
+                            $reportMember[$member->id]['report']['total'] += $qty;
                             if ($ticket['status'] == 0) {
                                 if (time() > $ticket['deadline_time']) {
-                                    $reportMember[$member->id]['report']['expired'] += 1;
+                                    $reportMember[$member->id]['report']['expired'] += $qty;
                                 } else {
-                                    $reportMember[$member->id]['report']['new'] += 1;
+                                    $reportMember[$member->id]['report']['new'] += $qty;
                                 }
                             }
                             if ($ticket['status'] == 1) {
-                                $reportMember[$member->id]['report']['done'] += 1;
+                                $reportMember[$member->id]['report']['done'] += $qty;
                                 if ($ticket['complete_time'] <= $ticket['deadline_time']) {
-                                    $reportMember[$member->id]['report']['done_on_time'] += 1;
+                                    $reportMember[$member->id]['report']['done_on_time'] += $qty;
                                 } else {
-                                    $reportMember[$member->id]['report']['done_out_time'] += 1;
+                                    $reportMember[$member->id]['report']['done_out_time'] += $qty;
                                 }
                             }
+                            $reportMember[$member->id]['report']['percent'] = !empty($reportMember[$member->id]['report']['total']) ? round($reportMember[$member->id]['report']['done'] / $reportMember[$member->id]['report']['total'] * 100) : 0;
                         }
                     }
                 }
             }
-            $data['report']['percent'] = !empty($data['report']['total']) ? round($data['report']['done'] / $data['report']['total'] * 100) : 0;
+            $data['report']['percent'] = !empty($group[$group_id]['phase_qty']) ? round($data['report']['done'] / $group[$group_id]['phase_qty'] * 100) : 0;
             return $data;
         })->values()->all();
         $reportMember = array_values($reportMember);
@@ -112,17 +121,20 @@ class AdminGroupController extends Controller
             return back()->with('error_message', 'Bạn không có quyền quản lý nhóm!');
         }
         $params = $request->only('id', 'project_id', 'name');
+        $qty = $request->get('qty', []);
         if(isset($params['id'])){
             $group = $this->groupRepo->first(['id' => $params['id']]);
             if($group){
                 $res = $this->groupRepo->update($group, $params);
                 if($res){
+                    $this->groupRepo->cuPhaseGroup($res->id, $qty);
                     return back()->with('success_message', 'Cập nhật nhóm thành công!');
                 }
             }
         } else {
             $res = $this->groupRepo->create($params);
             if($res){
+                $this->groupRepo->cuPhaseGroup($res->id, $qty);
                 return back()->with('success_message', 'Tạo nhóm thành công!');
             }
         }

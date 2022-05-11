@@ -2,6 +2,7 @@
 namespace App\Repo;
 
 use App\Models\Group;
+use App\Models\PhaseGroup;
 use Exception;
 
 class GroupRepo
@@ -147,6 +148,25 @@ class GroupRepo
             $data = $query->pluck($field);
         }
         return $data;
+    }
+
+    public function cuPhaseGroup($group_id, $dataQty)
+    {
+        if (!empty($dataQty)) {
+            foreach ($dataQty as $phase_id => $qty) {
+                $repo = new PhaseGroup();
+                $phaseGroup = $repo->where('group_id', $group_id)->where('phase_id', $phase_id)->first();
+                if (!empty($phaseGroup)) {
+                    $phaseGroup->qty = (int)$qty;
+                    $phaseGroup->save();
+                } else {
+                    $repo->qty = (int)$qty;
+                    $repo->phase_id = $phase_id;
+                    $repo->group_id = $group_id;
+                    $repo->save();
+                }
+            }
+        }
     }
 
 }

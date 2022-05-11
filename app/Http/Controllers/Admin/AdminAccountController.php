@@ -110,9 +110,10 @@ class AdminAccountController extends Controller
         $start_time =  strtotime($request->get('start_time',''));
         $end_time =  strtotime($request->get('end_time',''));
         $projectByAdmin = $this->projectRepo->getProjectByAdmin($id)->keyBy('id');
-        $data = $this->ticketRepo->getTicketByAdmin($id, $project_id, $start_time, $end_time)->groupBy('project_id')->map(function ($tickets, $project_id) use ($projectByAdmin){
+        $admin_ids = [$id];
+        $data = $this->ticketRepo->getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time)->groupBy('project_id')->map(function ($tickets, $project_id) use ($projectByAdmin){
             $data['project'] = @$projectByAdmin[$project_id]['name'];
-            $data['report']['total'] = count($tickets);
+            $data['report']['total'] = 0;
             $data['report']['new'] = 0;
             $data['report']['expired'] = 0;
             $data['report']['done'] = 0;
@@ -121,19 +122,21 @@ class AdminAccountController extends Controller
             $data['report']['percent'] = 0;
             if (!empty($tickets)) {
                 foreach ($tickets as $ticket) {
-                    if ($ticket['status'] == 0 && empty($ticket['complete_time'])) {
+                    $qty = $ticket['qty'] ?? 1;
+                    $data['report']['total'] += $qty;
+                    if ($ticket['status'] == 0) {
                         if (time() > $ticket['deadline_time']) {
-                            $data['report']['expired'] += 1;
+                            $data['report']['expired'] += $qty;
                         } else {
-                            $data['report']['new'] += 1;
+                            $data['report']['new'] += $qty;
                         }
                     }
-                    if ($ticket['status'] == 1 || !empty($ticket['complete_time'])) {
-                        $data['report']['done'] += 1;
+                    if ($ticket['status'] == 1) {
+                        $data['report']['done'] += $qty;
                         if ($ticket['complete_time'] <= $ticket['deadline_time']) {
-                            $data['report']['done_on_time'] += 1;
+                            $data['report']['done_on_time'] += $qty;
                         } else {
-                            $data['report']['done_out_time'] += 1;
+                            $data['report']['done_out_time'] += $qty;
                         }
                     }
                 }

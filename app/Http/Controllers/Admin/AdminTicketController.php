@@ -59,7 +59,7 @@ class AdminTicketController extends Controller
     public function create(Request $request){
         $user = auth('admin')->user();
         $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
-        $params['deadline_time'] = $params['deadline_time'] ? strtotime($params['deadline_time']) : null;
+        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime($params['deadline_time']) : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
         $params['priority'] = !empty($params['priority']) ? (int)$params['priority'] : 2;

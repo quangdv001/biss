@@ -15,4 +15,9 @@ class Role extends Model
         'slug',
     ];
     protected $dates = ['created_at', 'updated_at'];
+
+    public function admin()
+    {
+        return $this->belongsToMany(Admin::class);
+    }
 }
