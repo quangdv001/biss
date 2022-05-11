@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
 use App\Repo\GroupRepo;
+use App\Repo\NotyRepo;
 use App\Repo\PhaseRepo;
 use App\Repo\ProjectRepo;
 use App\Repo\TicketRepo;
@@ -17,14 +18,16 @@ class AdminTicketController extends Controller
     private $ticketRepo;
     private $adminRepo;
     private $phase;
+    private $noty;
 
-    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase)
+    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase, NotyRepo $noty)
     {
         $this->projectRepo = $projectRepo;
         $this->groupRepo = $groupRepo;
         $this->ticketRepo = $ticketRepo;
         $this->adminRepo = $adminRepo;
         $this->phase = $phase;
+        $this->noty = $noty;
     }
 
     public function index(Request $request, $gid, $pid = 0){
@@ -65,12 +68,13 @@ class AdminTicketController extends Controller
         $params['deadline_time'] = $params['deadline_time'] ? strtotime($params['deadline_time']) : null;
         $params['complete_time'] = $params['complete_time'] ? strtotime($params['complete_time']) : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
+        $admins = $request->get('admin',[]);
         if(isset($params['id'])){
             $ticket = $this->ticketRepo->first(['id' => $params['id']]);
             if($ticket){
                 $res = $this->ticketRepo->update($ticket, $params);
                 if($res){
-                    $res->admin()->sync($request->get('admin',[]));
+                    $res->admin()->sync($admins);
                     return back()->with('success_message', 'Cập nhật ticket thành công!');
                 }
             }
@@ -79,7 +83,8 @@ class AdminTicketController extends Controller
             $params['admin_id_c'] = $admin->id;
             $res = $this->ticketRepo->create($params);
             if($res){
-                $res->admin()->sync($request->get('admin',[]));
+                $res->admin()->sync($admins);
+                $this->createNoty($admins, $res);
                 return back()->with('success_message', 'Tạo ticket thành công!');
             }
         }
@@ -94,5 +99,26 @@ class AdminTicketController extends Controller
             $res['success'] = 1;
         }
         return response()->json($res);
+    }
+
+    private function createNoty($admins, $data){
+        if(!empty($admins)){
+            foreach($admins as $v){
+                $check = $this->noty->first(['admin_id' => $v, 'group_id' => $data->group_id, 'type' => 1]);
+                $params = [];
+                $params['status'] = 1;
+                $params['admin_id_c'] = $data->admin_id_c;
+                if($check){
+                    $this->noty->update($check, $params);
+                } else {
+                    $params['admin_id'] = $v;
+                    $params['project_id'] = $data->project_id;
+                    $params['group_id'] = $data->group_id;
+                    $params['phase_id'] = $data->phase_id;
+                    $params['type'] = 1;
+                    $this->noty->create($params);
+                }
+            }
+        }
     }
 }

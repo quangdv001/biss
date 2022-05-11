@@ -94,9 +94,9 @@ Biss
 
                 <tbody>
                     @if(!empty($data))
-                    @foreach($data as $v)
+                    @foreach($data as $k => $v)
                     <tr>
-                        <td>{{ $v->id }}</td>
+                        <td>{{ $k + 1 }}</td>
                         <td>{{ $v->username }}</td>
                         <td>{{ $v->mns }}</td>
                         <td>{{ $v->name }}</td>

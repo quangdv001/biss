@@ -79,11 +79,11 @@ Danh sách dự án
                 <div class="row align-items-center">
 
                     
-                    <div class="col-lg-6 col-xl-4">
+                    <div class="col-lg-6 col-xl-5">
                         <div class="row align-items-center">
-                            <div class="col-md-5 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
-                                    <label class="mr-3 mb-0 d-none d-md-block">Show:</label>
+                                    <label class="mr-2 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="limit" id="select-limit">
                                         <option value="10" @if(old('limit') == 10) selected @endif>10</option>
                                         <option value="30" @if(old('limit') == 30) selected @endif>30</option>
@@ -92,8 +92,18 @@ Danh sách dự án
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="col-md-4 my-2 my-md-0">
+                                <div class="d-flex align-items-center">
+                                    <label class="mr-3 mb-0 d-none d-md-block"></label>
+                                    <select class="form-control" name="status">
+                                        <option value="1" @if(old('status') == 1) selected @endif>Hoạt động</option>
+                                        <option value="0" @if(old('status') == 0) selected @endif>Hoàn thành</option>
+                                    </select>
+                                </div>
+                            </div>
                             
-                            <div class="col-md-7 my-2 my-md-0">
+                            <div class="col-md-6 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
@@ -103,7 +113,7 @@ Danh sách dự án
                             
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-8 mt-5 mt-lg-0">
+                    <div class="col-lg-6 col-xl-7 mt-5 mt-lg-0">
                         <button type="submit" class="btn btn-light-primary px-6 font-weight-bold">Tìm kiếm</button>
                     </div>
                 </div>
@@ -120,6 +130,7 @@ Danh sách dự án
                             <tr>
                                 <th scope="col">#</th>
                                 <th scope="col">Tên</th>
+                                <th scope="col">Lĩnh vực</th>
                                 <th scope="col">Account</th>
                                 <th scope="col">Phụ trách</th>
                                 <th scope="col">Gói</th>
@@ -131,14 +142,16 @@ Danh sách dự án
                                 <th scope="col">Website</th>
                                 <th scope="col">Mô tả</th>
                                 <th scope="col">Ghi chú</th>
+                                <th scope="col">Trạng thái</th>
                                 <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($data as $v)
+                            @foreach($data as $k => $v)
                             <tr>
-                                <th scope="row">{{ $v->id }}</th>
+                                <th scope="row">{{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</th>
                                 <td><a href="{{ route('admin.group.index', $v->id) }}">{{ $v->name }}</a></td>
+                                <td>{{ $v->field }}</td>
                                 <td>{{ $v->planer->username }}</td>
                                 <td>{{ $v->executive->username }}</td>
                                 <td>{{ $v->package }}</td>
@@ -150,6 +163,9 @@ Danh sách dự án
                                 <td>@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</td>
                                 <td>{{ $v->description }}</td>
                                 <td>{{ $v->note }}</td>
+                                <td>
+                                    <span class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
+                                </td>
                                 <td nowrap class="{{$isAdmin?'':'d-none'}}">
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
@@ -210,7 +226,7 @@ Danh sách dự án
                             <select class="form-control select2" name="planer_id" style="width: 100%">
                                 @if(!empty($admins))
                                 @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                <option value="{{ $v->id }}" @if($v->id == auth('admin')->user()->id) check @endif>{{ $v->username }}</option>
                                 @endforeach
                                 @endif
                             </select>
@@ -220,21 +236,14 @@ Danh sách dự án
                             <select class="form-control select2" name="executive_id" style="width: 100%">
                                 @if(!empty($admins))
                                 @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                <option value="{{ $v->id }}" @if($v->id == auth('admin')->user()->id) check @endif>{{ $v->username }}</option>
                                 @endforeach
                                 @endif
                             </select>
                         </div>
                         <div class="col-lg-4">
-                            <label>Nhân sự:</label>
-                            <select class="form-control select2" name="admin_project[]" multiple="multiple"
-                                style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
+                            <label>Lĩnh vực</label>
+                            <input type="text" class="form-control" name="field" placeholder="Lĩnh vực"/>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -264,6 +273,26 @@ Danh sách dự án
                         <div class="col-lg-4">
                             <label>Website</label>
                             <input type="text" class="form-control" name="website" placeholder="Website" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            
+                            <label>Nhân sự:</label>
+                            <select class="form-control select2" name="admin_project[]" multiple="multiple"
+                                style="width: 100%">
+                                @if(!empty($admins))
+                                @foreach($admins as $v)
+                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                @endforeach
+                                @endif
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -327,15 +356,8 @@ Danh sách dự án
                             </select>
                         </div>
                         <div class="col-lg-4">
-                            <label>Nhân sự:</label>
-                            <select class="form-control select2" name="admin_project[]" multiple="multiple"
-                                style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
+                            <label>Lĩnh vực</label>
+                            <input type="text" class="form-control" name="field" placeholder="Lĩnh vực"/>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -367,6 +389,26 @@ Danh sách dự án
                             <input type="text" class="form-control" name="website" placeholder="Website" />
                         </div>
                     </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            
+                            <label>Nhân sự:</label>
+                            <select class="form-control select2" name="admin_project[]" multiple="multiple"
+                                style="width: 100%">
+                                @if(!empty($admins))
+                                @foreach($admins as $v)
+                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                @endforeach
+                                @endif
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -392,6 +434,7 @@ Danh sách dự án
         let project = data[id];
         $('#modalEdit input[name="id"]').val(project.id);
         $('#modalEdit input[name="name"]').val(project.name);
+        $('#modalEdit input[name="field"]').val(project.field);
         $('#modalEdit input[name="package"]').val(project.package);
         $('#modalEdit input[name="payment_month"]').val(project.payment_month);
         $('#modalEdit input[name="website"]').val(project.website);
