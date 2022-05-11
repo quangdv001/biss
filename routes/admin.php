@@ -8,6 +8,8 @@ Route::get('logout', 'AdminAuthController@logout')->name('auth.logout');
 
 Route::middleware(['auth:admin'])->group(function () {
     Route::get('/', 'AdminHomeController@index')->name('home.index');
+    Route::post('home/getNoty', 'AdminHomeController@getNoty')->name('home.getNoty');
+    Route::post('home/detailNoty', 'AdminHomeController@detailNoty')->name('home.detailNoty');
 
     Route::get('profile', 'AdminProfileController@index')->name('profile.index');
     Route::post('profile', 'AdminProfileController@postIndex')->name('profile.postIndex');

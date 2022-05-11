@@ -92,9 +92,9 @@
 
                         <tbody>
                             
-                            @foreach($data as $v)
+                            @foreach($data as $k => $v)
                             <tr>
-                                <td>{{ $v->id }}</td>
+                                <td>{{ $k + 1 }}</td>
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->description }}</td>
                                 <td><a href="{{ $v->input }}" target="_blank">Xem</a></td>

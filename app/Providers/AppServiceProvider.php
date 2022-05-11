@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Paginator::useBootstrap();
+        \Carbon\Carbon::setLocale('vi');
         Schema::defaultStringLength(191);
         if (!App::environment('local')) {
             URL::forceScheme('https');

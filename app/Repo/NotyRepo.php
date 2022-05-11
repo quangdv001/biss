@@ -1,13 +1,13 @@
 <?php
 namespace App\Repo;
 
-use App\Models\Project;
+use App\Models\Noty;
 use Exception;
 
-class ProjectRepo
+class NotyRepo
 {
     private $repo;
-    public function __construct(Project $repo)
+    public function __construct(Noty $repo)
     {
         $this->repo = $repo;
     }
@@ -15,13 +15,14 @@ class ProjectRepo
     public function create($data)
     {
         try {
-            $repo = new Project();
+            $repo = new Noty();
             foreach ($data as $key => $value) {
                 $repo->$key = $value;
             }
             $repo->save();
             return $repo;
         } catch (Exception $e) {
+            dd(1, $data);
             throw $e;
         }
     }
@@ -35,6 +36,7 @@ class ProjectRepo
             $repo->save();
             return $repo;
         } catch (Exception $e) {
+            dd(2, $data);
             throw $e;
         }
     }
@@ -109,8 +111,6 @@ class ProjectRepo
             foreach ($condition as $key => $value) {
                 if (is_array($value)) {
                     $query = $query->whereIn($key, $value);
-                } elseif ($key == 'name') {
-                    $query = $query->where($key, 'like', '%' . $value . '%');
                 } else {
                     $query = $query->where($key, $value);
                 }
@@ -148,32 +148,6 @@ class ProjectRepo
         } else {
             $data = $query->pluck($field);
         }
-        return $data;
-    }
-
-    public function search($params, $limit, $userId){
-        $query = $this->repo;
-        if(!empty($params['name'])){
-            $query = $query->where('name', 'like', '%' . $params['name'] . '%');
-        }
-        $query = $query->whereHas('admin', function ($query) use ($userId) {
-            $query->where('admin_id','=', $userId);
-        });
-        $query = $query->with(['planer', 'executive', 'admin']);
-        $query = $query->orderBy('status', 'ASC');
-        $query = $query->orderBy('id', 'DESC');
-        $query = $query->paginate($limit);
-        return $query;
-
-    }
-
-    public function getProjectByAdmin($admin_id)
-    {
-        $query = $this->repo;
-        $query = $query->whereHas('admin', function ($query) use ($admin_id) {
-            $query->where('id', $admin_id);
-        });
-        $data = $query->get();
         return $data;
     }
 

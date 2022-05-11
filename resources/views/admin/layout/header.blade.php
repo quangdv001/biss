@@ -2,7 +2,7 @@
 <div id="kt_header_mobile" class="header-mobile ">
     <!--begin::Logo-->
     <a href="index.html">
-        <img alt="Logo" src="/assets/admin/themes/assets/media/logos/logo-default.png" class="max-h-30px" />
+        <img alt="Logo" src="https://bissbrand.com/wp-content/uploads/2020/11/BISS-LOGO-FINAL-1.png" class="max-h-30px" />
     </a>
     <!--end::Logo-->
 
@@ -51,6 +51,9 @@
 
         <!--begin::Topbar-->
         <div class="topbar  topbar-minimize ">
+            <!--begin::Notifications-->
+            @include('admin.layout.noty')
+            <!--end::Notifications-->
             <!--begin::User-->
             <div class="dropdown">
                 <!--begin::Toggle-->
@@ -192,7 +195,7 @@
                                         </svg>
                                         <!--end::Svg Icon-->
                                     </span>
-                                    <span class="menu-text">Chức vụ</span>
+                                    <span class="menu-text">Phòng</span>
                                 </a>
                             </li>
                         </ul>
