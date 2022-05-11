@@ -43,7 +43,7 @@
                         </div>
                         <div class="navi-text">
                             <div class="font-weight-bold">
-                                Bạn vừa có Task mới ở dự án "{{ $v->project->name }}" tạo bởi "{{ $v->adminc->username }}"
+                                Bạn vừa có Task mới ở dự án "{{ $v->project->name }}" nhóm "{{ $v->group->name }}" tạo bởi "{{ $v->adminc->username }}"
                             </div>
                             <div class="text-muted">
                                 {{ $v->updated_at->diffForHumans() }}
