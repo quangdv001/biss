@@ -285,7 +285,7 @@
                         </div>
                         <div class="col-lg-4">
                             <label>Deadline:</label>
-                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required disabled/>
+                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required readonly/>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -339,9 +339,9 @@ $('.btn-edit').click(function(){
     if(timestamp){
         let tzoffset = (new Date()).getTimezoneOffset() * 60000;
         let date = new Date(timestamp - tzoffset).toISOString().split('T')[0];
-        $('#modalEdit input[name="deadline_time"]').val(date);
+        $('#modalEdit input[name="deadline_time"]').val(date).trigger('change');
     } else {
-        $('#modalEdit input[name="deadline_time"]').val('');
+        $('#modalEdit input[name="deadline_time"]').val('').trigger('change');
     }
     $('#modalEdit input[name="id"]').val(ticket.id);
     let admin = []
