@@ -83,6 +83,8 @@
                                 <th>Sản phẩm</th>
                                 <th>Deadline</th>
                                 <th>Hoàn thành</th>
+                                <th>Khối lượng</th>
+                                <th>Độ ưu tiên</th>
                                 <th>Người xử lý</th>
                                 <th>Người tạo</th>
                                 <th>Trạng thái</th>
@@ -101,6 +103,16 @@
                                 <td><a href="{{ $v->output }}" target="_blank">Xem</a></td>
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
+                                <td>{{ $v->qty }}</td>
+                                <td>
+                                    @if($v->priority == 1)
+                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-success label-inline">Thấp</span>
+                                    @elseif($v->priority == 2)
+                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-warning label-inline">Trung bình</span>
+                                    @else
+                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-danger label-inline">Cao</span>
+                                    @endif
+                                </td>
                                 <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
                                 <td>{{ @$v->creator->username }}</td>
                                 </td>
