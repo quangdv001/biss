@@ -156,14 +156,16 @@ class GroupRepo
             foreach ($dataQty as $phase_id => $qty) {
                 $repo = new PhaseGroup();
                 $phaseGroup = $repo->where('group_id', $group_id)->where('phase_id', $phase_id)->first();
+                
                 if (!empty($phaseGroup)) {
                     $phaseGroup->qty = (int)$qty;
                     $phaseGroup->save();
                 } else {
-                    $repo->qty = (int)$qty;
-                    $repo->phase_id = $phase_id;
-                    $repo->group_id = $group_id;
-                    $repo->save();
+                    $p = new PhaseGroup();
+                    $p->qty = (int)$qty;
+                    $p->phase_id = $phase_id;
+                    $p->group_id = $group_id;
+                    $p->save();
                 }
             }
         }

@@ -39,6 +39,14 @@ class AdminTicketController extends Controller
         }
         $id = $group->project_id;
         $project = $this->projectRepo->first(['id' => $id], [], ['group','admin']);
+        $gro = $project->group;
+        $gro->load(['phaseGroup' => function($query) use($pid){
+        }])->map(function ($gr){
+            $gr->phase_qty = $gr->phaseGroup->sum('qty');
+        })->keyBy('id');
+        if(empty($group)){
+            return back()->with('success_message', 'Không tìm thấy nhóm!');
+        }
         if(empty($project)){
             return back()->with('success_message', 'Không tìm thấy dự án!');
         }
