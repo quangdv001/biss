@@ -35,4 +35,9 @@ class Group extends Model
     {
         return $this->hasMany(PhaseGroup::class, 'group_id', 'id');
     }
+
+    public function phase()
+    {
+        return $this->belongsToMany(Phase::class, 'phase_group');
+    }
 }

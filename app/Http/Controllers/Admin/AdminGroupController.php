@@ -37,7 +37,6 @@ class AdminGroupController extends Controller
         $pid = $pid > 0 ? $pid : $phase->first()->id;
         $group = $project->group;
         $group->load(['phaseGroup' => function($query) use($pid){
-            $query->where('phase_id',$pid);
         }])->map(function ($gr){
             $gr->phase_qty = $gr->phaseGroup->sum('qty');
         })->keyBy('id');
@@ -127,7 +126,15 @@ class AdminGroupController extends Controller
             if($group){
                 $res = $this->groupRepo->update($group, $params);
                 if($res){
-                    $this->groupRepo->cuPhaseGroup($res->id, $qty);
+                    if(!empty($qty)){
+                        
+                        $paramsQ = [];
+                        foreach($qty as $k => $v){
+                            $paramsQ[$k]['qty'] = $v;
+                        }
+                        $res->phase()->sync($paramsQ);
+                    }
+                    // $this->groupRepo->cuPhaseGroup($res->id, $qty);
                     return back()->with('success_message', 'Cập nhật nhóm thành công!');
                 }
             }
