@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdminGroupTable extends Migration
+class CreatePhaseGroupTable extends Migration
 {
     /**
      * Run the migrations.
@@ -17,7 +17,7 @@ class CreateAdminGroupTable extends Migration
             $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('phase_id');
             $table->integer('qty');
-            $table->unique(['admin_id', 'group_id']);
+            $table->unique(['phase_id', 'group_id']);
             $table->foreign('group_id')->references('id')->on('group')
                 ->onDelete('cascade');
             $table->foreign('phase_id')->references('id')->on('phase')
@@ -33,6 +33,6 @@ class CreateAdminGroupTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('admin_group');
+        Schema::dropIfExists('phase_group');
     }
 }
