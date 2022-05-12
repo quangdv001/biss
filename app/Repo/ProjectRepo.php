@@ -160,6 +160,7 @@ class ProjectRepo
             $query->where('admin_id','=', $userId);
         });
         $query = $query->with(['planer', 'executive', 'admin']);
+        $query = $query->orderBy('status', 'ASC');
         $query = $query->orderBy('id', 'DESC');
         $query = $query->paginate($limit);
         return $query;

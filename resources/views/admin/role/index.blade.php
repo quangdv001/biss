@@ -89,9 +89,9 @@ Biss
 
                 <tbody>
                     @if(!empty($data))
-                    @foreach($data as $v)
+                    @foreach($data as $k => $v)
                     <tr>
-                        <td>{{ $v->id }}</td>
+                        <td>{{ $k + 1 }}</td>
                         <td>{{ $v->name }}</td>
                         <td>{{ $v->slug }}</td>
                         <td nowrap>
@@ -100,6 +100,9 @@ Biss
                             </a>
                             <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Delete" data-id="{{ $v->id }}">
                                 <i class="la la-trash"></i>
+                            </a>
+                            <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-report" title="Báo cáo" data-id="{{ $v->id }}">
+                                <i class="la la-signal"></i>
                             </a>
                         </td>
                         @endforeach
@@ -181,6 +184,102 @@ Biss
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalReport" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Báo cáo tài khoản <span class="username font-weight-bold text-primary"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id">
+                <div class="row text-nowrap mb-4">
+                    <div class="col-md-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Dự án: </div>
+                        <select name="project_id" class="select-project form-control"></select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Ngày bắt đầu: </div>
+                        <input type="date" class="form-control" name="start_time">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Ngày kết thúc: </div>
+                        <input type="date" class="form-control" name="end_time">
+                    </div>
+                    <div class="col-md-3">
+                        <a href="javascript:void(0)" class="btn btn-light-primary mb-2" onclick="reportRole()">Tìm kiếm</a>
+                    </div>
+                </div>
+                <table class="table text-center">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tài khoản</th>
+                        <th scope="col">Dự án</th>
+                        <th scope="col">Số lượng</th>
+                        <th scope="col">Mới</th>
+                        <th scope="col">Hết hạn</th>
+                        <th scope="col">Hoàn thành</th>
+                        <th scope="col">Hoàn thành đúng hạn</th>
+                        <th scope="col">Hoàn thành trễ</th>
+                        <th scope="col">Tiến độ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <tr>
+                        <th scope="col" rowspan="2">#</th>
+                        <th scope="col" rowspan="2">Tài khoản</th>
+                        <th scope="col">Dự án</th>
+                        <th scope="col">Số lượng</th>
+                        <th scope="col">Mới</th>
+                        <th scope="col">Hết hạn</th>
+                        <th scope="col">Hoàn thành</th>
+                        <th scope="col">Hoàn thành đúng hạn</th>
+                        <th scope="col">Hoàn thành trễ</th>
+                        <th scope="col">Tiến độ</th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Dự án</th>
+                        <th scope="col">Số lượng</th>
+                        <th scope="col">Mới</th>
+                        <th scope="col">Hết hạn</th>
+                        <th scope="col">Hoàn thành</th>
+                        <th scope="col">Hoàn thành đúng hạn</th>
+                        <th scope="col">Hoàn thành trễ</th>
+                        <th scope="col">Tiến độ</th>
+                    </tr>
+                    <tr>
+                        <th scope="col" rowspan="2">#</th>
+                        <th scope="col" rowspan="2">Tài khoản</th>
+                        <th scope="col">Dự án</th>
+                        <th scope="col">Số lượng</th>
+                        <th scope="col">Mới</th>
+                        <th scope="col">Hết hạn</th>
+                        <th scope="col">Hoàn thành</th>
+                        <th scope="col">Hoàn thành đúng hạn</th>
+                        <th scope="col">Hoàn thành trễ</th>
+                        <th scope="col">Tiến độ</th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Dự án</th>
+                        <th scope="col">Số lượng</th>
+                        <th scope="col">Mới</th>
+                        <th scope="col">Hết hạn</th>
+                        <th scope="col">Hoàn thành</th>
+                        <th scope="col">Hoàn thành đúng hạn</th>
+                        <th scope="col">Hoàn thành trễ</th>
+                        <th scope="col">Tiến độ</th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('custom_js')
 <script>
@@ -237,5 +336,88 @@ Biss
             }
         });
     });
+
+    $('.btn-report').click(function(){
+        let id = $(this).data('id');
+        $('#modalReport input[name="id"]').val(id);
+        $('#modalReport select[name="project_id"]').val(0).trigger('change');
+        reportRole();
+        $('#modalReport').modal('show');
+    });
+
+    function reportRole() {
+        let id = $('#modalReport input[name="id"]').val();
+        let start_time = $('#modalReport input[name="start_time"]').val();
+        let end_time = $('#modalReport input[name="end_time"]').val();
+        let project_id = $('#modalReport select[name="project_id"]').val() ?? 0;
+        if(!init.conf.ajax_sending){
+            $.ajax({
+                type: 'GET',
+                url: "{{ route('admin.role.report') }}",
+                data: {id, start_time, end_time, project_id},
+                beforeSend: function(){
+                    init.conf.ajax_sending = true;
+                },
+                success: function(res){
+                    let html = '', htmlSelect = '';
+                    if(res.success){
+                        if(res.data.length > 0){
+                            res.data.forEach(function (admin, $ka) {
+                                if(admin.projects.length> 0){
+                                    admin.projects.forEach(function (project) {
+                                        if(!!!$ka){
+                                            html += `<tr>
+                                                    <td rowspan="${admin.projects.length}">${($ka+1)}</td>
+                                                    <td rowspan="${admin.projects.length}">${admin.admin}</td>
+                                                    <td>${project.project}</td>
+                                                    <td>${project.report.total}</td>
+                                                    <td>${project.report.new}</td>
+                                                    <td>${project.report.expired}</td>
+                                                    <td>${project.report.done}</td>
+                                                    <td>${project.report.done_on_time}</td>
+                                                    <td>${project.report.done_out_time}</td>
+                                                    <td>${project.report.percent} %</td>
+                                                </tr>`;
+                                        }else{
+                                            html += `<tr>
+                                                    <td>${project.project}</td>
+                                                    <td>${project.report.total}</td>
+                                                    <td>${project.report.new}</td>
+                                                    <td>${project.report.expired}</td>
+                                                    <td>${project.report.done}</td>
+                                                    <td>${project.report.done_on_time}</td>
+                                                    <td>${project.report.done_out_time}</td>
+                                                    <td>${project.report.percent} %</td>
+                                                </tr>`;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        $('#modalReport tbody').html(html);
+                        if ($('.select-project').hasClass("select2-hidden-accessible")) {
+                            $('.select-project').select2('destroy');
+                        }
+                        if(res.project.length > 0){
+                            htmlSelect += `<option value="0" ${project_id == 0? 'selected' : ''}>Tất cả dự án</option>`
+                            res.project.forEach(function ($project, $k) {
+                                htmlSelect += `<option value="${$project.id}" ${project_id == $project.id? 'selected' : ''}>${$project.name}</option>`
+                            });
+                        }
+                        $('.select-project').html(htmlSelect);
+                        $('.select-project').select2({
+                            placeholder: 'Chọn dự án',
+                            minimumResultsForSearch:-1,
+                        });
+                    } else {
+                        init.showNoty('Có lỗi xảy ra!', 'error');
+                    }
+                },
+                complete: function(){
+                    init.conf.ajax_sending = false;
+                }
+            })
+        }
+    }
 </script>
 @endsection

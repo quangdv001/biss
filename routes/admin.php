@@ -8,6 +8,8 @@ Route::get('logout', 'AdminAuthController@logout')->name('auth.logout');
 
 Route::middleware(['auth:admin'])->group(function () {
     Route::get('/', 'AdminHomeController@index')->name('home.index');
+    Route::post('home/getNoty', 'AdminHomeController@getNoty')->name('home.getNoty');
+    Route::post('home/detailNoty', 'AdminHomeController@detailNoty')->name('home.detailNoty');
 
     Route::get('profile', 'AdminProfileController@index')->name('profile.index');
     Route::post('profile', 'AdminProfileController@postIndex')->name('profile.postIndex');
@@ -17,6 +19,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('role', 'AdminRoleController@index')->name('role.index');
     Route::post('role/create', 'AdminRoleController@create')->name('role.create');
     Route::post('role/remove', 'AdminRoleController@remove')->name('role.remove');
+    Route::get('role/report', 'AdminRoleController@report')->name('role.report');
     
     Route::get('account', 'AdminAccountController@index')->name('account.index');
     Route::post('account/create', 'AdminAccountController@create')->name('account.create');

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTicketTable extends Migration
+class CreateNotyTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,22 +13,20 @@ class CreateTicketTable extends Migration
      */
     public function up()
     {
-        Schema::create('ticket', function (Blueprint $table) {
+        Schema::create('noty', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->longText('description')->nullable();
-            $table->longText('input')->nullable();
-            $table->longText('output')->nullable();
-            $table->tinyInteger('status')->default(0);
-            $table->integer('created_time');
-            $table->integer('qty');
-            $table->integer('priority');
-            $table->integer('deadline_time')->nullable();
-            $table->integer('complete_time')->nullable();
-            $table->unsignedBigInteger('admin_id_c');
+            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('type')->default(1);
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('phase_id');
+            $table->unsignedBigInteger('admin_id_c');
+            $table->unsignedBigInteger('admin_id');
+            $table->unique(['admin_id', 'group_id', 'type']);
+            $table->foreign('admin_id_c')->references('id')->on('admin')
+                ->onDelete('cascade');
+            $table->foreign('admin_id')->references('id')->on('admin')
+                ->onDelete('cascade');
             $table->foreign('project_id')->references('id')->on('project')
                 ->onDelete('cascade');
             $table->foreign('group_id')->references('id')->on('group')
@@ -46,6 +44,6 @@ class CreateTicketTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ticket');
+        Schema::dropIfExists('noty');
     }
 }

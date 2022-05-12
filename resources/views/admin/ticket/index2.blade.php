@@ -59,7 +59,7 @@
                         <span class="text-muted font-weight-bold font-size-sm mt-1">Danh sách công việc</span>
                     </div>
                     <div class="card-toolbar">
-                        <button type="button" class="btn btn-success mr-2 {{$isAdmin || $isSeo ? '' :'d-none'}}" data-toggle="modal"
+                        <button type="button" class="btn btn-success mr-2" data-toggle="modal"
                         data-target="#modalCreate">Thêm công việc</button>
                     </div>
                 </div>
@@ -84,16 +84,17 @@
                                 <th>Deadline</th>
                                 <th>Hoàn thành</th>
                                 <th>Người xử lý</th>
+                                <th>Người tạo</th>
                                 <th>Trạng thái</th>
-                                <th class="{{$isAdmin || $isSeo ? '' :'d-none'}}">Hành động</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             
-                            @foreach($data as $v)
+                            @foreach($data as $k => $v)
                             <tr>
-                                <td>{{ $v->id }}</td>
+                                <td>{{ $k + 1 }}</td>
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->description }}</td>
                                 <td><a href="{{ $v->input }}" target="_blank">Xem</a></td>
@@ -101,12 +102,13 @@
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
                                 <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
+                                <td>{{ @$v->creator->username }}</td>
                                 </td>
                                 <td>
                                     <span
-                                        class="label label-lg font-weight-bold label-light-{{ ($v->status && ($v->complete_time <= $v->deadline_time)) || ($v->status == 0 && $time < $v->deadline_time)  ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoàn thành' : 'Mới' }}</span>
+                                        class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoàn thành' : 'Mới' }}</span>
                                 </td>
-                                <td nowrap class="{{$isAdmin || $isSeo ? '' :'d-none'}}">
+                                <td nowrap>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit"
                                         title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
@@ -172,18 +174,20 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-4">
+                            <label>Khối lượng</label>
+                            <input type="number" class="form-control" name="qty" placeholder="Khối lượng công việc" value="1" min="1"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Độ ưu tiên</label>
+                            <select class="form-control select2" name="priority" style="width: 100%">
+                                <option value="1">Thấp</option>
+                                <option value="2" selected>Trung bình</option>
+                                <option value="3">Cao</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-4">
                             <label>Deadline:</label>
                             <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required/>
-                        </div>
-                        <div class="col-lg-4">
-                            <label>Hoàn thành:</label>
-                            <input type="date" class="form-control" name="complete_time" placeholder="Hoàn thành"/>
-                        </div>
-                        <div class="col-lg-4">
-                            <label>Trạng thái:</label>
-                            <div>
-                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
-                            </div>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -198,7 +202,14 @@
                             </select>
                         </div>
                     </div>
-
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -214,7 +225,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thêm công việc</h5>
+                <h5 class="modal-title">Chỉnh sửa công việc</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i aria-hidden="true" class="ki ki-close"></i>
                 </button>
@@ -249,18 +260,20 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-4">
+                            <label>Khối lượng</label>
+                            <input type="number" class="form-control" name="qty" placeholder="Khối lượng công việc" value="1" min="1"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Độ ưu tiên</label>
+                            <select class="form-control select2" name="priority" style="width: 100%">
+                                <option value="1">Thấp</option>
+                                <option value="2" selected>Trung bình</option>
+                                <option value="3">Cao</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-4">
                             <label>Deadline:</label>
-                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required/>
-                        </div>
-                        <div class="col-lg-4">
-                            <label>Hoàn thành:</label>
-                            <input type="date" class="form-control" name="complete_time" placeholder="Hoàn thành"/>
-                        </div>
-                        <div class="col-lg-4">
-                            <label>Trạng thái:</label>
-                            <div>
-                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
-                            </div>
+                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required disabled/>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -275,7 +288,14 @@
                             </select>
                         </div>
                     </div>
-
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -301,6 +321,8 @@ $('.btn-edit').click(function(){
     $('#modalEdit input[name="description"]').val(ticket.description);
     $('#modalEdit input[name="input"]').val(ticket.input);
     $('#modalEdit input[name="output"]').val(ticket.output);
+    $('#modalEdit input[name="qty"]').val(ticket.qty);
+    $('#modalEdit select[name="priority"]').val(ticket.priority).trigger('change');
     let timestamp = ticket.deadline_time ? ticket.deadline_time*1000 : null;
     if(timestamp){
         let tzoffset = (new Date()).getTimezoneOffset() * 60000;
@@ -309,14 +331,6 @@ $('.btn-edit').click(function(){
     } else {
         $('#modalEdit input[name="deadline_time"]').val('');
     }
-    let timestamp1 = ticket.complete_time ? ticket.complete_time*1000 : null;
-    if(timestamp1){
-        let tzoffset1 = (new Date()).getTimezoneOffset() * 60000;
-        let date1 = new Date(timestamp1 - tzoffset1).toISOString().split('T')[0];
-        $('#modalEdit input[name="complete_time"]').val(date1);
-    } else {
-        $('#modalEdit input[name="complete_time"]').val('');
-    }
     $('#modalEdit input[name="id"]').val(ticket.id);
     let admin = []
     if(ticket.admin.length > 0){
@@ -324,8 +338,8 @@ $('.btn-edit').click(function(){
             admin.push(v.id);
         });
     }
-    $('#modalEdit select').val(admin).change();
-    $('#modalEdit input[name="status"]').prop('checked', ticket.status == 1 ? true : false).change();
+    $('#modalEdit select[name="admin[]"]').val(admin).trigger('change');
+    $('#modalEdit input[name="status"]').prop('checked', ticket.status == 1 ? true : false).trigger('change');
     $('#modalEdit').modal('show');
 });
 

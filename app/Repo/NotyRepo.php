@@ -1,13 +1,13 @@
 <?php
 namespace App\Repo;
 
-use App\Models\Ticket;
+use App\Models\Noty;
 use Exception;
 
-class TicketRepo
+class NotyRepo
 {
     private $repo;
-    public function __construct(Ticket $repo)
+    public function __construct(Noty $repo)
     {
         $this->repo = $repo;
     }
@@ -15,13 +15,14 @@ class TicketRepo
     public function create($data)
     {
         try {
-            $repo = new Ticket();
+            $repo = new Noty();
             foreach ($data as $key => $value) {
                 $repo->$key = $value;
             }
             $repo->save();
             return $repo;
         } catch (Exception $e) {
+            dd(1, $data);
             throw $e;
         }
     }
@@ -35,6 +36,7 @@ class TicketRepo
             $repo->save();
             return $repo;
         } catch (Exception $e) {
+            dd(2, $data);
             throw $e;
         }
     }
@@ -109,10 +111,6 @@ class TicketRepo
             foreach ($condition as $key => $value) {
                 if (is_array($value)) {
                     $query = $query->whereIn($key, $value);
-                } elseif ($key == 'name') {
-                    $query = $query->where($key, 'like', '%' . $value . '%');
-                } elseif ($key == 'created_time') {
-                    $query = $query->whereBetween($key, $value);
                 } else {
                     $query = $query->where($key, $value);
                 }
@@ -153,23 +151,4 @@ class TicketRepo
         return $data;
     }
 
-    public function getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time)
-    {
-        $query = $this->repo;
-        if (!empty($start_time) && !empty($end_time)) {
-            $query = $query->whereBetween('created_time', [$start_time, $end_time]);
-        }
-        if (!empty($project_id)) {
-            $query = $query->where('project_id', $project_id);
-        }
-        $query = $query->with('admin');
-        $query = $query->whereHas('admin', function ($query) use ($admin_ids) {
-            $query->whereIn('id', $admin_ids);
-        });
-        $result = collect([]);
-        $query->chunkById(200, function ($data) use (&$result) {
-            $result = $result->merge($data->all());
-        });
-        return $result;
-    }
 }

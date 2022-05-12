@@ -5,36 +5,30 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ticket extends Model
+class Noty extends Model
 {
     use HasFactory;
 
-    protected $table = 'ticket';
+    protected $table = 'noty';
     protected $fillable = [
-        'name',
-        'description',
-        'input',
-        'output',
         'status',
-        'created_time',
-        'deadline_time',
-        'complete_time',
-        'qty',
-        'priority',
-        'admin_id_c',
+        'type',
         'project_id',
         'group_id',
+        'phase_id',
+        'admin_id_c',
+        'admin_id',
     ];
     protected $dates = ['created_at', 'updated_at'];
 
     public function admin()
     {
-        return $this->belongsToMany(Admin::class);
+        return $this->belongsTo(Admin::class);
     }
 
-    public function creator()
+    public function adminc()
     {
-        return $this->belongsTo(Admin::class,'admin_id_c');
+        return $this->belongsTo(Admin::class, 'admin_id_c', 'id');
     }
 
     public function group()

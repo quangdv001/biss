@@ -148,20 +148,16 @@
                     <div class="form-group row">
                         <div class="col-lg-12">
                             <label>Tên nhóm công việc</label>
-                            <input type="text" class="form-control" name="name"
-                                placeholder="Tên nhóm công việc" />
+                            <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" autocomplete="off" />
                         </div>
-                        <div class="col-lg-12 mt-3">
-                            <label>Nhân sự:</label>
-                            <select class="form-control select2" name="admin_group[]" multiple="multiple"
-                                style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
-                        </div>
+                        @if(!empty($phase))
+                            @foreach($phase as $v)
+                                <div class="col-lg-12 mt-4">
+                                    <label>Khối lượng{{ $v->name }} ({{ date('d/m', $v->start_time)  }} - {{ date('d/m', $v->end_time) }})</label>
+                                    <input type="number" class="form-control" name="qty[{{$v->id}}]" placeholder="Khối lượng công việc" value="1" min="1"/>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -232,17 +228,14 @@
                             <label>Tên nhóm công việc</label>
                             <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" />
                         </div>
-                        <div class="col-lg-12 mt-3">
-                            <label>Nhân sự:</label>
-                            <select class="form-control select2" name="admin_group[]" multiple="multiple"
-                                style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
-                        </div>
+                        @if(!empty($phase))
+                            @foreach($phase as $v)
+                                <div class="col-lg-12 mt-4">
+                                    <label>Khối lượng {{ $v->name }} ({{ date('d/m', $v->start_time)  }} - {{ date('d/m', $v->end_time) }})</label>
+                                    <input type="number" class="form-control" name="qty[{{$v->id}}]" placeholder="Khối lượng công việc" value="1" min="1" data-phase="{{$v->id}}"/>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -266,18 +259,21 @@
 
     $('.btn-edit-group').click(function () {
         let id = $(this).data('id');
-        console.log(id);
         let g = group[id];
+        console.log(g);
         $('#modalEditGroup input[name="id"]').val(g.id);
         $('#modalEditGroup input[name="name"]').val(g.name);
-        let admin = [];
-        if (g.admin.length > 0) {
-            $.each(g.admin, function (i, v) {
-                admin.push(v.id);
-            });
-        }
-        $('#modalEditGroup select[name="admin_group[]"]').val(admin).trigger('change');
-        // $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
+        $('#modalEditGroup input[name="qty"]').val(g.qty);
+        $('#modalEditGroup input[type=number]').each(function () {
+            let phase_id = $(this).data('phase');
+            let qty = 1;
+            if (g.phase_group.length > 0) {
+                let phase_group = g.phase_group.find(v => v.phase_id === phase_id);
+                console.log(phase_group);
+                qty = !!phase_group ? phase_group.qty : 1;
+            }
+            $(this).val(qty);
+        });
         $('#modalEditGroup').modal('show');
     });
 

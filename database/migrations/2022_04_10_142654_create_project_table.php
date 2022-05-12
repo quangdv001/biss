@@ -16,6 +16,7 @@ class CreateProjectTable extends Migration
         Schema::create('project', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('field')->nullable();
             $table->longText('description')->nullable();
             $table->longText('note')->nullable();
             $table->unsignedBigInteger('planer_id')->nullable();
