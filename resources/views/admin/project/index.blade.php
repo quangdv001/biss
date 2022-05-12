@@ -164,7 +164,7 @@ Danh sách dự án
                                 <td>{{ $v->description }}</td>
                                 <td>{{ $v->note }}</td>
                                 <td>
-                                    <span class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
+                                    <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
                                 <td nowrap class="{{$isAdmin?'':'d-none'}}">
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
