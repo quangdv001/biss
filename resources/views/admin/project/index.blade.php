@@ -152,8 +152,8 @@ Danh sách dự án
                                 <th scope="row">{{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</th>
                                 <td><a href="{{ route('admin.group.index', $v->id) }}">{{ $v->name }}</a></td>
                                 <td>{{ $v->field }}</td>
-                                <td>{{ $v->planer->username }}</td>
-                                <td>{{ $v->executive->username }}</td>
+                                <td>{{ $v->planer ? $v->planer->username : '' }}</td>
+                                <td>{{ $v->executive ? $v->executive->username : '' }}</td>
                                 <td>{{ $v->package }}</td>
                                 <td>{{ $v->payment_month }}</td>
                                 <td>{{ date('d/m/Y', $v->accept_time) }}</td>
