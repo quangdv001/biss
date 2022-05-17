@@ -60107,7 +60107,7 @@ body {
   background-color: #ECEEF7;
   border-radius: 0.42rem; }
 
-@media (min-width: 992px) {
+@media (min-width: 1400px) {
   body.header-fixed[data-header-scroll="on"] {
     padding-top: 100px; }
   .main {
@@ -60119,7 +60119,7 @@ body {
   .container-fluid, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl {
     padding: 0 100px; } }
 
-@media (max-width: 991.98px) {
+@media (max-width: 1399px) {
   .container, .container-fluid, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl {
     max-width: none;
     padding: 0 15px; } }
