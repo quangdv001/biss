@@ -117,7 +117,7 @@
                                 <td>{{ @$v->creator->username }}</td>
                                 </td>
                                 <td>
-                                    <span
+                                    <span style="white-space: nowrap;"
                                         class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoàn thành' : 'Mới' }}</span>
                                 </td>
                                 <td nowrap>
@@ -326,7 +326,7 @@ $('#kt_datatable').DataTable({
     paging: true,
 });
 var data = @json($data->keyBy('id'));
-$('.btn-edit').click(function(){
+$(document).on('click', '.btn-edit', function(){
     let id = $(this).data('id');
     let ticket = data[id];
     $('#modalEdit input[name="name"]').val(ticket.name);
@@ -355,7 +355,7 @@ $('.btn-edit').click(function(){
     $('#modalEdit').modal('show');
 });
 
-$('.btn-remove').click(function(){
+$(document).on('click', '.btn-remove', function(){
     let id = $(this).data('id');
     Swal.fire({
         title: "Bạn chắc chắn muốn xóa?",

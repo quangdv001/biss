@@ -63,7 +63,7 @@ Thông tin cá nhân
                                 {{ auth('admin')->user()->name ? auth('admin')->user()->name : auth('admin')->user()->username }}
                             </a>
                             <div class="text-muted">
-                                Application Developer
+                                {{ !empty(auth('admin')->user()->roles()) ? implode(', ', auth('admin')->user()->roles()->pluck('name')->toArray()) : '' }}
                             </div>
                         </div>
                     </div>

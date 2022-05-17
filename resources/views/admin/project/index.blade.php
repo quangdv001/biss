@@ -125,7 +125,7 @@ Danh sách dự án
             <!--begin: Datatable-->
             <div class="row">
                 <div class="col-12">
-                    <table class="table table-responsive-sm">
+                    <table class="table table-responsive table-separate">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>

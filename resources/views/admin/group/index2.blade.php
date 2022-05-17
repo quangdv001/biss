@@ -74,7 +74,7 @@
                                 </div>
                                 <div class="card-body">
                                     <!--begin::Chart-->
-                                    <table class="table text-center">
+                                    <table class="table text-center table-responsive">
                                         <thead>
                                         <tr>
                                             <th scope="col">#</th>
@@ -123,7 +123,7 @@
                                 </div>
                                 <div class="card-body">
                                     <!--begin::Chart-->
-                                    <table class="table text-center">
+                                    <table class="table text-center table-responsive">
                                         <thead>
                                         <tr>
                                             <th scope="col">#</th>

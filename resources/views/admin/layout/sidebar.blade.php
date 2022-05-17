@@ -1,9 +1,9 @@
 <!--begin::Aside-->
-<div class="flex-row-auto offcanvas-mobile w-250px w-xxl-350px" id="kt_profile_aside">
+<div class="flex-row-auto offcanvas-mobile w-300px w-xxl-350px" id="kt_profile_aside">
     <!--begin::Profile Card-->
     <div class="card card-custom card-stretch">
         <!--begin::Body-->
-        <div class="card-body pt-10">
+        <div class="card-body pt-10 p-4">
 
             <!--begin::Nav-->
             <div class="navi navi-bold navi-hover navi-active navi-link-rounded">

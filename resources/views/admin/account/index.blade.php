@@ -108,7 +108,7 @@ Biss
                         </td>
                         <td>{{ !empty($v->roles) ? implode(', ', $v->roles->pluck('name')->toArray()) : '' }}</td>
                         <td>
-                            <span class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoạt động' : 'khóa' }}</span>
+                            <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoạt động' : 'khóa' }}</span>
                         </td>
                         <td nowrap>
                             <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
@@ -415,7 +415,7 @@ Biss
     });
 
     var data = @json($data->keyBy('id'));
-    $('.btn-edit').click(function(){
+    $(document).on('click', '.btn-edit', function(){
         let id = $(this).data('id');
         let admin = data[id];
         $('#modalEdit input[name="username"]').val(admin.username);
@@ -443,8 +443,8 @@ Biss
         $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
         $('#modalEdit').modal('show');
     });
-
-    $('.btn-pass').click(function(){
+    
+    $(document).on('click', '.btn-pass', function(){
         let id = $(this).data('id');
         let admin = data[id];
         $('#modalPass input[name="username"]').val(admin.username);
@@ -453,7 +453,7 @@ Biss
         $('#modalPass').modal('show');
     });
 
-    $('.btn-remove').click(function(){
+    $(document).on('click', '.btn-remove', function(){
         let id = $(this).data('id');
         Swal.fire({
             title: "Bạn chắc chắn muốn xóa?",
@@ -492,7 +492,7 @@ Biss
         });
     });
 
-    $('.btn-report').click(function(){
+    $(document).on('click', '.btn-report', function(){
         let id = $(this).data('id');
         let admin = data[id];
         $('#modalReport .username').html(admin.username);
