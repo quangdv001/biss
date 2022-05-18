@@ -85,22 +85,24 @@
                                             <th scope="col">Hoàn thành</th>
                                             <th scope="col">Hoàn thành đúng hạn</th>
                                             <th scope="col">Hoàn thành trễ</th>
+                                            <th scope="col">Khối lượng</th>
                                             <th scope="col">Tiến độ</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @if(!empty($reportGroup))
-                                            @foreach($reportGroup as $k => $groupR)
+                                        @if(!empty($project->group))
+                                            @foreach($project->group as $k => $gr)
                                                 <tr>
                                                     <td scope="row">{{$k + 1}}</td>
-                                                    <td>{{$groupR['group']}}</td>
-                                                    <td>{{$groupR['report']['total']}}</td>
-                                                    <td>{{$groupR['report']['new']}}</td>
-                                                    <td>{{$groupR['report']['expired']}}</td>
-                                                    <td>{{$groupR['report']['done']}}</td>
-                                                    <td>{{$groupR['report']['done_on_time']}}</td>
-                                                    <td>{{$groupR['report']['done_out_time']}}</td>
-                                                    <td>{{$groupR['report']['percent']}} %</td>
+                                                    <td>{{$gr['name']}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['total'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['new'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['expired'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['done'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['done_on_time'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['done_out_time'] ?? 0}}</td>
+                                                    <td>{{$gr['phase_qty'] ?? 0}} </td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['percent'] ?? 0}} %</td>
                                                 </tr>
                                             @endforeach
                                         @endif

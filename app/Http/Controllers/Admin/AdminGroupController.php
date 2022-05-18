@@ -24,27 +24,27 @@ class AdminGroupController extends Controller
         $this->phase = $phase;
     }
 
-    public function index(Request $request, $id, $pid = 0){
+    public function index(Request $request, $id, $pid = 0)
+    {
         $user = auth('admin')->user();
         $isAdmin = $user->hasRole(['super_admin', 'account']);
         $gid = 0;
         $project = $this->projectRepo->first(['id' => $id], [], ['group', 'admin', 'ticket.admin']);
-
-        if(empty($project)){
+        if (empty($project)) {
             return back()->with('error_message', 'Không tìm thấy dự án!');
         }
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
-        $group = $project->group;
-        $group->load(['phaseGroup' => function($query) use($pid){
-        }])->map(function ($gr){
+        $project->group->load(['phaseGroup' => function ($query) use ($pid) {
+            $query->where('phase_id', $pid);
+        }])->map(function ($gr) {
             $gr->phase_qty = $gr->phaseGroup->sum('qty');
         })->keyBy('id');
         $admins = $project->admin ?? [];
         if (!$isAdmin && !in_array($user->id, $project->admin->pluck('id')->all())) {
             return back()->with('error_message', 'Bạn không có quyền vào dự án!');
         }
-        $reportMember = $project->admin->map(function ($member){
+        $reportMember = $project->admin->map(function ($member) {
             $data = $member->toArray();
             $data['report']['total'] = 0;
             $data['report']['new'] = 0;
@@ -55,8 +55,8 @@ class AdminGroupController extends Controller
             $data['report']['percent'] = 0;
             return $data;
         })->keyBy('id')->all();
+        $group = $project->group->keyBy('id');
         $reportGroup = $project->ticket->where('phase_id', $pid)->groupBy('group_id')->map(function ($tickets, $group_id) use ($group, &$reportMember) {
-            $data['group'] = @$group[$group_id]['name'];
             $data['report']['total'] = 0;
             $data['report']['new'] = 0;
             $data['report']['expired'] = 0;
@@ -108,7 +108,7 @@ class AdminGroupController extends Controller
             }
             $data['report']['percent'] = !empty($group[$group_id]['phase_qty']) ? round($data['report']['done'] / $group[$group_id]['phase_qty'] * 100) : 0;
             return $data;
-        })->values()->all();
+        })->all();
         $reportMember = array_values($reportMember);
 
         return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin'));
