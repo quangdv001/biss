@@ -103,9 +103,9 @@ type="text/css" /> --}}
                 <div class="row align-items-center">
 
                     
-                    <div class="col-lg-6 col-xl-5">
+                    <div class="col-lg-9 col-xl-10">
                         <div class="row align-items-center">
-                            <div class="col-md-3 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-2 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="limit" id="select-limit">
@@ -117,7 +117,7 @@ type="text/css" /> --}}
                                 </div>
                             </div>
 
-                            <div class="col-md-4 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="status">
@@ -126,18 +126,21 @@ type="text/css" /> --}}
                                     </select>
                                 </div>
                             </div>
-                            
-                            <div class="col-md-5 my-2 my-md-0">
+                            <div class="col-md-4 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
                                 </div>
                             </div>
-
-                            
+                            <div class="col-md-4 my-2 my-md-0">
+                                <div class="input-icon">
+                                    <input type="text" class="form-control" name="field" placeholder="Lĩnh vực" value="{{ old('field') }}"/>
+                                    <span><i class="flaticon2-search-1 text-muted"></i></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-7 mt-5 mt-lg-0">
+                    <div class="col-lg-3 col-xl-2 mt-5 mt-lg-0">
                         <button type="submit" class="btn btn-light-primary px-6 font-weight-bold">Tìm kiếm</button>
                     </div>
                 </div>
@@ -232,6 +235,12 @@ type="text/css" /> --}}
                                             <li>
                                                 <span class="dtr-title">Ghi chú:</span>
                                                 <span class="dtr-data">{{ $v->note }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Tài liệu:</span>
+                                                @if(!empty($v->extra_link))
+                                                    <a href="{{ $v->extra_link }}" target="_blank" class="dtr-data">Link</a>
+                                                @endif
                                             </li>
                                         </ul>
                                     </div>
@@ -339,13 +348,16 @@ type="text/css" /> --}}
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-4">
+                            <label>Tài liệu</label>
+                            <input type="text" class="form-control" name="extra_link" placeholder="Tài liệu" />
+                        </div>
+                        <div class="col-lg-4">
                             <label>Trạng thái:</label>
                             <div>
                                 <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
                             </div>
                         </div>
-                        <div class="col-lg-8">
-                            
+                        <div class="col-lg-12">
                             <label>Nhân sự:</label>
                             <select class="form-control select2" name="admin_project[]" multiple="multiple"
                                 style="width: 100%">
@@ -453,13 +465,16 @@ type="text/css" /> --}}
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-4">
+                            <label>Tài liệu</label>
+                            <input type="text" class="form-control" name="extra_link" placeholder="Tài liệu" />
+                        </div>
+                        <div class="col-lg-4">
                             <label>Trạng thái:</label>
                             <div>
                                 <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
                             </div>
                         </div>
-                        <div class="col-lg-8">
-                            
+                        <div class="col-lg-12">
                             <label>Nhân sự:</label>
                             <select class="form-control select2" name="admin_project[]" multiple="multiple"
                                 style="width: 100%">
@@ -500,6 +515,7 @@ type="text/css" /> --}}
         $('#modalEdit input[name="package"]').val(project.package);
         $('#modalEdit input[name="payment_month"]').val(project.payment_month);
         $('#modalEdit input[name="website"]').val(project.website);
+        $('#modalEdit input[name="extra_link"]').val(project.extra_link);
         $('#modalEdit input[name="fanpage"]').val(project.fanpage);
         $('#modalEdit input[name="address"]').val(project.address);
         $('#modalEdit textarea[name="description"]').val(project.description);
