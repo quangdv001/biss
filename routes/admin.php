@@ -39,4 +39,5 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('ticket/{gid}/{pid?}', 'AdminTicketController@index')->name('ticket.index');
     Route::post('ticket/create', 'AdminTicketController@create')->name('ticket.create');
     Route::post('ticket/remove', 'AdminTicketController@remove')->name('ticket.remove');
+    Route::post('ticket/createNote', 'AdminTicketController@createNote')->name('ticket.createNote');
 });

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
 use App\Repo\PhaseRepo;
 use App\Repo\ProjectRepo;
+use App\Repo\TicketRepo;
 use Illuminate\Http\Request;
 
 class AdminProjectController extends Controller
@@ -23,7 +24,7 @@ class AdminProjectController extends Controller
 
     public function index(Request $request){
         $request->flash();
-        $limit = $request->get('limit', 10);
+        $limit = $request->get('limit', 20);
         $name = $request->get('name', '');
         $condition['status'] = $request->get('status', 1);
         $condition = [];

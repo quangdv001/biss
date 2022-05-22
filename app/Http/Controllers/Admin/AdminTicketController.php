@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
 use App\Repo\GroupRepo;
+use App\Repo\NoteRepo;
 use App\Repo\NotyRepo;
 use App\Repo\PhaseRepo;
 use App\Repo\ProjectRepo;
@@ -19,8 +20,9 @@ class AdminTicketController extends Controller
     private $adminRepo;
     private $phase;
     private $noty;
+    private $note;
 
-    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase, NotyRepo $noty)
+    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase, NotyRepo $noty, NoteRepo $note)
     {
         $this->projectRepo = $projectRepo;
         $this->groupRepo = $groupRepo;
@@ -28,6 +30,7 @@ class AdminTicketController extends Controller
         $this->adminRepo = $adminRepo;
         $this->phase = $phase;
         $this->noty = $noty;
+        $this->note = $note;
     }
 
     public function index(Request $request, $gid, $pid = 0){
@@ -61,7 +64,9 @@ class AdminTicketController extends Controller
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
         $data = $this->ticketRepo->get($params, [], ['admin','creator']);
-        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin'));
+
+        $notes = $this->note->get(['group_id' => $gid], ['id' => 'DESC'], ['admin']);
+        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes'));
     }
 
     public function create(Request $request){
@@ -147,5 +152,19 @@ class AdminTicketController extends Controller
                 }
             }
         }
+    }
+
+    public function createNote(Request $request){
+        $params = $request->only('note', 'admin_id', 'group_id');
+
+        $resC = $this->note->create($params);
+        $res['success'] = 0;
+        if($resC){
+            $notes = $this->note->get(['group_id' => $resC->group_id], ['id' => 'DESC'], ['admin']);
+            $res['success'] = 1;
+            $res['html'] = view('admin.ticket.note', compact('notes'))->render();
+        }
+
+        return response()->json($res);
     }
 }
