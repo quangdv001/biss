@@ -41,6 +41,17 @@ class AdminProjectController extends Controller
         } else {
             $data = $this->projectRepo->search($condition, $limit, $user->id);
         }
+        $data->load('ticket')->map(function ($project){
+            $project->has_late = false;
+            if(!empty($project->ticket)){
+                foreach ($project->ticket as $ticket){
+                    if($ticket->status == 0 && $ticket->deadline_time < time()){
+                        $project->has_late = true;
+                    }
+                }
+            }
+            return $project;
+        });
         $admins = $this->adminRepo->get();
         return view('admin.project.index', compact('data', 'admins', 'isAdmin'));
     }
