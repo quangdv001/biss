@@ -27,7 +27,6 @@ class AdminProjectController extends Controller
         $limit = $request->get('limit', 20);
         $name = $request->get('name', '');
         $condition['status'] = $request->get('status', 1);
-        $condition = [];
         if(!empty($name)){
             $condition['name'] = $name;
         }
@@ -48,7 +47,7 @@ class AdminProjectController extends Controller
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
         $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'accept_time', 'expired_time', 'created_time', 'status', 'field');
-        $params['status'] = isset($params['status']) ? 1 : 0;
+        $params['status'] = isset($params['status']) ? 1 : 2;
         $params['accept_time'] = $params['accept_time'] ? strtotime($params['accept_time']) : null;
         $params['expired_time'] = $params['expired_time'] ? strtotime($params['expired_time']) : null;
         if(isset($params['id'])){

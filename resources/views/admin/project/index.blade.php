@@ -105,11 +105,11 @@ type="text/css" /> --}}
                     
                     <div class="col-lg-6 col-xl-5">
                         <div class="row align-items-center">
-                            <div class="col-md-2 my-2 my-md-0">
+                            <div class="col-md-3 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-2 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="limit" id="select-limit">
-                                        <option value="10" @if(old('limit') == 10) selected @endif>10</option>
+                                        <option value="20" @if(old('limit') == 20) selected @endif>20</option>
                                         <option value="30" @if(old('limit') == 30) selected @endif>30</option>
                                         <option value="50" @if(old('limit') == 50) selected @endif>50</option>
                                         <option value="100" @if(old('limit') == 100) selected @endif>100</option>
@@ -122,12 +122,12 @@ type="text/css" /> --}}
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="status">
                                         <option value="1" @if(old('status') == 1) selected @endif>Hoạt động</option>
-                                        <option value="0" @if(old('status') == 0) selected @endif>Hoàn thành</option>
+                                        <option value="2" @if(old('status') == 2) selected @endif>Hoàn thành</option>
                                     </select>
                                 </div>
                             </div>
                             
-                            <div class="col-md-6 my-2 my-md-0">
+                            <div class="col-md-5 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
@@ -204,7 +204,7 @@ type="text/css" /> --}}
                             <tr>
                                 <td colspan="9" class="hiddenRow">
                                     <div class="accordian-body collapse" id="collapse{{ $k }}">
-                                        <ul class="dtr-details">
+                                        <ul class="dtr-details pt-4">
                                             <li>
                                                 <span class="dtr-title">Account:</span>
                                                 <span class="dtr-data">{{ @$v->planer->username}}</span>

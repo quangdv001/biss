@@ -156,6 +156,7 @@ class ProjectRepo
         if(!empty($params['name'])){
             $query = $query->where('name', 'like', '%' . $params['name'] . '%');
         }
+        $query = $query->where('status',$params['status']);
         $query = $query->whereHas('admin', function ($query) use ($userId) {
             $query->where('admin_id','=', $userId);
         });
