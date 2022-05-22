@@ -26,13 +26,17 @@ class AdminProjectController extends Controller
         $request->flash();
         $limit = $request->get('limit', 20);
         $name = $request->get('name', '');
+        $field = $request->get('field', '');
         $condition['status'] = $request->get('status', 1);
         if(!empty($name)){
             $condition['name'] = $name;
         }
+        if(!empty($field)){
+            $condition['field'] = $field;
+        }
         $user = auth('admin')->user();
-        $isAdmin = $user->hasRole(['super_admin', 'account']);
-        if($isAdmin){
+        $isAdmin = $user->hasRole(['super_admin','account']);
+        if($user->hasRole(['super_admin'])){
             $data = $this->projectRepo->paginate($condition, $limit, ['status' => 'ASC', 'id' => 'DESC'], ['planer', 'executive', 'admin']);
         } else {
             $data = $this->projectRepo->search($condition, $limit, $user->id);

@@ -63,8 +63,26 @@ class AdminTicketController extends Controller
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
-        $data = $this->ticketRepo->get($params, [], ['admin','creator']);
-
+        $data = $this->ticketRepo->get($params, [], ['admin','creator'])->map(function ($ticket){
+            if ($ticket->status == 0) {
+                if ($ticket->deadline_time > time()) {
+                    $ticket->status_lb = 'Mới';
+                    $ticket->status_cl = 'info';
+                } else {
+                    $ticket->status_lb = 'Trễ hạn';
+                    $ticket->status_cl = 'danger';
+                }
+            } else {
+                if ($ticket->deadline_time > $ticket->complete_time) {
+                    $ticket->status_lb = 'Hoàn thành';
+                    $ticket->status_cl = 'success';
+                } else {
+                    $ticket->status_lb = 'Hoàn thành trễ';
+                    $ticket->status_cl = 'warning';
+                }
+            }
+            return $ticket;
+        });
         $notes = $this->note->get(['group_id' => $gid], ['id' => 'DESC'], ['admin']);
         return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes'));
     }

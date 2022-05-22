@@ -111,6 +111,8 @@ class ProjectRepo
                     $query = $query->whereIn($key, $value);
                 } elseif ($key == 'name') {
                     $query = $query->where($key, 'like', '%' . $value . '%');
+                } elseif ($key == 'field') {
+                    $query = $query->where($key, 'like', '%' . $value . '%');
                 } else {
                     $query = $query->where($key, $value);
                 }
@@ -153,19 +155,23 @@ class ProjectRepo
 
     public function search($params, $limit, $userId){
         $query = $this->repo;
-        if(!empty($params['name'])){
+        if (!empty($params['name'])) {
             $query = $query->where('name', 'like', '%' . $params['name'] . '%');
         }
         $query = $query->where('status',$params['status']);
-        $query = $query->whereHas('admin', function ($query) use ($userId) {
-            $query->where('admin_id','=', $userId);
+        if (!empty($params['field'])) {
+            $query = $query->where('field', 'like', '%' . $params['field'] . '%');
+        }
+        $query = $query->where(function ($query) use ($userId) {
+            $query->whereHas('admin', function ($query) use ($userId) {
+                $query->where('admin_id', $userId);
+            })->orwhere('planer_id', $userId);
         });
         $query = $query->with(['planer', 'executive', 'admin']);
         $query = $query->orderBy('status', 'ASC');
         $query = $query->orderBy('id', 'DESC');
         $query = $query->paginate($limit);
         return $query;
-
     }
 
     public function getProjectByAdmin($admin_id)
