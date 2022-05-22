@@ -99,8 +99,8 @@
                                 <td>{{ $k + 1 }}</td>
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->description }}</td>
-                                <td><a href="{{ $v->input }}" target="_blank">Xem</a></td>
-                                <td><a href="{{ $v->output }}" target="_blank">Xem</a></td>
+                                <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
+                                <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
                                 <td>{{ $v->qty }}</td>
@@ -115,10 +115,9 @@
                                 </td>
                                 <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
                                 <td>{{ @$v->creator->username }}</td>
-                                </td>
                                 <td>
                                     <span style="white-space: nowrap;"
-                                        class="label label-lg font-weight-bold label-light-{{ $v->status ? 'success' : 'danger' }} label-inline">{{ $v->status ? 'Hoàn thành' : 'Mới' }}</span>
+                                        class="label label-lg font-weight-bold label-light-{{ $v->status_cl }} label-inline">{{ $v->status_lb }}</span>
                                 </td>
                                 <td nowrap>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit"
@@ -323,6 +322,7 @@
 <script>
 $('#kt_datatable').DataTable({
     responsive: true,
+    pageLength: 25,
     paging: true,
 });
 var data = @json($data->keyBy('id'));
