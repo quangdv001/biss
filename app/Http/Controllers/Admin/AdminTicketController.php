@@ -63,7 +63,7 @@ class AdminTicketController extends Controller
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
-        $data = $this->ticketRepo->get($params, [], ['admin','creator'])->map(function ($ticket){
+        $data = $this->ticketRepo->get($params, ['deadline_time' => 'asc'], ['admin','creator'])->map(function ($ticket){
             if ($ticket->status == 0) {
                 if ($ticket->deadline_time > time()) {
                     $ticket->status_lb = 'Mới';
@@ -90,7 +90,7 @@ class AdminTicketController extends Controller
     public function create(Request $request){
         $user = auth('admin')->user();
         $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
-        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime($params['deadline_time']) : null;
+        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
         $params['priority'] = !empty($params['priority']) ? (int)$params['priority'] : 2;
