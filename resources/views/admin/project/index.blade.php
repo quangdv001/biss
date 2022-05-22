@@ -3,12 +3,36 @@
 Danh sách dự án
 @endsection
 @section('lib_css')
-{{--<link href="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet"--}}
-{{--type="text/css" />--}}
+{{-- <link href="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet"
+type="text/css" /> --}}
 @endsection
 @section('lib_js')
 <script src="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.js"></script>
 <script src="/assets/admin/themes/assets/js/pages/crud/forms/widgets/bootstrap-switch.js"></script>
+@endsection
+@section('custom_css')
+<style>
+    .hiddenRow {
+        padding: 0 !important;
+    }
+
+    .dtr-details{
+        list-style: none;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .dtr-details .dtr-title{
+        min-width: 70px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-block;
+    }
+    .dtr-details .dtr-data{
+
+    }
+</style>
+    
 @endsection
 @section('content')
 <!--begin::Subheader-->
@@ -131,38 +155,31 @@ Danh sách dự án
                                 <th scope="col">#</th>
                                 <th scope="col">Tên</th>
                                 <th scope="col">Lĩnh vực</th>
-                                <th scope="col">Account</th>
-                                <th scope="col">Phụ trách</th>
                                 <th scope="col">Gói</th>
                                 <th scope="col">Thanh toán</th>
                                 <th scope="col">Ngày nhận</th>
                                 <th scope="col">Ngày hết hạn</th>
+                                <th scope="col">Trạng thái</th>
+                                <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
+                                {{-- <th scope="col">Account</th>
+                                <th scope="col">Phụ trách</th>
                                 <th scope="col">Nhân sự</th>
                                 <th scope="col">Fanpage</th>
                                 <th scope="col">Website</th>
                                 <th scope="col">Mô tả</th>
-                                <th scope="col">Ghi chú</th>
-                                <th scope="col">Trạng thái</th>
-                                <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
+                                <th scope="col">Ghi chú</th> --}}
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($data as $k => $v)
                             <tr>
-                                <th scope="row">{{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</th>
+                                <th scope="row" nowrap><a href="javascript:void(0);" data-toggle="collapse"  class="accordion-toggle" data-target="#collapse{{ $k }}"><i class="la la-angle-down text-success mr-1"></i> {{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</a> </th>
                                 <td><a href="{{ route('admin.group.index', $v->id) }}">{{ $v->name }}</a></td>
                                 <td>{{ $v->field }}</td>
-                                <td>{{ $v->planer ? $v->planer->username : '' }}</td>
-                                <td>{{ $v->executive ? $v->executive->username : '' }}</td>
                                 <td>{{ $v->package }}</td>
                                 <td>{{ $v->payment_month }}</td>
                                 <td>{{ date('d/m/Y', $v->accept_time) }}</td>
                                 <td>{{ date('d/m/Y', $v->expired_time) }}</td>
-                                <td>{{ implode(', ', $v->admin->pluck('username')->toArray()) }}</td>
-                                <td>@if($v->fanpage) <a href="{{ $v->fanpage }}" target="_blank">Xem</a> @endif</td>
-                                <td>@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</td>
-                                <td>{{ $v->description }}</td>
-                                <td>{{ $v->note }}</td>
                                 <td>
                                     <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
@@ -173,6 +190,51 @@ Danh sách dự án
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Xóa" data-id="{{ $v->id }}">
                                         <i class="la la-trash"></i>
                                     </a>
+                                </td>
+                                {{-- <td>{{ $v->planer ? $v->planer->username : '' }}</td>
+                                <td>{{ $v->executive ? $v->executive->username : '' }}</td>
+                                <td>{{ implode(', ', $v->admin->pluck('username')->toArray()) }}</td>
+                                <td>@if($v->fanpage) <a href="{{ $v->fanpage }}" target="_blank">Xem</a> @endif</td>
+                                <td>@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</td>
+                                <td>{{ $v->description }}</td>
+                                <td>{{ $v->note }}</td> --}}
+                                
+                                
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="hiddenRow">
+                                    <div class="accordian-body collapse" id="collapse{{ $k }}">
+                                        <ul class="dtr-details">
+                                            <li>
+                                                <span class="dtr-title">Account:</span>
+                                                <span class="dtr-data">{{ @$v->planer->username}}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Phụ trách:</span>
+                                                <span class="dtr-data">{{ @$v->executive->username }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Nhân sự:</span>
+                                                <span class="dtr-data">{{ implode(', ', $v->admin->pluck('username')->toArray()) }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Fanpage:</span>
+                                                <span class="dtr-data">@if($v->fanpage) <a href="{{ $v->fanpage }}" target="_blank">Xem</a> @endif</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Website:</span>
+                                                <span class="dtr-data">@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Mô tả:</span>
+                                                <span class="dtr-data">{{ $v->description }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Ghi chú:</span>
+                                                <span class="dtr-data">{{ $v->note }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

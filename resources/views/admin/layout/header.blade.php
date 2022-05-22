@@ -85,7 +85,7 @@
                     <div class="d-flex align-items-center p-8 rounded-top">
                         <!--begin::Symbol-->
                         <div class="symbol symbol-md bg-light-primary mr-3 flex-shrink-0">
-                            <img src="/assets/admin/themes/assets/media/users/default.jpg" alt="" />
+                            <img src="{{ auth('admin')->user()->avatar ? Storage::url(auth('admin')->user()->avatar) : '/assets/admin/themes/assets/media/users/default.jpg' }}" alt="" />
                         </div>
                         <!--end::Symbol-->
 

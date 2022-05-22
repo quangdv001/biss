@@ -59,6 +59,8 @@
                         <span class="text-muted font-weight-bold font-size-sm mt-1">Danh sách công việc</span>
                     </div>
                     <div class="card-toolbar">
+                        <button type="button" class="btn btn-warning mr-2" data-toggle="modal"
+                        data-target="#modalNote">Thêm ghi chú</button>
                         <button type="button" class="btn btn-success mr-2" data-toggle="modal"
                         data-target="#modalCreate">Thêm công việc</button>
                     </div>
@@ -317,6 +319,87 @@
         </div>
     </div>
 </div>
+
+{{-- modal note --}}
+<div class="modal fade" id="modalNote" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ghi chú</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <!--begin::Body-->
+            <div class="card-body p-0 pb-4">
+                <div class="tab-content pt-5">
+                    <!--begin::Tab Content-->
+                    <div class="tab-pane active" id="kt_apps_contacts_view_tab_1"
+                        role="tabpanel">
+                        <div class="container">
+                            @if(auth('admin')->user()->hasRole(['super_admin', 'account', 'guest']))
+                            <form class="form">
+                                <div class="form-group">
+                                    <textarea
+                                        class="form-control form-control-lg form-control-solid inp-note"
+                                        id="exampleTextarea" rows="3"
+                                        placeholder="Thêm ghi chú"></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <a href="javascript:void(0);"
+                                            class="btn btn-light-primary font-weight-bold btn-add-note">Thêm ghi chú</a>
+                                    </div>
+                                </div>
+                            </form>
+                            @endif
+                            <div class="separator separator-dashed my-10"></div>
+
+                            <!--begin::Timeline-->
+                            <div class="timeline timeline-3" style="max-height: 500px;
+                            overflow: auto;">
+                                <div class="timeline-items list-notes">
+                                    @if($notes->count() > 0)
+                                    @foreach($notes as $v)
+                                    <div class="timeline-item">
+                                        <div class="timeline-media">
+                                            <img alt="Pic"
+                                                src="{{ @$v->admin->avatar ? Storage::url($v->admin->avatar) : '/assets/admin/themes/assets/media/users/default.jpg' }}" />
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div
+                                                class="d-flex align-items-center justify-content-between mb-3">
+                                                <div class="mr-2">
+                                                    <a href="#"
+                                                        class="text-dark-75 text-hover-primary font-weight-bold">
+                                                        {{ @$v->admin->username }}
+                                                    </a>
+                                                    <span class="text-muted ml-2">
+                                                        {{ $v->created_at->diffForHumans() }}
+                                                    </span>
+                                                    {{-- <span
+                                                        class="label label-light-success font-weight-bolder label-inline ml-2">new</span> --}}
+                                                </div>
+                                            </div>
+                                            <p class="p-0">
+                                                {!! nl2br($v->note) !!}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                            <!--end::Timeline-->
+                        </div>
+                    </div>
+                    <!--end::Tab Content-->
+                </div>
+            </div>
+            <!--end::Body-->
+        </div>
+    </div>
+</div>
 @endsection
 @section('custom_js')
 <script>
@@ -392,6 +475,37 @@ $(document).on('click', '.btn-remove', function(){
             
         }
     });
+});
+
+$('.btn-add-note').click(function(){
+    let note = $('.inp-note').val();
+    let admin_id = @json(auth('admin')->user()->id);
+    let group_id = @json($gid);
+    if(!note){
+        init.showNoty('Mời nhập ghi chú!', 'error');
+        return false;
+    }
+    if(!init.conf.ajax_sending){
+        $.ajax({
+            type: 'POST',
+            url: "{{ route('admin.ticket.createNote') }}",
+            data: {note, admin_id, group_id},
+            beforeSend: function(){
+                init.conf.ajax_sending = true;
+            },
+            success: function(res){
+                if(res.success){
+                    $('.list-notes').html(res.html);
+                    $('.inp-note').val('');
+                } else {
+                    init.showNoty('Có lỗi xảy ra!', 'error');
+                }
+            },
+            complete: function(){
+                init.conf.ajax_sending = false;
+            }
+        })
+    }
 });
 </script>
 @endsection
