@@ -47,15 +47,15 @@
             <!--begin::Card-->
             <div class="card card-custom card-stretch">
                 <!--begin::Header-->
-                <div class="card-header py-3">
+                <div class="card-header py-3 d-flex justify-content-between">
                     <div class="card-title align-items-start flex-column">
                         <h3 class="card-label font-weight-bolder text-dark">Tổng quan dự án
                         </h3>
                         <span class="text-muted font-weight-bold font-size-sm mt-1">Báo cáo {{ $phase[$pid]->name }}</span>
                     </div>
-                    {{-- <div class="card-toolbar">
-                        <button type="button" class="btn btn-success mr-2 btn-submit">Cập nhật</button>
-                    </div> --}}
+                    <div class="{{empty($project->extra_link)?'d-none':''}}">
+                        <a href="{{$project->extra_link}}" target="_blank" class="btn btn-primary font-weight-bolder">Tài liệu dự án</a>
+                    </div>
                 </div>
                 <!--end::Header-->
 
@@ -78,29 +78,33 @@
                                         <thead>
                                         <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col">Nội dung công việc</th>
-                                            <th scope="col">Số lượng</th>
+                                            <th scope="col">Nội dung</th>
+                                            <th scope="col">Số lượng HĐ</th>
                                             <th scope="col">Mới</th>
                                             <th scope="col">Hết hạn</th>
                                             <th scope="col">Hoàn thành</th>
+                                            @if($isAdmin)
                                             <th scope="col">Hoàn thành đúng hạn</th>
                                             <th scope="col">Hoàn thành trễ</th>
+                                            @endif
                                             <th scope="col">Tiến độ</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @if(!empty($reportGroup))
-                                            @foreach($reportGroup as $k => $groupR)
+                                        @if(!empty($project->group))
+                                            @foreach($project->group as $k => $gr)
                                                 <tr>
                                                     <td scope="row">{{$k + 1}}</td>
-                                                    <td>{{$groupR['group']}}</td>
-                                                    <td>{{$groupR['report']['total']}}</td>
-                                                    <td>{{$groupR['report']['new']}}</td>
-                                                    <td>{{$groupR['report']['expired']}}</td>
-                                                    <td>{{$groupR['report']['done']}}</td>
-                                                    <td>{{$groupR['report']['done_on_time']}}</td>
-                                                    <td>{{$groupR['report']['done_out_time']}}</td>
-                                                    <td>{{$groupR['report']['percent']}} %</td>
+                                                    <td>{{$gr['name']}}</td>
+                                                    <td>{{$gr['phase_qty'] ?? 0}} </td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['new'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['expired'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['done'] ?? 0}}</td>
+                                                    @if($isAdmin)
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['done_on_time'] ?? 0}}</td>
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['done_out_time'] ?? 0}}</td>
+                                                    @endif
+                                                    <td>{{$reportGroup[@$gr['id']]['report']['percent'] ?? 0}} %</td>
                                                 </tr>
                                             @endforeach
                                         @endif
@@ -132,8 +136,10 @@
                                             <th scope="col">Mới</th>
                                             <th scope="col">Hết hạn</th>
                                             <th scope="col">Hoàn thành</th>
+                                            @if($isAdmin)
                                             <th scope="col">Hoàn thành đúng hạn</th>
                                             <th scope="col">Hoàn thành trễ</th>
+                                            @endif
                                             <th scope="col">Tiến độ</th>
                                         </tr>
                                         </thead>
@@ -147,8 +153,10 @@
                                                     <td>{{$member['report']['new']}}</td>
                                                     <td>{{$member['report']['expired']}}</td>
                                                     <td>{{$member['report']['done']}}</td>
+                                                    @if($isAdmin)
                                                     <td>{{$member['report']['done_on_time']}}</td>
                                                     <td>{{$member['report']['done_out_time']}}</td>
+                                                    @endif
                                                     <td>{{$member['report']['percent']}} %</td>
                                                 </tr>
                                             @endforeach

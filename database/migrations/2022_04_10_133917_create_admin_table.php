@@ -19,6 +19,7 @@ class CreateAdminTable extends Migration
             $table->string('password');
             $table->tinyInteger('status')->default(1);
             $table->string('name')->nullable();
+            $table->string('avatar')->nullable();
             $table->string('phone')->nullable();
             $table->string('address')->nullable();
             $table->string('email')->nullable();

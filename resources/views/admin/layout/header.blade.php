@@ -85,7 +85,7 @@
                     <div class="d-flex align-items-center p-8 rounded-top">
                         <!--begin::Symbol-->
                         <div class="symbol symbol-md bg-light-primary mr-3 flex-shrink-0">
-                            <img src="/assets/admin/themes/assets/media/users/default.jpg" alt="" />
+                            <img src="{{ auth('admin')->user()->avatar ? Storage::url(auth('admin')->user()->avatar) : '/assets/admin/themes/assets/media/users/default.jpg' }}" alt="" />
                         </div>
                         <!--end::Symbol-->
 
@@ -148,7 +148,7 @@
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is('admin.home.index')) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.home.index') }}" class="menu-link"><span class="menu-text">Dashboard</span></a>
                 </li>
-                @if(auth('admin')->user()->hasRole(['super_admin']))
+                @if(auth('admin')->user()->hasRole(['super_admin','account']))
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is(['admin.role.*', 'admin.account.*'])) menu-item-open menu-item-here @endif" data-menu-toggle="click"
                     aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
                             class="menu-text">Admin</span><span class="menu-desc"></span><i

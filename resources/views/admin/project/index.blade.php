@@ -3,12 +3,36 @@
 Danh sách dự án
 @endsection
 @section('lib_css')
-{{--<link href="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet"--}}
-{{--type="text/css" />--}}
+{{-- <link href="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet"
+type="text/css" /> --}}
 @endsection
 @section('lib_js')
 <script src="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.js"></script>
 <script src="/assets/admin/themes/assets/js/pages/crud/forms/widgets/bootstrap-switch.js"></script>
+@endsection
+@section('custom_css')
+<style>
+    .hiddenRow {
+        padding: 0 !important;
+    }
+
+    .dtr-details{
+        list-style: none;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .dtr-details .dtr-title{
+        min-width: 70px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-block;
+    }
+    .dtr-details .dtr-data{
+
+    }
+</style>
+    
 @endsection
 @section('content')
 <!--begin::Subheader-->
@@ -79,13 +103,13 @@ Danh sách dự án
                 <div class="row align-items-center">
 
                     
-                    <div class="col-lg-6 col-xl-5">
+                    <div class="col-lg-9 col-xl-10">
                         <div class="row align-items-center">
                             <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-2 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="limit" id="select-limit">
-                                        <option value="10" @if(old('limit') == 10) selected @endif>10</option>
+                                        <option value="20" @if(old('limit') == 20) selected @endif>20</option>
                                         <option value="30" @if(old('limit') == 30) selected @endif>30</option>
                                         <option value="50" @if(old('limit') == 50) selected @endif>50</option>
                                         <option value="100" @if(old('limit') == 100) selected @endif>100</option>
@@ -93,27 +117,30 @@ Danh sách dự án
                                 </div>
                             </div>
 
-                            <div class="col-md-4 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="status">
                                         <option value="1" @if(old('status') == 1) selected @endif>Hoạt động</option>
-                                        <option value="0" @if(old('status') == 0) selected @endif>Hoàn thành</option>
+                                        <option value="2" @if(old('status') == 2) selected @endif>Hoàn thành</option>
                                     </select>
                                 </div>
                             </div>
-                            
-                            <div class="col-md-6 my-2 my-md-0">
+                            <div class="col-md-4 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
                                 </div>
                             </div>
-
-                            
+                            <div class="col-md-4 my-2 my-md-0">
+                                <div class="input-icon">
+                                    <input type="text" class="form-control" name="field" placeholder="Lĩnh vực" value="{{ old('field') }}"/>
+                                    <span><i class="flaticon2-search-1 text-muted"></i></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-7 mt-5 mt-lg-0">
+                    <div class="col-lg-3 col-xl-2 mt-5 mt-lg-0">
                         <button type="submit" class="btn btn-light-primary px-6 font-weight-bold">Tìm kiếm</button>
                     </div>
                 </div>
@@ -131,38 +158,31 @@ Danh sách dự án
                                 <th scope="col">#</th>
                                 <th scope="col">Tên</th>
                                 <th scope="col">Lĩnh vực</th>
-                                <th scope="col">Account</th>
-                                <th scope="col">Phụ trách</th>
                                 <th scope="col">Gói</th>
                                 <th scope="col">Thanh toán</th>
                                 <th scope="col">Ngày nhận</th>
                                 <th scope="col">Ngày hết hạn</th>
+                                <th scope="col">Trạng thái</th>
+                                <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
+                                {{-- <th scope="col">Account</th>
+                                <th scope="col">Phụ trách</th>
                                 <th scope="col">Nhân sự</th>
                                 <th scope="col">Fanpage</th>
                                 <th scope="col">Website</th>
                                 <th scope="col">Mô tả</th>
-                                <th scope="col">Ghi chú</th>
-                                <th scope="col">Trạng thái</th>
-                                <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
+                                <th scope="col">Ghi chú</th> --}}
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($data as $k => $v)
                             <tr>
-                                <th scope="row">{{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</th>
+                                <th scope="row" nowrap><a href="javascript:void(0);" data-toggle="collapse"  class="accordion-toggle" data-target="#collapse{{ $k }}"><i class="la la-angle-down text-success mr-1"></i> {{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</a> </th>
                                 <td><a href="{{ route('admin.group.index', $v->id) }}">{{ $v->name }}</a></td>
                                 <td>{{ $v->field }}</td>
-                                <td>{{ $v->planer ? $v->planer->username : '' }}</td>
-                                <td>{{ $v->executive ? $v->executive->username : '' }}</td>
                                 <td>{{ $v->package }}</td>
                                 <td>{{ $v->payment_month }}</td>
                                 <td>{{ date('d/m/Y', $v->accept_time) }}</td>
                                 <td>{{ date('d/m/Y', $v->expired_time) }}</td>
-                                <td>{{ implode(', ', $v->admin->pluck('username')->toArray()) }}</td>
-                                <td>@if($v->fanpage) <a href="{{ $v->fanpage }}" target="_blank">Xem</a> @endif</td>
-                                <td>@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</td>
-                                <td>{{ $v->description }}</td>
-                                <td>{{ $v->note }}</td>
                                 <td>
                                     <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
@@ -173,6 +193,57 @@ Danh sách dự án
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Xóa" data-id="{{ $v->id }}">
                                         <i class="la la-trash"></i>
                                     </a>
+                                </td>
+                                {{-- <td>{{ $v->planer ? $v->planer->username : '' }}</td>
+                                <td>{{ $v->executive ? $v->executive->username : '' }}</td>
+                                <td>{{ implode(', ', $v->admin->pluck('username')->toArray()) }}</td>
+                                <td>@if($v->fanpage) <a href="{{ $v->fanpage }}" target="_blank">Xem</a> @endif</td>
+                                <td>@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</td>
+                                <td>{{ $v->description }}</td>
+                                <td>{{ $v->note }}</td> --}}
+                                
+                                
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="hiddenRow">
+                                    <div class="accordian-body collapse" id="collapse{{ $k }}">
+                                        <ul class="dtr-details pt-4">
+                                            <li>
+                                                <span class="dtr-title">Account:</span>
+                                                <span class="dtr-data">{{ @$v->planer->username}}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Phụ trách:</span>
+                                                <span class="dtr-data">{{ @$v->executive->username }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Nhân sự:</span>
+                                                <span class="dtr-data">{{ implode(', ', $v->admin->pluck('username')->toArray()) }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Fanpage:</span>
+                                                <span class="dtr-data">@if($v->fanpage) <a href="{{ $v->fanpage }}" target="_blank">Xem</a> @endif</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Website:</span>
+                                                <span class="dtr-data">@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Mô tả:</span>
+                                                <span class="dtr-data">{{ $v->description }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Ghi chú:</span>
+                                                <span class="dtr-data">{{ $v->note }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Tài liệu:</span>
+                                                @if(!empty($v->extra_link))
+                                                    <a href="{{ $v->extra_link }}" target="_blank" class="dtr-data">Link</a>
+                                                @endif
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
@@ -277,13 +348,16 @@ Danh sách dự án
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-4">
+                            <label>Tài liệu</label>
+                            <input type="text" class="form-control" name="extra_link" placeholder="Tài liệu" />
+                        </div>
+                        <div class="col-lg-4">
                             <label>Trạng thái:</label>
                             <div>
                                 <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
                             </div>
                         </div>
-                        <div class="col-lg-8">
-                            
+                        <div class="col-lg-12">
                             <label>Nhân sự:</label>
                             <select class="form-control select2" name="admin_project[]" multiple="multiple"
                                 style="width: 100%">
@@ -391,13 +465,16 @@ Danh sách dự án
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-4">
+                            <label>Tài liệu</label>
+                            <input type="text" class="form-control" name="extra_link" placeholder="Tài liệu" />
+                        </div>
+                        <div class="col-lg-4">
                             <label>Trạng thái:</label>
                             <div>
                                 <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
                             </div>
                         </div>
-                        <div class="col-lg-8">
-                            
+                        <div class="col-lg-12">
                             <label>Nhân sự:</label>
                             <select class="form-control select2" name="admin_project[]" multiple="multiple"
                                 style="width: 100%">
@@ -438,6 +515,7 @@ Danh sách dự án
         $('#modalEdit input[name="package"]').val(project.package);
         $('#modalEdit input[name="payment_month"]').val(project.payment_month);
         $('#modalEdit input[name="website"]').val(project.website);
+        $('#modalEdit input[name="extra_link"]').val(project.extra_link);
         $('#modalEdit input[name="fanpage"]').val(project.fanpage);
         $('#modalEdit input[name="address"]').val(project.address);
         $('#modalEdit textarea[name="description"]').val(project.description);

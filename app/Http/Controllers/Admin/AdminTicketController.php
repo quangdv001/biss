@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
 use App\Repo\GroupRepo;
+use App\Repo\NoteRepo;
 use App\Repo\NotyRepo;
 use App\Repo\PhaseRepo;
 use App\Repo\ProjectRepo;
@@ -19,8 +20,9 @@ class AdminTicketController extends Controller
     private $adminRepo;
     private $phase;
     private $noty;
+    private $note;
 
-    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase, NotyRepo $noty)
+    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase, NotyRepo $noty, NoteRepo $note)
     {
         $this->projectRepo = $projectRepo;
         $this->groupRepo = $groupRepo;
@@ -28,6 +30,7 @@ class AdminTicketController extends Controller
         $this->adminRepo = $adminRepo;
         $this->phase = $phase;
         $this->noty = $noty;
+        $this->note = $note;
     }
 
     public function index(Request $request, $gid, $pid = 0){
@@ -60,14 +63,34 @@ class AdminTicketController extends Controller
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
-        $data = $this->ticketRepo->get($params, [], ['admin','creator']);
-        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin'));
+        $data = $this->ticketRepo->get($params, ['deadline_time' => 'asc'], ['admin','creator'])->map(function ($ticket){
+            if ($ticket->status == 0) {
+                if ($ticket->deadline_time > time()) {
+                    $ticket->status_lb = 'Mới';
+                    $ticket->status_cl = 'info';
+                } else {
+                    $ticket->status_lb = 'Trễ hạn';
+                    $ticket->status_cl = 'danger';
+                }
+            } else {
+                if ($ticket->deadline_time > $ticket->complete_time) {
+                    $ticket->status_lb = 'Hoàn thành';
+                    $ticket->status_cl = 'success';
+                } else {
+                    $ticket->status_lb = 'Hoàn thành trễ';
+                    $ticket->status_cl = 'warning';
+                }
+            }
+            return $ticket;
+        });
+        $notes = $this->note->get(['group_id' => $gid, 'phase_id' => $pid], ['id' => 'DESC'], ['admin']);
+        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes'));
     }
 
     public function create(Request $request){
         $user = auth('admin')->user();
         $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
-        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime($params['deadline_time']) : null;
+        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
         $params['priority'] = !empty($params['priority']) ? (int)$params['priority'] : 2;
@@ -147,5 +170,19 @@ class AdminTicketController extends Controller
                 }
             }
         }
+    }
+
+    public function createNote(Request $request){
+        $params = $request->only('note', 'admin_id', 'group_id', 'phase_id');
+
+        $resC = $this->note->create($params);
+        $res['success'] = 0;
+        if($resC){
+            $notes = $this->note->get(['group_id' => $resC->group_id, 'phase_id' => $resC->phase_id], ['id' => 'DESC'], ['admin']);
+            $res['success'] = 1;
+            $res['html'] = view('admin.ticket.note', compact('notes'))->render();
+        }
+
+        return response()->json($res);
     }
 }

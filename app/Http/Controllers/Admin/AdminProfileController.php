@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminProfileController extends Controller
 {
@@ -21,6 +22,11 @@ class AdminProfileController extends Controller
 
     public function postIndex(Request $request){
         $params = $request->only('name', 'address', 'phone', 'email', 'birthday');
+        $profile_avatar_remove = $request->input('profile_avatar_remove', '');
+        if($request->hasFile('profile_avatar')){
+            $params['avatar'] = $request->file('profile_avatar')->store('avatars');
+        }
+        $params['avatar'] = $profile_avatar_remove ? '' : $params['avatar'];
         $params['birthday'] = $params['birthday'] ? strtotime($params['birthday']) : null;
         $admin = auth('admin')->user();
         $resU = $this->admin->update($admin, $params);

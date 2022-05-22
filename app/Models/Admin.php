@@ -36,7 +36,7 @@ class Admin extends Authenticatable
     public function hasRole($roles)
     {
         if (is_array($roles)) {
-            return array_intersect($roles, $this->roles()->pluck('slug')->all());
+            return !empty(array_intersect($roles, $this->roles()->pluck('slug')->all()));
         }
         return false;
     }

@@ -95,12 +95,14 @@ Biss
                         <td>{{ $v->name }}</td>
                         <td>{{ $v->slug }}</td>
                         <td nowrap>
-                            <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Edit details" data-id="{{ $v->id }}">
-                                <i class="la la-edit"></i>
-                            </a>
-                            <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove" title="Delete" data-id="{{ $v->id }}">
-                                <i class="la la-trash"></i>
-                            </a>
+                            @if(auth('admin')->user()->hasRole(['super_admin']))
+                                <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-edit" title="Edit details" data-id="{{ $v->id }}">
+                                    <i class="la la-edit"></i>
+                                </a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-remove" title="Delete" data-id="{{ $v->id }}">
+                                    <i class="la la-trash"></i>
+                                </a>
+                            @endif
                             <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-report" title="Báo cáo" data-id="{{ $v->id }}">
                                 <i class="la la-signal"></i>
                             </a>

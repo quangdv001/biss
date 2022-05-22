@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Repo\AdminRepo;
 use App\Repo\PhaseRepo;
 use App\Repo\ProjectRepo;
+use App\Repo\TicketRepo;
 use Illuminate\Http\Request;
 
 class AdminProjectController extends Controller
@@ -23,16 +24,19 @@ class AdminProjectController extends Controller
 
     public function index(Request $request){
         $request->flash();
-        $limit = $request->get('limit', 10);
+        $limit = $request->get('limit', 20);
         $name = $request->get('name', '');
+        $field = $request->get('field', '');
         $condition['status'] = $request->get('status', 1);
-        $condition = [];
         if(!empty($name)){
             $condition['name'] = $name;
         }
+        if(!empty($field)){
+            $condition['field'] = $field;
+        }
         $user = auth('admin')->user();
-        $isAdmin = $user->hasRole(['super_admin', 'account']);
-        if($isAdmin){
+        $isAdmin = $user->hasRole(['super_admin','account']);
+        if($user->hasRole(['super_admin'])){
             $data = $this->projectRepo->paginate($condition, $limit, ['status' => 'ASC', 'id' => 'DESC'], ['planer', 'executive', 'admin']);
         } else {
             $data = $this->projectRepo->search($condition, $limit, $user->id);
@@ -46,8 +50,8 @@ class AdminProjectController extends Controller
         if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
-        $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'accept_time', 'expired_time', 'created_time', 'status', 'field');
-        $params['status'] = isset($params['status']) ? 1 : 0;
+        $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'extra_link', 'accept_time', 'expired_time', 'created_time', 'status', 'field');
+        $params['status'] = isset($params['status']) ? 1 : 2;
         $params['accept_time'] = $params['accept_time'] ? strtotime($params['accept_time']) : null;
         $params['expired_time'] = $params['expired_time'] ? strtotime($params['expired_time']) : null;
         if(isset($params['id'])){
