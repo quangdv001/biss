@@ -481,6 +481,7 @@ $('.btn-add-note').click(function(){
     let note = $('.inp-note').val();
     let admin_id = @json(auth('admin')->user()->id);
     let group_id = @json($gid);
+    let phase_id = @json($pid);
     if(!note){
         init.showNoty('Mời nhập ghi chú!', 'error');
         return false;
@@ -489,7 +490,7 @@ $('.btn-add-note').click(function(){
         $.ajax({
             type: 'POST',
             url: "{{ route('admin.ticket.createNote') }}",
-            data: {note, admin_id, group_id},
+            data: {note, admin_id, group_id, phase_id},
             beforeSend: function(){
                 init.conf.ajax_sending = true;
             },

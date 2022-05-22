@@ -83,7 +83,7 @@ class AdminTicketController extends Controller
             }
             return $ticket;
         });
-        $notes = $this->note->get(['group_id' => $gid], ['id' => 'DESC'], ['admin']);
+        $notes = $this->note->get(['group_id' => $gid, 'phase_id' => $pid], ['id' => 'DESC'], ['admin']);
         return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes'));
     }
 
@@ -173,12 +173,12 @@ class AdminTicketController extends Controller
     }
 
     public function createNote(Request $request){
-        $params = $request->only('note', 'admin_id', 'group_id');
+        $params = $request->only('note', 'admin_id', 'group_id', 'phase_id');
 
         $resC = $this->note->create($params);
         $res['success'] = 0;
         if($resC){
-            $notes = $this->note->get(['group_id' => $resC->group_id], ['id' => 'DESC'], ['admin']);
+            $notes = $this->note->get(['group_id' => $resC->group_id, 'phase_id' => $resC->phase_id], ['id' => 'DESC'], ['admin']);
             $res['success'] = 1;
             $res['html'] = view('admin.ticket.note', compact('notes'))->render();
         }

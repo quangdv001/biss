@@ -25,6 +25,7 @@ class CreateProjectTable extends Migration
             $table->string('payment_month')->nullable();
             $table->string('fanpage')->nullable();
             $table->string('website')->nullable();
+            $table->string('extra_link')->nullable();
             $table->integer('accept_time')->nullable();
             $table->integer('expired_time')->nullable();
             $table->integer('created_time')->nullable();
