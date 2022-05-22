@@ -163,6 +163,9 @@ type="text/css" /> --}}
                                 <th scope="col">Ngày nhận</th>
                                 <th scope="col">Ngày hết hạn</th>
                                 <th scope="col">Trạng thái</th>
+                                @if($isAdmin)
+                                <th scope="col">Ticket trễ hạn</th>
+                                @endif
                                 <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
                                 {{-- <th scope="col">Account</th>
                                 <th scope="col">Phụ trách</th>
@@ -186,6 +189,11 @@ type="text/css" /> --}}
                                 <td>
                                     <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
+                                @if($isAdmin)
+                                    <td>
+                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->has_late ? 'danger' : 'success' }} label-inline">{{ $v->has_late ? 'Có' : 'Không' }}</span>
+                                    </td>
+                                @endif
                                 <td nowrap class="{{$isAdmin?'':'d-none'}}">
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
