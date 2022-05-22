@@ -286,7 +286,7 @@
                         </div>
                         <div class="col-lg-4">
                             <label>Deadline:</label>
-                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required readonly/>
+                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required {{auth('admin')->user()->hasRole(['super_admin']) || auth('admin')->user()->id == $project->planer_id ? '' : 'readonly'}}/>
                         </div>
                     </div>
                     <div class="form-group row">

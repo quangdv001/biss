@@ -51,7 +51,7 @@ class AdminProjectController extends Controller
         if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
-        $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'accept_time', 'expired_time', 'created_time', 'status', 'field');
+        $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'extra_link', 'accept_time', 'expired_time', 'created_time', 'status', 'field');
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['accept_time'] = $params['accept_time'] ? strtotime($params['accept_time']) : null;
         $params['expired_time'] = $params['expired_time'] ? strtotime($params['expired_time']) : null;
