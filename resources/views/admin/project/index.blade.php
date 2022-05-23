@@ -31,6 +31,10 @@ type="text/css" /> --}}
     .dtr-details .dtr-data{
 
     }
+
+    th, td{
+        text-align: center;
+    }
 </style>
     
 @endsection
@@ -152,11 +156,11 @@ type="text/css" /> --}}
             <!--begin: Datatable-->
             <div class="row">
                 <div class="col-12">
-                    <table class="table table-responsive table-separate">
+                    <table class="table table-responsive-md table-separate">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col">Tên</th>
+                                <th scope="col" style="width: 20%">Tên</th>
                                 <th scope="col">Lĩnh vực</th>
                                 <th scope="col">Gói</th>
                                 <th scope="col">Thanh toán</th>
@@ -213,7 +217,7 @@ type="text/css" /> --}}
                                 
                             </tr>
                             <tr>
-                                <td colspan="9" class="hiddenRow">
+                                <td colspan="9" class="hiddenRow text-left">
                                     <div class="accordian-body collapse" id="collapse{{ $k }}">
                                         <ul class="dtr-details pt-4">
                                             <li>

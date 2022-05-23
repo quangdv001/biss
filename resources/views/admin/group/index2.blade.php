@@ -74,7 +74,7 @@
                                 </div>
                                 <div class="card-body">
                                     <!--begin::Chart-->
-                                    <table class="table text-center table-responsive">
+                                    <table class="table text-center table-responsive-md">
                                         <thead>
                                         <tr>
                                             <th scope="col">#</th>
@@ -95,7 +95,7 @@
                                             @foreach($project->group as $k => $gr)
                                                 <tr>
                                                     <td scope="row">{{$k + 1}}</td>
-                                                    <td>{{$gr['name']}}</td>
+                                                    <td class="text-left">{{$gr['name']}}</td>
                                                     <td>{{$gr['phase_qty'] ?? 0}} </td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['new'] ?? 0}}</td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['expired'] ?? 0}}</td>
@@ -127,7 +127,7 @@
                                 </div>
                                 <div class="card-body">
                                     <!--begin::Chart-->
-                                    <table class="table text-center table-responsive">
+                                    <table class="table text-center table-responsive-md">
                                         <thead>
                                         <tr>
                                             <th scope="col">#</th>
@@ -148,7 +148,7 @@
                                             @foreach($reportMember as $k => $member)
                                                 <tr>
                                                     <td scope="row">{{$k + 1}}</td>
-                                                    <td>{{$member['username']}}</td>
+                                                    <td class="text-left">{{$member['username']}}</td>
                                                     <td>{{$member['report']['total']}}</td>
                                                     <td>{{$member['report']['new']}}</td>
                                                     <td>{{$member['report']['expired']}}</td>

@@ -28,7 +28,7 @@ class AdminHomeController extends Controller
         $tickets = $this->ticket->getTicketByAdmin([$user->id], '', '', '');
         $time = time();
         $ticket = $tickets->where('status', 0);
-        $group = $this->group->get(['id' => $ticket->pluck('group_id')->toArray()])->keyBy('id');
+        $group = $this->group->get(['id' => $ticket->pluck('group_id')->toArray()], [], ['project'])->keyBy('id');
         $new = $ticket->where('status', 0)->where('deadline_time', '>', $time)->pluck('group_id')->countBy();
         $old = $ticket->where('status', 0)->where('deadline_time', '<=', $time)->pluck('group_id')->countBy();
 

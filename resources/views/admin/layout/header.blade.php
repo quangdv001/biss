@@ -2,7 +2,7 @@
 <div id="kt_header_mobile" class="header-mobile ">
     <!--begin::Logo-->
     <a href="index.html">
-        <img alt="Logo" src="https://bissbrand.com/wp-content/uploads/2020/11/BISS-LOGO-FINAL-1.png" class="max-h-30px" />
+        <img alt="Logo" src="https://bissbrand.com/wp-content/uploads/2020/11/BISS-LOGO-FINAL-1.png" class="max-h-60px" />
     </a>
     <!--end::Logo-->
 
@@ -43,7 +43,7 @@
             <!--begin::Logo-->
             <a href="{{ route('admin.home.index') }}" class="mr-20">
                 <img alt="Logo" src="https://bissbrand.com/wp-content/uploads/2020/11/BISS-LOGO-FINAL-1.png"
-                    class="logo-default max-h-35px" />
+                    class="logo-default max-h-100px" />
             </a>
             <!--end::Logo-->
         </div>

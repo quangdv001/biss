@@ -204,6 +204,19 @@
                         </div>
                     </div>
                     <div class="form-group row">
+                        <div class="col-lg-8">
+                            <label>Ghi chú</label>
+                            <textarea class="form-control" name="note" rows="1" placeholder="Ghi chú"></textarea>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="form-group row">
                         <label class="col-form-label col-lg-3 col-sm-12">Người xử lý:</label>
                         <div class="col-lg-12">
                             <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
@@ -215,14 +228,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <div class="col-lg-4">
-                            <label>Trạng thái:</label>
-                            <div>
-                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -290,6 +296,19 @@
                         </div>
                     </div>
                     <div class="form-group row">
+                        <div class="col-lg-8">
+                            <label>Ghi chú</label>
+                            <textarea class="form-control" name="note" rows="1" placeholder="Ghi chú"></textarea>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="form-group row">
                         <label class="col-form-label col-lg-3 col-sm-12">Người xử lý:</label>
                         <div class="col-lg-12">
                             <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
@@ -301,14 +320,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <div class="col-lg-4">
-                            <label>Trạng thái:</label>
-                            <div>
-                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -337,7 +349,7 @@
                     <div class="tab-pane active" id="kt_apps_contacts_view_tab_1"
                         role="tabpanel">
                         <div class="container">
-                            @if(auth('admin')->user()->hasRole(['super_admin', 'account', 'guest']))
+                            {{-- @if(auth('admin')->user()->hasRole(['super_admin', 'account', 'guest'])) --}}
                             <form class="form">
                                 <div class="form-group">
                                     <textarea
@@ -352,7 +364,7 @@
                                     </div>
                                 </div>
                             </form>
-                            @endif
+                            {{-- @endif --}}
                             <div class="separator separator-dashed my-10"></div>
 
                             <!--begin::Timeline-->
@@ -414,6 +426,7 @@ $(document).on('click', '.btn-edit', function(){
     let ticket = data[id];
     $('#modalEdit input[name="name"]').val(ticket.name);
     $('#modalEdit input[name="description"]').val(ticket.description);
+    $('#modalEdit textarea[name="note"]').val(ticket.note);
     $('#modalEdit input[name="input"]').val(ticket.input);
     $('#modalEdit input[name="output"]').val(ticket.output);
     $('#modalEdit input[name="qty"]').val(ticket.qty);
