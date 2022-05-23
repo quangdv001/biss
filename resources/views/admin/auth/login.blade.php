@@ -46,7 +46,7 @@
                     <!--begin::Login Header-->
                     <div class="d-flex flex-center mb-5">
                         <a href="#">
-                            <img src="https://bissbrand.com/wp-content/uploads/2020/11/BISS-LOGO-FINAL-1.png" class="max-h-100px" alt="" />
+                            <img src="https://bissbrand.com/wp-content/uploads/2020/11/BISS-LOGO-FINAL-1.png" class="max-h-150px" alt="" />
                         </a>
                     </div>
                     <!--end::Login Header-->

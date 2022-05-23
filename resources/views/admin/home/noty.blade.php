@@ -43,7 +43,7 @@
                         </div>
                         <div class="navi-text">
                             <div class="font-weight-bold">
-                                Bạn có ({{ $v }}) Task mới ở nhóm "{{ $group[$k]->name }}"
+                                Bạn có ({{ $v }}) Task mới ở dự án "{{ @$group[$k]->project->name }}" nhóm "{{ @$group[$k]->name }}"
                             </div>
                             {{-- <div class="text-muted">
                                 {{ $v->updated_at->diffForHumans() }}

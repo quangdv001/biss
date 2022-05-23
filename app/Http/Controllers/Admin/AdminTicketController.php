@@ -67,9 +67,9 @@ class AdminTicketController extends Controller
             if ($ticket->status == 0) {
                 if ($ticket->deadline_time > time()) {
                     $ticket->status_lb = 'Mới';
-                    $ticket->status_cl = 'info';
+                    $ticket->status_cl = 'success';
                 } else {
-                    $ticket->status_lb = 'Trễ hạn';
+                    $ticket->status_lb = 'Mới';
                     $ticket->status_cl = 'danger';
                 }
             } else {
@@ -77,8 +77,8 @@ class AdminTicketController extends Controller
                     $ticket->status_lb = 'Hoàn thành';
                     $ticket->status_cl = 'success';
                 } else {
-                    $ticket->status_lb = 'Hoàn thành trễ';
-                    $ticket->status_cl = 'warning';
+                    $ticket->status_lb = 'Hoàn thành';
+                    $ticket->status_cl = 'danger';
                 }
             }
             return $ticket;
@@ -89,7 +89,7 @@ class AdminTicketController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
+        $params = $request->only('id', 'name', 'description', 'note', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
         $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
