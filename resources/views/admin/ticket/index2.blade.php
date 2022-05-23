@@ -81,6 +81,7 @@
                                 <th>#</th>
                                 <th>Tên</th>
                                 <th>Mô tả</th>
+                                <th>Ghi chú</th>
                                 <th>Duyệt Khách</th>
                                 <th>Sản phẩm</th>
                                 <th>Deadline</th>
@@ -101,6 +102,7 @@
                                 <td>{{ $k + 1 }}</td>
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->description }}</td>
+                                <td>{{ $v->note }}</td>
                                 <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
                                 <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
