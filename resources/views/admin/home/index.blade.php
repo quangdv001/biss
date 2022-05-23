@@ -32,16 +32,7 @@ Biss
         
         <div class="col-xl-12">
             <div class="row">
-                <div class="col-xl-3">
-                    <div class="fb-page" data-href="https://www.facebook.com/marketingbiss" data-tabs="timeline"
-                                data-width="2000" data-height="" data-small-header="false" data-adapt-container-width="true"
-                                data-hide-cover="false" data-show-facepile="true">
-                                <blockquote cite="https://www.facebook.com/marketingbiss" class="fb-xfbml-parse-ignore"><a
-                                        href="https://www.facebook.com/marketingbiss">Biss Agency</a></blockquote>
-                            </div>
-        
-                </div>
-                <div class="col-xl-9">
+                <div class="col-xl-4">
                     <script type='text/javascript'>
                         ! function (c, d) {
                             "use strict";
@@ -97,9 +88,22 @@ Biss
                         title="&#8220;Phòng Marketing thuê ngoài&#8221; &#8212; Biss Brand" frameborder="0"
                         marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content"></iframe>
                 </div>
+                <div class="col-xl-4">
+                    <iframe width="" height="" src="https://www.youtube.com/embed/RDwO3k5dypQ?autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height: 100%"></iframe>
+                </div>
+                <div class="col-xl-4">
+                    <div class="fb-page" data-href="https://www.facebook.com/marketingbiss" data-tabs="timeline"
+                                data-width="2000" data-height="" data-small-header="false" data-adapt-container-width="true"
+                                data-hide-cover="false" data-show-facepile="true">
+                                <blockquote cite="https://www.facebook.com/marketingbiss" class="fb-xfbml-parse-ignore"><a
+                                        href="https://www.facebook.com/marketingbiss">Biss Agency</a></blockquote>
+                            </div>
+        
+                </div>
+                
 
             </div>
-            <div class="row mt-4">
+            <div class="row mt-10">
                 <div class="col-xl-4">
 
                     <script type='text/javascript'>
@@ -153,7 +157,7 @@ Biss
                         }(window, document);
 
                     </script><iframe sandbox="allow-scripts" security="restricted"
-                        src="https://bissbrand.com/thiet-ke-ho-so-nang-luc-cong-ty/embed/" width="100%" height="400"
+                        src="https://bissbrand.com/dich-vu-thiet-ke-profile-cong-ty/embed/" width="100%" height="400"
                         title="&#8220;Thiết kế hồ sơ năng lực&#8221; &#8212; Biss Brand" frameborder="0" marginwidth="0"
                         marginheight="0" scrolling="no" class="wp-embedded-content"></iframe>
                 </div>
@@ -266,7 +270,7 @@ Biss
                         }(window, document);
 
                     </script><iframe sandbox="allow-scripts" security="restricted"
-                        src="https://bissbrand.com/du-an-da-trien-khai/" width="100%" height="400"
+                        src="https://bissbrand.com/thiet-ke-website-chuyen-nghiep/embed/" width="100%" height="400"
                         title="&#8220;Dự án đã triển khai&#8221; &#8212; Biss Brand" frameborder="0"
                         marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content"></iframe>
                 </div>
