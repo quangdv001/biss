@@ -23,6 +23,7 @@ class AdminProfileController extends Controller
     public function postIndex(Request $request){
         $params = $request->only('name', 'address', 'phone', 'email', 'birthday');
         $profile_avatar_remove = $request->input('profile_avatar_remove', '');
+        $params['avatar'] = '';
         if($request->hasFile('profile_avatar')){
             $params['avatar'] = $request->file('profile_avatar')->store('avatars');
         }
