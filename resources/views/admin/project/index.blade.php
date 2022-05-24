@@ -191,7 +191,7 @@ type="text/css" /> --}}
                                 <td>{{ date('d/m/Y', $v->accept_time) }}</td>
                                 <td>{{ date('d/m/Y', $v->expired_time) }}</td>
                                 <td>
-                                    <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
+                                    <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? 'danger' : 'success' }} label-inline">{{ $v->status == 1 ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
                                 @if($isAdmin)
                                     <td>
