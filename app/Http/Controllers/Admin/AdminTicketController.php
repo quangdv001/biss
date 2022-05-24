@@ -125,7 +125,7 @@ class AdminTicketController extends Controller
             $res = $this->ticketRepo->create($params);
             if($res){
                 $res->admin()->sync($admins);
-                $this->createNoty($admins, $res);
+                // $this->createNoty($admins, $res);
                 return back()->with('success_message', 'Tạo ticket thành công!');
             }
         }
@@ -151,23 +151,38 @@ class AdminTicketController extends Controller
         return response()->json($res);
     }
 
-    private function createNoty($admins, $data){
+    private function createNoty($data){
+        $data = $data->load('group.project.admin');
+        $admins = $data->group->project->admin->pluck('id');
         if(!empty($admins)){
+            $params = [];
             foreach($admins as $v){
-                $check = $this->noty->first(['admin_id' => $v, 'group_id' => $data->group_id, 'type' => 1]);
-                $params = [];
-                $params['status'] = 1;
-                $params['admin_id_c'] = $data->admin_id_c;
-                if($check){
-                    $this->noty->update($check, $params);
-                } else {
-                    $params['admin_id'] = $v;
-                    $params['project_id'] = $data->project_id;
-                    $params['group_id'] = $data->group_id;
-                    $params['phase_id'] = $data->phase_id;
-                    $params['type'] = 1;
-                    $this->noty->create($params);
-                }
+                $params[] = [
+                    'admin_id_c' => $data->admin_id,
+                    'project_id' => $data->group->project->id,
+                    'group_id' => $data->group_id,
+                    'phase_id' => $data->phase_id,
+                    'type' => 1,
+                    'admin_id' => $v,
+                ];
+                // $check = $this->noty->first(['admin_id' => $v, 'group_id' => $data->group_id, 'type' => 1]);
+                // $params = [];
+                // $params['status'] = 1;
+                // $params['admin_id_c'] = $data->admin_id_c;
+                // if($check){
+                //     $this->noty->update($check, $params);
+                // } else {
+                //     $params['admin_id'] = $v;
+                //     $params['project_id'] = $data->project_id;
+                //     $params['group_id'] = $data->group_id;
+                //     $params['phase_id'] = $data->phase_id;
+                //     $params['type'] = 1;
+                //     $this->noty->create($params);
+                // }
+            }
+
+            if(!empty($params)){
+                $this->noty->createMult($params);
             }
         }
     }
@@ -179,6 +194,7 @@ class AdminTicketController extends Controller
         $res['success'] = 0;
         if($resC){
             $notes = $this->note->get(['group_id' => $resC->group_id, 'phase_id' => $resC->phase_id], ['id' => 'DESC'], ['admin']);
+            $this->createNoty($resC);
             $res['success'] = 1;
             $res['html'] = view('admin.ticket.note', compact('notes'))->render();
         }
