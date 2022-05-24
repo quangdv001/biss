@@ -132,6 +132,32 @@ class AdminTicketController extends Controller
         return back()->with('error_message', 'Có lỗi xảy ra!');
     }
 
+    public function createAjax(Request $request){
+        $user = auth('admin')->user();
+        $params = $request->only('id', 'name', 'description', 'note', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
+        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
+        $params['status'] = isset($params['status']) ? 1 : 0;
+        $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
+        $params['priority'] = !empty($params['priority']) ? (int)$params['priority'] : 2;
+        $admins = $request->get('admin',[]);
+        
+        if ($params['status'] == 1) {
+            $params['complete_time'] = time();
+        } else {
+            $params['complete_time'] = null;
+        }
+        $params['created_time'] = time();
+        $params['admin_id_c'] = $user->id;
+        $resC = $this->ticketRepo->create($params);
+
+        $res['success'] = 0;
+        if($resC){
+            $resC->admin()->sync($admins);
+            $res['success'] = 1;
+        }
+        return response()->json($res);
+    }
+
     public function remove(Request $request){
         $user = auth('admin')->user();
         $id = $request->input('id');

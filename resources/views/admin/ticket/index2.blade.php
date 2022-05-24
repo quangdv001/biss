@@ -161,7 +161,7 @@
                 </button>
             </div>
             <!--begin::Form-->
-            <form method="post" action="{{ route('admin.ticket.create') }}">
+            <form method="post" action="{{ route('admin.ticket.createAjax') }}" id="formCreate">
                 @csrf
                 <input type="hidden" name="project_id" value="{{ $project->id }}">
                 <input type="hidden" name="group_id" value="{{ $gid }}">
@@ -522,6 +522,44 @@ $('.btn-add-note').click(function(){
             }
         })
     }
+});
+
+$("#formCreate").submit(function(e) {
+    //prevent Default functionality
+    e.preventDefault();
+
+    //get the action-url of the form
+    var actionurl = e.currentTarget.action;
+    //do your own request an handle the results
+    if(!init.conf.ajax_sending){
+        $.ajax({
+            url: actionurl,
+            type: 'post',
+            data: $("#formCreate").serialize(),
+            beforeSend: function(){
+                init.conf.ajax_sending = true;
+            },
+            success: function(res) {
+                if(res.success){
+                    $('#modalCreate input[name="name"]').val('');
+                    $('#modalCreate input[name="description"]').val('');
+                    $('#modalCreate input[name="input"]').val('');
+                    $('#modalCreate input[name="output"]').val('');
+                    init.showNoty('Tạo ticket thành công!', 'success');
+                } else {
+                    init.showNoty('Có lỗi xảy ra!', 'error');
+                }
+            },
+            complete: function(){
+                init.conf.ajax_sending = false;
+            }
+        });
+    }
+
+});
+
+$("#modalCreate").on('hide.bs.modal', function () {
+    window.location.reload();
 });
 </script>
 @endsection
