@@ -31,6 +31,10 @@ type="text/css" /> --}}
     .dtr-details .dtr-data{
 
     }
+
+    th, td{
+        text-align: center;
+    }
 </style>
     
 @endsection
@@ -152,11 +156,11 @@ type="text/css" /> --}}
             <!--begin: Datatable-->
             <div class="row">
                 <div class="col-12">
-                    <table class="table table-responsive table-separate">
+                    <table class="table table-responsive-md table-separate">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col">Tên</th>
+                                <th scope="col" style="width: 20%">Tên</th>
                                 <th scope="col">Lĩnh vực</th>
                                 <th scope="col">Gói</th>
                                 <th scope="col">Thanh toán</th>
@@ -187,7 +191,7 @@ type="text/css" /> --}}
                                 <td>{{ date('d/m/Y', $v->accept_time) }}</td>
                                 <td>{{ date('d/m/Y', $v->expired_time) }}</td>
                                 <td>
-                                    <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status ? 'danger' : 'success' }} label-inline">{{ $v->status ? 'Hoạt động' : 'Hoàn thành' }}</span>
+                                    <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? 'danger' : 'success' }} label-inline">{{ $v->status == 1 ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
                                 @if($isAdmin)
                                     <td>
@@ -213,7 +217,7 @@ type="text/css" /> --}}
                                 
                             </tr>
                             <tr>
-                                <td colspan="9" class="hiddenRow">
+                                <td colspan="9" class="hiddenRow text-left">
                                     <div class="accordian-body collapse" id="collapse{{ $k }}">
                                         <ul class="dtr-details pt-4">
                                             <li>
@@ -550,6 +554,8 @@ type="text/css" /> --}}
             });
         }
         $('#modalEdit select[name="admin_project[]"]').val(admin).trigger('change');
+        $('#modalEdit select[name="planer_id"]').val(project.planer_id).trigger('change');
+        $('#modalEdit select[name="executive_id"]').val(project.executive_id).trigger('change');
         // $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
         $('#modalEdit').modal('show');
     });

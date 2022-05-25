@@ -64,5 +64,27 @@
             });
         }
     });
+
+    $(document).on('click', '.view-note', function(){
+        if(!init.conf.ajax_sending){
+            let id = $(this).data('id');
+            $.ajax({
+                type: 'POST',
+                url : "{{ route('admin.home.viewNoty') }}",
+                data: {id},
+                beforeSend: function(){
+                    init.conf.ajax_sending = true;
+                },
+                success: function(res){
+                    if(res.success){
+                        window.location.href = res.url;
+                    }
+                },
+                complete: function(){
+                    init.conf.ajax_sending = false;
+                }
+            });
+        }
+    });
 </script>
 @endpush

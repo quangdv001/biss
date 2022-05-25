@@ -3,6 +3,7 @@ namespace App\Repo;
 
 use App\Models\Noty;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class NotyRepo
 {
@@ -22,7 +23,21 @@ class NotyRepo
             $repo->save();
             return $repo;
         } catch (Exception $e) {
-            dd(1, $data);
+            throw $e;
+        }
+    }
+
+    public function createMult($params)
+    {
+        DB::beginTransaction();
+        try {
+            foreach($params as $v){
+                Noty::updateOrCreate($v, ['status' => 1]);
+            }
+            DB::commit();
+            return true;
+        } catch (Exception $e) {
+            DB::rollBack();
             throw $e;
         }
     }

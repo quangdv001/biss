@@ -17,6 +17,7 @@ class CreateTicketTable extends Migration
             $table->id();
             $table->string('name');
             $table->longText('description')->nullable();
+            $table->longText('note')->nullable();
             $table->longText('input')->nullable();
             $table->longText('output')->nullable();
             $table->tinyInteger('status')->default(0);

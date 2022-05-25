@@ -164,7 +164,7 @@ class AdminGroupController extends Controller
                 $paramsP['expired_time'] = $res->end_time;
                 $this->projectRepo->update($project, $paramsP);
             }
-            return back()->with('success_message', 'Tạo phase thành công!');
+            return redirect()->route('admin.group.index', ['id' => $res->project_id])->with('success_message', 'Tạo phase thành công!');
         }
         return back()->with('error_message', 'Có lỗi xảy ra!');
     }

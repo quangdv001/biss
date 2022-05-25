@@ -28,15 +28,13 @@ class AdminHomeController extends Controller
         $tickets = $this->ticket->getTicketByAdmin([$user->id], '', '', '');
         $time = time();
         $ticket = $tickets->where('status', 0);
-        $group = $this->group->get(['id' => $ticket->pluck('group_id')->toArray()])->keyBy('id');
+        $group = $this->group->get(['id' => $ticket->pluck('group_id')->toArray()], [], ['project'])->keyBy('id');
         $new = $ticket->where('status', 0)->where('deadline_time', '>', $time)->pluck('group_id')->countBy();
         $old = $ticket->where('status', 0)->where('deadline_time', '<=', $time)->pluck('group_id')->countBy();
-
-        // dd($group, $new, $old);
-        // $data = $this->noty->get(['admin_id' => $user->id, 'status' => 1], ['updated_at' => 'DESC'], ['project', 'group', 'admin', 'adminc']);
+        $data = $this->noty->get(['admin_id' => $user->id, 'status' => 1], ['updated_at' => 'DESC'], ['project', 'group', 'admin', 'adminc']);
 
         $res['success'] = 1;
-        $res['html'] = view('admin.home.noty', compact('ticket', 'group', 'new', 'old'))->render();
+        $res['html'] = view('admin.home.noty', compact('ticket', 'group', 'new', 'old', 'data'))->render();
         return response()->json($res);
     }
 
@@ -44,15 +42,21 @@ class AdminHomeController extends Controller
         $id = $request->input('id', 0);
         $res['success'] = 1;
         $res['url'] = route('admin.ticket.index', ['gid' => $id]);
-        // $noty = $this->noty->first(['id' => $id]);
-        // $res['success'] = 0;
-        // if($noty){
-        //     $params['status'] = 0;
-        //     $this->noty->update($noty, $params);
 
-        //     $res['success'] = 1;
-        //     $res['url'] = route('admin.ticket.index', ['gid' => $noty->group_id, 'pid' => $noty->phase_id]);
-        // }
+        return response()->json($res);
+    }
+
+    public function viewNoty(Request $request){
+        $id = $request->input('id', 0);
+        $noty = $this->noty->first(['id' => $id]);
+        $res['success'] = 0;
+        if($noty){
+            $params['status'] = 0;
+            $this->noty->update($noty, $params);
+
+            $res['success'] = 1;
+            $res['url'] = route('admin.ticket.index', ['gid' => $noty->group_id, 'pid' => $noty->phase_id]);
+        }
 
         return response()->json($res);
     }
