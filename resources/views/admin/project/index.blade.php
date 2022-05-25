@@ -554,6 +554,8 @@ type="text/css" /> --}}
             });
         }
         $('#modalEdit select[name="admin_project[]"]').val(admin).trigger('change');
+        $('#modalEdit select[name="planer_id"]').val(project.planer_id).trigger('change');
+        $('#modalEdit select[name="executive_id"]').val(project.executive_id).trigger('change');
         // $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
         $('#modalEdit').modal('show');
     });
