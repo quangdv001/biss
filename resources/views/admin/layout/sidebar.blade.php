@@ -148,7 +148,7 @@
                     <div class="form-group row">
                         <div class="col-lg-12">
                             <label>Tên nhóm công việc</label>
-                            <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" autocomplete="off" />
+                            <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" autocomplete="off" required/>
                         </div>
                         @if(!empty($phase))
                             @foreach($phase as $v)
@@ -188,15 +188,15 @@
                         <div class="col-lg-12">
                             <label>Tên phase</label>
                             <input type="text" class="form-control" name="name"
-                                placeholder="Tên phase" />
+                                placeholder="Tên phase" required/>
                         </div>
                         <div class="col-lg-12 mt-3">
                             <label>Ngày bắt đầu:</label>
-                            <input type="date" class="form-control" name="start_time" placeholder="Ngày bắt đầu"/>
+                            <input type="date" class="form-control" name="start_time" placeholder="Ngày bắt đầu" required/>
                         </div>
                         <div class="col-lg-12 mt-3">
                             <label>Ngày kết thúc:</label>
-                            <input type="date" class="form-control" name="end_time" placeholder="Ngày kết thúc"/>
+                            <input type="date" class="form-control" name="end_time" placeholder="Ngày kết thúc" required/>
                         </div>
                     </div>
                 </div>
@@ -226,13 +226,13 @@
                     <div class="form-group row">
                         <div class="col-lg-12">
                             <label>Tên nhóm công việc</label>
-                            <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" />
+                            <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" required/>
                         </div>
                         @if(!empty($phase))
                             @foreach($phase as $v)
                                 <div class="col-lg-12 mt-4">
                                     <label>Khối lượng {{ $v->name }} ({{ date('d/m', $v->start_time)  }} - {{ date('d/m', $v->end_time) }})</label>
-                                    <input type="number" class="form-control" name="qty[{{$v->id}}]" placeholder="Khối lượng công việc" value="1" min="1" data-phase="{{$v->id}}"/>
+                                    <input type="number" class="form-control" name="qty[{{$v->id}}]" placeholder="Khối lượng công việc" value="1" min="1" data-phase="{{$v->id}}" required/>
                                 </div>
                             @endforeach
                         @endif
