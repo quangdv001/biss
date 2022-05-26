@@ -479,7 +479,7 @@ $(document).on('click', '.btn-remove', function(){
                                 location.reload();
                             }, 500);
                         } else {
-                            init.showNoty('Có lỗi xảy ra!', 'error');
+                            init.showNoty(res.mess, 'error');
                         }
                     },
                     complete: function(){
@@ -547,7 +547,7 @@ $("#formCreate").submit(function(e) {
                     $('#modalCreate input[name="output"]').val('');
                     init.showNoty('Tạo ticket thành công!', 'success');
                 } else {
-                    init.showNoty('Có lỗi xảy ra!', 'error');
+                    init.showNoty(res.mess, 'error');
                 }
             },
             complete: function(){
