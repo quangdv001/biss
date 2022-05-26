@@ -260,13 +260,14 @@
     $('.btn-edit-group').click(function () {
         let id = $(this).data('id');
         let g = group[id];
-        console.log(g);
+        
         $('#modalEditGroup input[name="id"]').val(g.id);
         $('#modalEditGroup input[name="name"]').val(g.name);
         $('#modalEditGroup input[name="qty"]').val(g.qty);
         $('#modalEditGroup input[type=number]').each(function () {
             let phase_id = $(this).data('phase');
             let qty = 1;
+            console.log(g, phase_id);
             if (g.phase_group.length > 0) {
                 let phase_group = g.phase_group.find(v => v.phase_id === phase_id);
                 console.log(phase_group);
