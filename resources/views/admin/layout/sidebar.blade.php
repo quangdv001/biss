@@ -269,7 +269,7 @@
             let qty = 1;
             console.log(g, phase_id);
             if (g.phase_group.length > 0) {
-                let phase_group = g.phase_group.find(v => v.phase_id === phase_id);
+                let phase_group = g.phase_group.find(v => v.phase_id == phase_id);
                 console.log(phase_group);
                 qty = !!phase_group ? phase_group.qty : 1;
             }
