@@ -294,7 +294,7 @@
                         </div>
                         <div class="col-lg-4">
                             <label>Deadline:</label>
-                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required {{auth('admin')->user()->hasRole(['super_admin']) || auth('admin')->user()->id == $project->planer_id ? '' : 'readonly'}}/>
+                            <input type="date" class="form-control" name="deadline_time" placeholder="Deadline" required/>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -423,9 +423,16 @@ $('#kt_datatable').DataTable({
     paging: true,
 });
 var data = @json($data->keyBy('id'));
+let user_id = @json(auth('admin')->user()->id);
+let is_admin = @json(auth('admin')->user()->hasRole(['super_admin', 'account']));
 $(document).on('click', '.btn-edit', function(){
     let id = $(this).data('id');
     let ticket = data[id];
+    if(is_admin || user_id == ticket.admin_id_c){
+        $('#modalEdit input[name="deadline_time"]').attr("readonly", false);
+    } else {
+        $('#modalEdit input[name="deadline_time"]').attr("readonly", true);
+    }
     $('#modalEdit input[name="name"]').val(ticket.name);
     $('#modalEdit input[name="description"]').val(ticket.description);
     $('#modalEdit textarea[name="note"]').val(ticket.note);
