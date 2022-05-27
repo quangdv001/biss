@@ -89,9 +89,9 @@ class AdminTicketController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if($user->hasRole(['guest'])){
-            return back()->with('error_message', 'Bạn không có quyền!');
-        }
+        // if($user->hasRole(['guest'])){
+        //     return back()->with('error_message', 'Bạn không có quyền!');
+        // }
         $params = $request->only('id', 'name', 'description', 'note', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
         $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
@@ -102,10 +102,11 @@ class AdminTicketController extends Controller
             $ticket = $this->ticketRepo->first(['id' => $params['id']]);
             if($ticket){
                 $ticket->load('admin');
-                $isAdmin = $user->hasRole(['super_admin', 'account']);
-                if (!$isAdmin && !in_array($user->id, $ticket->admin->pluck('id')->all()) && $user->id != @$ticket->admin_id_c) {
-                    return back()->with('error_message', 'Bạn không có quyền sửa ticket!');
-                }
+                // $isAdmin = $user->hasRole(['super_admin', 'account']);
+                
+                // if (!$isAdmin && !in_array($user->id, $ticket->admin->pluck('id')->all()) && $user->id != @$ticket->admin_id_c) {
+                //     return back()->with('error_message', 'Bạn không có quyền sửa ticket!');
+                // }
                 if ($params['status'] == 1) {
                     $params['complete_time'] = $ticket->complete_time ?? time();
                 } else {

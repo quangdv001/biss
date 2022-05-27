@@ -305,7 +305,7 @@
                         <div class="col-lg-4">
                             <label>Trạng thái:</label>
                             <div>
-                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary" @if(auth('admin')->user()->hasRole(['guest'])) readonly @endif/>
                             </div>
                         </div>
                         
@@ -421,10 +421,27 @@ $('#kt_datatable').DataTable({
     responsive: true,
     pageLength: 25,
     paging: true,
+    "columns": [
+        null,
+        { "width": "20%" },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+    ]
 });
 var data = @json($data->keyBy('id'));
 let user_id = @json(auth('admin')->user()->id);
 let is_admin = @json(auth('admin')->user()->hasRole(['super_admin', 'account']));
+let is_guest = @json(auth('admin')->user()->hasRole(['guest']));
 $(document).on('click', '.btn-edit', function(){
     let id = $(this).data('id');
     let ticket = data[id];
@@ -433,6 +450,7 @@ $(document).on('click', '.btn-edit', function(){
     } else {
         $('#modalEdit input[name="deadline_time"]').attr("readonly", true);
     }
+
     $('#modalEdit input[name="name"]').val(ticket.name);
     $('#modalEdit input[name="description"]').val(ticket.description);
     $('#modalEdit textarea[name="note"]').val(ticket.note);
@@ -457,6 +475,12 @@ $(document).on('click', '.btn-edit', function(){
     }
     $('#modalEdit select[name="admin[]"]').val(admin).trigger('change');
     $('#modalEdit input[name="status"]').prop('checked', ticket.status == 1 ? true : false).trigger('change');
+
+
+    if(is_guest){
+        $('#modalEdit input').attr("readonly", true);
+        $('#modalEdit select').attr("readonly", true);
+    }
     $('#modalEdit').modal('show');
 });
 
