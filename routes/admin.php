@@ -42,4 +42,5 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('ticket/createAjax', 'AdminTicketController@createAjax')->name('ticket.createAjax');
     Route::post('ticket/remove', 'AdminTicketController@remove')->name('ticket.remove');
     Route::post('ticket/createNote', 'AdminTicketController@createNote')->name('ticket.createNote');
+    Route::post('ticket/editNote', 'AdminTicketController@editNote')->name('ticket.editNote');
 });

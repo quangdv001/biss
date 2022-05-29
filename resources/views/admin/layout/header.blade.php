@@ -1,7 +1,7 @@
 <!--begin::Header Mobile-->
 <div id="kt_header_mobile" class="header-mobile ">
     <!--begin::Logo-->
-    <a href="index.html">
+    <a href="{{ route('admin.home.index') }}">
         <img alt="Logo" src="https://bissbrand.com/wp-content/uploads/2020/11/BISS-LOGO-FINAL-1.png" class="max-h-60px" />
     </a>
     <!--end::Logo-->

@@ -32,7 +32,7 @@ class NotyRepo
         DB::beginTransaction();
         try {
             foreach($params as $v){
-                Noty::updateOrCreate($v, ['status' => 1]);
+                Noty::upsert($v, ['admin_id', 'group_id', 'type'], ['status']);
             }
             DB::commit();
             return true;

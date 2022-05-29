@@ -75,23 +75,23 @@
                     $time = time()
                     @endphp
                     @if($data->count())
-                    <table class="table table-separate table-head-custom table-checkable" id="kt_datatable">
+                    <table class="table table-separate table-head-custom collapsed display display" id="kt_datatable">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Tên</th>
-                                <th>Mô tả</th>
-                                <th>Ghi chú</th>
-                                <th>Duyệt Khách</th>
-                                <th>Sản phẩm</th>
-                                <th>Deadline</th>
-                                <th>Hoàn thành</th>
-                                <th>Khối lượng</th>
-                                <th>Độ ưu tiên</th>
-                                <th>Người xử lý</th>
-                                <th>Người tạo</th>
-                                <th>Trạng thái</th>
-                                <th>Hành động</th>
+                                <th data-priority="1">#</th>
+                                <th data-priority="1" style="min-width: 100px">Tên</th>
+                                <th data-priority="1">Ghi chú</th>
+                                <th data-priority="1">Deadline</th>
+                                <th data-priority="1">Hoàn thành</th>
+                                <th data-priority="1">Khách duyệt</th>
+                                <th data-priority="1">Sản phẩm</th>
+                                <th data-priority="1">Độ ưu tiên</th>
+                                <th data-priority="1">Trạng thái</th>
+                                <th data-priority="2">Khối lượng</th>
+                                <th data-priority="2">Người xử lý</th>
+                                <th data-priority="2">Người tạo</th>
+                                <th data-priority="2">Mô tả</th>
+                                <th data-priority="2">Hành động</th>
                             </tr>
                         </thead>
 
@@ -100,30 +100,35 @@
                             @foreach($data as $k => $v)
                             <tr>
                                 <td>{{ $k + 1 }}</td>
-                                <td>{{ $v->name }}</td>
-                                <td>{{ $v->description }}</td>
+                                <td >{{ $v->name }}</td>
                                 <td>{{ $v->note }}</td>
-                                <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
-                                <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
-                                <td>{{ $v->qty }}</td>
-                                <td>
+                                <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
+                                <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
+                                
+                                <td nowrap>
                                     @if($v->priority == 1)
-                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-success label-inline">Thấp</span>
+                                        <span  class="label label-lg font-weight-bold label-light-success label-inline">Thấp</span>
                                     @elseif($v->priority == 2)
-                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-warning label-inline">Trung bình</span>
+                                        <span  class="label label-lg font-weight-bold label-light-warning label-inline">Trung bình</span>
                                     @else
-                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-danger label-inline">Cao</span>
+                                        <span class="label label-lg font-weight-bold label-light-danger label-inline">Cao</span>
                                     @endif
                                 </td>
-                                <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
-                                <td>{{ @$v->creator->username }}</td>
-                                <td>
-                                    <span style="white-space: nowrap;"
+                                <td nowrap>
+                                    <span
                                         class="label label-lg font-weight-bold label-light-{{ $v->status_cl }} label-inline">{{ $v->status_lb }}</span>
                                 </td>
+                                <td>{{ $v->qty }}</td>
+                                <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
+                                <td>{{ @$v->creator->username }}</td>
+                                <td>{{ $v->description }}</td>
                                 <td nowrap>
+                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-note"
+                                        title="Ghi chú" data-id="{{ $v->id }}">
+                                        <i class="la la-sticky-note"></i>
+                                    </a>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit"
                                         title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
@@ -207,8 +212,14 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-8">
-                            <label>Ghi chú</label>
-                            <textarea class="form-control" name="note" rows="1" placeholder="Ghi chú"></textarea>
+                            <label>Người xử lý</label>
+                            <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
+                                @if(!empty($admins))
+                                @foreach($admins as $v)
+                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                @endforeach
+                                @endif
+                            </select>
                         </div>
                         <div class="col-lg-4">
                             <label>Trạng thái:</label>
@@ -218,18 +229,7 @@
                         </div>
                         
                     </div>
-                    <div class="form-group row">
-                        <label class="col-form-label col-lg-3 col-sm-12">Người xử lý:</label>
-                        <div class="col-lg-12">
-                            <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
-                        </div>
-                    </div>
+                    
                     
                 </div>
                 <div class="modal-footer">
@@ -299,8 +299,14 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-lg-8">
-                            <label>Ghi chú</label>
-                            <textarea class="form-control" name="note" rows="1" placeholder="Ghi chú"></textarea>
+                            <label>Người xử lý</label>
+                            <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
+                                @if(!empty($admins))
+                                @foreach($admins as $v)
+                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                @endforeach
+                                @endif
+                            </select>
                         </div>
                         <div class="col-lg-4">
                             <label>Trạng thái:</label>
@@ -310,19 +316,6 @@
                         </div>
                         
                     </div>
-                    <div class="form-group row">
-                        <label class="col-form-label col-lg-3 col-sm-12">Người xử lý:</label>
-                        <div class="col-lg-12">
-                            <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
-                        </div>
-                    </div>
-                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -414,6 +407,51 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalEditNote" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Ghi chú</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <!--begin::Body-->
+            <div class="card-body p-0 pb-4">
+                <div class="tab-content pt-5">
+                    <!--begin::Tab Content-->
+                    <div class="tab-pane active" id="kt_apps_contacts_view_tab_1"
+                        role="tabpanel">
+                        <div class="container">
+                            {{-- @if(auth('admin')->user()->hasRole(['super_admin', 'account', 'guest'])) --}}
+                            <form class="form" method="post" action="{{ route('admin.ticket.editNote') }}">
+                                @csrf
+                                <input type="hidden" name="id" value="">
+                                <div class="form-group">
+                                    <textarea
+                                        class="form-control form-control-lg form-control-solid"
+                                        id="exampleTextarea" rows="3" name="note"
+                                        placeholder="Thêm ghi chú"></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <button type="submit" class="btn btn-light-primary">Sửa ghi chú</button>
+                                    </div>
+                                </div>
+                            </form>
+                            {{-- @endif --}}
+                            <div class="separator separator-dashed my-10"></div>
+                            <!--end::Timeline-->
+                        </div>
+                    </div>
+                    <!--end::Tab Content-->
+                </div>
+            </div>
+            <!--end::Body-->
+        </div>
+    </div>
+</div>
 @endsection
 @section('custom_js')
 <script>
@@ -421,22 +459,22 @@ $('#kt_datatable').DataTable({
     responsive: true,
     pageLength: 25,
     paging: true,
-    "columns": [
-        null,
-        { "width": "20%" },
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-    ]
+    columns:[
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {"className": "none"},
+        {"className": "none"},
+        {"className": "none"},
+        {"className": "none"},
+        {"className": "none"},
+    ],
 });
 var data = @json($data->keyBy('id'));
 let user_id = @json(auth('admin')->user()->id);
@@ -482,6 +520,14 @@ $(document).on('click', '.btn-edit', function(){
         $('#modalEdit select').attr("readonly", true);
     }
     $('#modalEdit').modal('show');
+});
+
+$(document).on('click', '.btn-note', function(){
+    let id = $(this).data('id');
+    let ticket = data[id];
+    $('#modalEditNote input[name="id"]').val(ticket.id);
+    $('#modalEditNote textarea[name="note"]').val(ticket.note);
+    $('#modalEditNote').modal('show');
 });
 
 $(document).on('click', '.btn-remove', function(){
@@ -592,5 +638,9 @@ $("#formCreate").submit(function(e) {
 $("#modalCreate").on('hide.bs.modal', function () {
     window.location.reload();
 });
+
+if(window.location.href.indexOf('#modalNote') != -1) {
+    $('#modalNote').modal('show');
+  }
 </script>
 @endsection
