@@ -121,7 +121,7 @@
                         </div>
                         <div class="navi-text">
                             <div class="font-weight-bold">
-                                "{{ @$v->adminc->username }}" vừa thêm ghi chú ở dự án "{{ @$v->project->name }}" nhóm "{{ @$v->group->name }}"
+                                "{{ @$v->adminc->username }}" vừa thêm ghi chú {{ $v->type == 1 ? 'chung' : 'công việc' }} ở dự án "{{ @$v->project->name }}" nhóm "{{ @$v->group->name }}"
                             </div>
                             {{-- <div class="text-muted">
                                 {{ $v->updated_at->diffForHumans() }}

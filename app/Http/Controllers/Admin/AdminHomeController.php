@@ -55,7 +55,7 @@ class AdminHomeController extends Controller
             $this->noty->update($noty, $params);
 
             $res['success'] = 1;
-            $res['url'] = route('admin.ticket.index', ['gid' => $noty->group_id, 'pid' => $noty->phase_id]);
+            $res['url'] = route('admin.ticket.index', ['gid' => $noty->group_id, 'pid' => $noty->phase_id]) . ($noty->type == 1 ? '#modalNote' : '');
         }
 
         return response()->json($res);

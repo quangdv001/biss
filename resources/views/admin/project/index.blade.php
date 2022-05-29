@@ -181,21 +181,24 @@ type="text/css" /> --}}
                             </tr>
                         </thead>
                         <tbody>
+                            @php 
+                            $time = time();
+                            @endphp
                             @foreach($data as $k => $v)
                             <tr>
                                 <th scope="row" nowrap><a href="javascript:void(0);" data-toggle="collapse"  class="accordion-toggle" data-target="#collapse{{ $k }}"><i class="la la-angle-down text-success mr-1"></i> {{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</a> </th>
-                                <td><a href="{{ route('admin.group.index', $v->id) }}">{{ $v->name }}</a></td>
+                                <td class="text-left"><a href="{{ route('admin.group.index', $v->id) }}">{{ $v->name }}</a></td>
                                 <td>{{ $v->field }}</td>
                                 <td>{{ $v->package }}</td>
                                 <td>{{ $v->payment_month }}</td>
                                 <td>{{ date('d/m/Y', $v->accept_time) }}</td>
                                 <td>{{ date('d/m/Y', $v->expired_time) }}</td>
-                                <td>
-                                    <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? 'danger' : 'success' }} label-inline">{{ $v->status == 1 ? 'Hoạt động' : 'Hoàn thành' }}</span>
+                                <td nowrap>
+                                    <span class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? ($time > $v->expired_time ? 'danger' : ($time < $v->expired_time - 604800 ? 'success' : 'warning')) : 'success' }} label-inline">{{ $v->status == 1 ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
                                 @if($isAdmin)
-                                    <td>
-                                        <span style="white-space: nowrap;" class="label label-lg font-weight-bold label-light-{{ $v->has_late ? 'danger' : 'success' }} label-inline">{{ $v->has_late ? 'Có' : 'Không' }}</span>
+                                    <td nowrap>
+                                        <span class="label label-lg font-weight-bold label-light-{{ $v->has_late ? 'danger' : 'success' }} label-inline">{{ $v->has_late ? 'Có' : 'Không' }}</span>
                                     </td>
                                 @endif
                                 <td nowrap class="{{$isAdmin?'':'d-none'}}">
