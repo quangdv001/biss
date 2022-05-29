@@ -78,20 +78,20 @@
                     <table class="table table-separate table-head-custom table-checkable" id="kt_datatable">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Tên</th>
-                                <th>Mô tả</th>
-                                <th>Ghi chú</th>
-                                <th>Duyệt Khách</th>
-                                <th>Sản phẩm</th>
-                                <th>Deadline</th>
-                                <th>Hoàn thành</th>
-                                <th>Khối lượng</th>
-                                <th>Độ ưu tiên</th>
-                                <th>Người xử lý</th>
-                                <th>Người tạo</th>
-                                <th>Trạng thái</th>
-                                <th>Hành động</th>
+                                <th data-priority="1">#</th>
+                                <th data-priority="1" style="min-width: 100px">Tên</th>
+                                <th data-priority="2">Mô tả</th>
+                                <th data-priority="2">Ghi chú</th>
+                                <th data-priority="1">Deadline</th>
+                                <th data-priority="1">Hoàn thành</th>
+                                <th data-priority="2">Duyệt Khách</th>
+                                <th data-priority="2">Sản phẩm</th>
+                                <th data-priority="2">Khối lượng</th>
+                                <th data-priority="2">Độ ưu tiên</th>
+                                <th data-priority="2">Người xử lý</th>
+                                <th data-priority="2">Người tạo</th>
+                                <th data-priority="1">Trạng thái</th>
+                                <th data-priority="1">Hành động</th>
                             </tr>
                         </thead>
 
@@ -103,10 +103,10 @@
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->description }}</td>
                                 <td>{{ $v->note }}</td>
-                                <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
-                                <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
+                                <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
+                                <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
                                 <td>{{ $v->qty }}</td>
                                 <td>
                                     @if($v->priority == 1)
@@ -421,22 +421,6 @@ $('#kt_datatable').DataTable({
     responsive: true,
     pageLength: 25,
     paging: true,
-    "columns": [
-        null,
-        { "width": "20%" },
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-    ]
 });
 var data = @json($data->keyBy('id'));
 let user_id = @json(auth('admin')->user()->id);

@@ -74,6 +74,7 @@ class AdminRoleController extends Controller
         }
         $id = $request->get('id', '3');
         $project_id = $request->get('project_id', 0);
+        $admin_id = $request->get('admin_id', 0);
         $role = $this->role->first(['id' => $id]);
         if (empty($role)) {
             return response(['success' => 0, 'message' => 'Không tìm thấy chức vụ!']);
@@ -124,7 +125,14 @@ class AdminRoleController extends Controller
                 return $data;
             })->values()->all();
             return $data;
+        })->all();
+        $data = collect($admin)->filter(function ($admin) use ($admin_id){
+            return empty($admin_id) || $admin_id == $admin->id;
+        })->map(function ($admin,$admin_id) use ($data){
+            $item['admin'] = $admin->username ?? '';
+            $item['projects'] = $data[$admin_id]['projects'] ?? [];
+            return $item;
         })->values()->all();
-        return response(['success' => 1, 'data' => $data, 'project' => array_values($project)]);
+        return response(['success' => 1, 'data' => $data, 'project' => array_values($project) ,'admin' =>array_values($admin)]);
     }
 }

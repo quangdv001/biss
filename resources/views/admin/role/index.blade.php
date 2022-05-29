@@ -199,20 +199,24 @@ Biss
             <div class="modal-body">
                 <input type="hidden" name="id">
                 <div class="row text-nowrap mb-4">
-                    <div class="col-md-3 d-flex align-items-center mb-2">
+                    <div class="col-xl-3 d-flex align-items-center mb-2">
                         <div class="mr-2">Dự án: </div>
                         <select name="project_id" class="select-project form-control"></select>
                     </div>
-                    <div class="col-md-3 d-flex align-items-center mb-2">
+                    <div class="col-xl-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Tài khoản: </div>
+                        <select name="admin_id" class="select-admin form-control"></select>
+                    </div>
+                    <div class="col-xl-3 d-flex align-items-center mb-2">
                         <div class="mr-2">Ngày bắt đầu: </div>
                         <input type="date" class="form-control" name="start_time">
                     </div>
-                    <div class="col-md-3 d-flex align-items-center mb-2">
+                    <div class="col-xl-3 d-flex align-items-center mb-2">
                         <div class="mr-2">Ngày kết thúc: </div>
                         <input type="date" class="form-control" name="end_time">
                     </div>
-                    <div class="col-md-3">
-                        <a href="javascript:void(0)" class="btn btn-light-primary mb-2" onclick="reportRole()">Tìm kiếm</a>
+                    <div class="col-xl-3 ml-auto d-flex">
+                        <a href="javascript:void(0)" class="btn btn-light-primary mb-2 ml-auto" onclick="reportRole()">Tìm kiếm</a>
                     </div>
                 </div>
                 <table class="table text-center">
@@ -352,11 +356,12 @@ Biss
         let start_time = $('#modalReport input[name="start_time"]').val();
         let end_time = $('#modalReport input[name="end_time"]').val();
         let project_id = $('#modalReport select[name="project_id"]').val() ?? 0;
+        let admin_id = $('#modalReport select[name="admin_id"]').val() ?? 0;
         if(!init.conf.ajax_sending){
             $.ajax({
                 type: 'GET',
                 url: "{{ route('admin.role.report') }}",
-                data: {id, start_time, end_time, project_id},
+                data: {id, start_time, end_time, project_id, admin_id},
                 beforeSend: function(){
                     init.conf.ajax_sending = true;
                 },
@@ -393,6 +398,19 @@ Biss
                                                 </tr>`;
                                         }
                                     });
+                                } else {
+                                    html += `<tr>
+                                                    <td>${($ka + 1)}</td>
+                                                    <td>${admin.admin}</td>
+                                                    <td></td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0 %</td>
+                                                </tr>`;
                                 }
                             });
                         }
@@ -409,6 +427,23 @@ Biss
                         $('.select-project').html(htmlSelect);
                         $('.select-project').select2({
                             placeholder: 'Chọn dự án',
+                            minimumResultsForSearch:-1,
+                        });
+
+                        if ($('.select-admin').hasClass("select2-hidden-accessible")) {
+                            $('.select-admin').select2('destroy');
+                        }
+                        htmlSelect = '';
+                        if(res.admin.length > 0){
+                            htmlSelect += `<option value="0" ${admin_id == 0? 'selected' : ''}>Tất cả tài khoản</option>`
+                            res.admin.forEach(function ($admin, $k) {
+                                htmlSelect += `<option value="${$admin.id}" ${admin_id == $admin.id? 'selected' : ''}>${$admin.username}</option>`
+                            });
+                            console.log(htmlSelect)
+                        }
+                        $('.select-admin').html(htmlSelect);
+                        $('.select-admin').select2({
+                            placeholder: 'Chọn tài khoản',
                             minimumResultsForSearch:-1,
                         });
                     } else {
