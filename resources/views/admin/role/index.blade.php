@@ -199,10 +199,10 @@ Biss
             <div class="modal-body">
                 <input type="hidden" name="id">
                 <div class="row text-nowrap mb-4">
-                    <div class="col-xl-3 d-flex align-items-center mb-2">
-                        <div class="mr-2">Dự án: </div>
-                        <select name="project_id" class="select-project form-control"></select>
-                    </div>
+                    {{--<div class="col-xl-3 d-flex align-items-center mb-2">--}}
+                        {{--<div class="mr-2">Dự án: </div>--}}
+                        {{--<select name="project_id" class="select-project form-control"></select>--}}
+                    {{--</div>--}}
                     <div class="col-xl-3 d-flex align-items-center mb-2">
                         <div class="mr-2">Tài khoản: </div>
                         <select name="admin_id" class="select-admin form-control"></select>
@@ -371,8 +371,8 @@ Biss
                         if(res.data.length > 0){
                             res.data.forEach(function (admin, $ka) {
                                 if(admin.projects.length> 0){
-                                    admin.projects.forEach(function (project) {
-                                        if(!!!$ka){
+                                    admin.projects.forEach(function (project , $kp) {
+                                        if(!!!$kp){
                                             html += `<tr>
                                                     <td rowspan="${admin.projects.length}">${($ka+1)}</td>
                                                     <td rowspan="${admin.projects.length}">${admin.admin}</td>
