@@ -54,7 +54,7 @@ class AdminProjectController extends Controller
             return $project;
         });
         $admins = $this->adminRepo->get();
-        return view('admin.project.index', compact('data', 'admins', 'isAdmin'));
+        return view('admin.project.index', compact('data', 'admins', 'isAdmin', 'isGuest'));
     }
 
     public function create(Request $request){
