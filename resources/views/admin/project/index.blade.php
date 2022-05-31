@@ -167,7 +167,7 @@ type="text/css" /> --}}
                                 <th scope="col">Ngày nhận</th>
                                 <th scope="col">Ngày hết hạn</th>
                                 <th scope="col">Trạng thái</th>
-                                @if($isAdmin)
+                                @if(!$isGuest)
                                 <th scope="col">Ticket trễ hạn</th>
                                 @endif
                                 <th class="{{$isAdmin?'':'d-none'}}">Hành động</th>
@@ -196,7 +196,7 @@ type="text/css" /> --}}
                                 <td nowrap>
                                     <span class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? ($time > $v->expired_time ? 'danger' : ($time < $v->expired_time - 604800 ? 'success' : 'warning')) : 'success' }} label-inline">{{ $v->status == 1 ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
-                                @if($isAdmin)
+                                @if(!$isGuest)
                                     <td nowrap>
                                         <span class="label label-lg font-weight-bold label-light-{{ $v->has_late ? 'danger' : 'success' }} label-inline">{{ $v->has_late ? 'Có' : 'Không' }}</span>
                                     </td>

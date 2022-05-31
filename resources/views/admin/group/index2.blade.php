@@ -83,7 +83,7 @@
                                             <th scope="col">Mới</th>
                                             <th scope="col">Hết hạn</th>
                                             <th scope="col">Hoàn thành</th>
-                                            @if($isAdmin)
+                                            @if(!$isGuest)
                                             <th scope="col">Hoàn thành đúng hạn</th>
                                             <th scope="col">Hoàn thành trễ</th>
                                             @endif
@@ -100,7 +100,7 @@
                                                     <td>{{$reportGroup[@$gr['id']]['report']['new'] ?? 0}}</td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['expired'] ?? 0}}</td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['done'] ?? 0}}</td>
-                                                    @if($isAdmin)
+                                                    @if(!$isGuest)
                                                     <td>{{$reportGroup[@$gr['id']]['report']['done_on_time'] ?? 0}}</td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['done_out_time'] ?? 0}}</td>
                                                     @endif
@@ -136,7 +136,7 @@
                                             <th scope="col">Mới</th>
                                             <th scope="col">Hết hạn</th>
                                             <th scope="col">Hoàn thành</th>
-                                            @if($isAdmin)
+                                            @if(!$isGuest)
                                             <th scope="col">Hoàn thành đúng hạn</th>
                                             <th scope="col">Hoàn thành trễ</th>
                                             @endif
@@ -153,7 +153,7 @@
                                                     <td>{{$member['report']['new']}}</td>
                                                     <td>{{$member['report']['expired']}}</td>
                                                     <td>{{$member['report']['done']}}</td>
-                                                    @if($isAdmin)
+                                                    @if(!$isGuest)
                                                     <td>{{$member['report']['done_on_time']}}</td>
                                                     <td>{{$member['report']['done_out_time']}}</td>
                                                     @endif

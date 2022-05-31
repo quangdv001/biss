@@ -28,6 +28,7 @@ class AdminGroupController extends Controller
     {
         $user = auth('admin')->user();
         $isAdmin = $user->hasRole(['super_admin', 'account']);
+        $isGuest = $user->hasRole(['guest']);
         $gid = 0;
         $project = $this->projectRepo->first(['id' => $id], [], ['group', 'admin', 'ticket.admin']);
         if (empty($project)) {
@@ -111,7 +112,7 @@ class AdminGroupController extends Controller
         })->all();
         $reportMember = array_values($reportMember);
 
-        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin'));
+        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin', 'isGuest'));
     }
 
     public function create(Request $request){
