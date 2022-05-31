@@ -74,7 +74,7 @@ class AdminProjectController extends Controller
                     $phase = $this->phase->first(['project_id' => $res->id], ['id' => 'DESC']);
                     if($phase){
                         $paramsP['start_time'] = $res->accept_time;
-                        $paramsP['end_time'] = $res->expired_time + 86399;
+                        $paramsP['end_time'] = $res->expired_time;
                         $this->phase->update($phase, $paramsP);
                     }
                     $res->admin()->sync($request->get('admin_project',[]));
@@ -88,7 +88,7 @@ class AdminProjectController extends Controller
                 if($res->accept_time > 0 && $res->expired_time > 0){
                     $paramsP['name'] = 'Phase 1';
                     $paramsP['start_time'] = $res->accept_time;
-                    $paramsP['end_time'] = $res->expired_time + 86399;
+                    $paramsP['end_time'] = $res->expired_time;
                     $paramsP['project_id'] = $res->id;
                     $this->phase->create($paramsP);
                 }
