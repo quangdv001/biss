@@ -366,20 +366,20 @@ Biss
             <div class="modal-body">
                 <input type="hidden" name="id">
                 <div class="row text-nowrap mb-4">
-                        <div class="col-md-3 d-flex align-items-center mb-2">
+                        <div class="col-xl-3 d-flex align-items-center mb-2">
                             <div class="mr-2">Dự án: </div>
                             <select name="project_id" class="select-project form-control"></select>
                         </div>
-                        <div class="col-md-3 d-flex align-items-center mb-2">
+                        <div class="col-xl-3 d-flex align-items-center mb-2">
                             <div class="mr-2">Ngày bắt đầu: </div>
                             <input type="date" class="form-control" name="start_time">
                         </div>
-                        <div class="col-md-3 d-flex align-items-center mb-2">
+                        <div class="col-xl-3 d-flex align-items-center mb-2">
                             <div class="mr-2">Ngày kết thúc: </div>
                             <input type="date" class="form-control" name="end_time">
                         </div>
-                        <div class="col-md-3">
-                            <a href="javascript:void(0)" class="btn btn-light-primary mb-2" onclick="reportMember()">Tìm kiếm</a>
+                        <div class="col-xl-3 ml-auto d-flex">
+                            <a href="javascript:void(0)" class="btn btn-light-primary mb-2 ml-auto" onclick="reportMember()">Tìm kiếm</a>
                         </div>
                 </div>
                 <table class="table text-center">
@@ -387,7 +387,7 @@ Biss
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Dự án</th>
-                        <th scope="col">Số lượng</th>
+                        <th scope="col">Số lượng HD</th>
                         <th scope="col">Mới</th>
                         <th scope="col">Hết hạn</th>
                         <th scope="col">Hoàn thành</th>
@@ -523,7 +523,7 @@ Biss
                                 html += `<tr>
                                             <td scope="row">${($k+1)}</td>
                                             <td>${$project.project}</td>
-                                            <td>${$project.report.total}</td>
+                                            <td>${$project.report.qty}</td>
                                             <td>${$project.report.new}</td>
                                             <td>${$project.report.expired}</td>
                                             <td>${$project.report.done}</td>

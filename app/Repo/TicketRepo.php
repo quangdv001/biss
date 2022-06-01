@@ -162,7 +162,7 @@ class TicketRepo
         if (!empty($project_id)) {
             $query = $query->where('project_id', $project_id);
         }
-        $query = $query->with('admin');
+        $query = $query->with('admin','group.phaseGroup');
         $query = $query->whereHas('admin', function ($query) use ($admin_ids) {
             $query->whereIn('id', $admin_ids);
         });

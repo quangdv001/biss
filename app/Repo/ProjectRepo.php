@@ -184,4 +184,15 @@ class ProjectRepo
         return $data;
     }
 
+    public function getProjectByRole($role_id)
+    {
+        $query = $this->repo;
+        $query = $query->whereHas('admin', function ($query) use ($role_id) {
+            $query->whereHas('roles', function ($query) use ($role_id) {
+                $query->where('id', $role_id);
+            });
+        });
+        $data = $query->get();
+        return $data;
+    }
 }
