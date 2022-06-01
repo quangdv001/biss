@@ -131,6 +131,20 @@ class AdminRoleController extends Controller
         })->map(function ($admin,$admin_id) use ($data){
             $item['admin'] = $admin->username ?? '';
             $item['projects'] = $data[$admin_id]['projects'] ?? [];
+            if(!empty($item['projects'])){
+                $total = collect($item['projects'])->sum('report.total');
+                $new = collect($item['projects'])->sum('report.new');
+                $expired = collect($item['projects'])->sum('report.expired');
+                $done = collect($item['projects'])->sum('report.done');
+                $done_on_time = collect($item['projects'])->sum('report.done_on_time');
+                $done_out_time = collect($item['projects'])->sum('report.done_out_time');
+                $percent = $total ? round($done / $total * 100) : 0;
+                $rowAllProject = [
+                    'project' => 'Tất cả dự án',
+                    'report' => ['total' => $total, 'new' => $new, 'expired' => $expired, 'done' => $done, 'done_on_time' => $done_on_time, 'done_out_time' => $done_out_time, 'percent' => $percent]
+                ];
+                array_unshift($item['projects'], $rowAllProject);
+            }
             return $item;
         })->values()->all();
         return response(['success' => 1, 'data' => $data, 'project' => array_values($project) ,'admin' =>array_values($admin)]);
