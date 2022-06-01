@@ -1,6 +1,7 @@
 <div class="dropdown my-noty">
     <!--begin::Toggle-->
-    <div class="topbar-item mr-3" data-toggle="dropdown" data-offset="10px,0px">
+    <div class="topbar-item mr-3 position-relative" data-toggle="dropdown" data-offset="10px,0px">
+        <span class="btn btn-text btn-danger btn-sm font-weight-bold btn-font-md noty-numb d-none justify-content-center"><div class="align-self-center">1</div></span>
         <div class="btn btn-icon btn-clean h-40px w-40px btn-dropdown pulse pulse-white">
             <span class="svg-icon svg-icon-lg">
                 <!--begin::Svg Icon | path:assets/media/svg/icons/Code/Compiling.svg--><svg
@@ -29,8 +30,39 @@
     <!--end::Dropdown-->
 </div>
 
+<style>
+.noty-numb{
+    position: absolute;
+    top: -13px;
+    right: -7px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: #fff;
+    font-weight: bold;
+    
+}
+</style>
+
+
 @push('custom_js')
 <script>
+    $(document).ready(function(){
+        $.ajax({
+            type: 'POST',
+            url : "{{ route('admin.home.getNoty') }}",
+            success: function(res){
+                if(res.success){
+                    if(res.count){
+                        $('.noty-numb').removeClass('d-none');
+                        $('.noty-numb').addClass('d-flex');
+                        $('.noty-numb div').text(res.count);
+                    }
+                }
+            }
+        })
+    });
+
     $('.my-noty').on('show.bs.dropdown', function(){
         $.ajax({
             type: 'POST',
