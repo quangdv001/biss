@@ -86,23 +86,26 @@ class AdminGroupController extends Controller
                     }
                     if (!empty($ticket->admin)) {
                         foreach ($ticket->admin as $member) {
-                            $reportMember[$member->id]['report']['total'] += $qty;
-                            if ($ticket['status'] == 0) {
-                                if (time() > $ticket['deadline_time']) {
-                                    $reportMember[$member->id]['report']['expired'] += $qty;
-                                } else {
-                                    $reportMember[$member->id]['report']['new'] += $qty;
+                            if(isset($reportMember[$member->id])){
+
+                                $reportMember[$member->id]['report']['total'] += $qty;
+                                if ($ticket['status'] == 0) {
+                                    if (time() > $ticket['deadline_time']) {
+                                        $reportMember[$member->id]['report']['expired'] += $qty;
+                                    } else {
+                                        $reportMember[$member->id]['report']['new'] += $qty;
+                                    }
                                 }
-                            }
-                            if ($ticket['status'] == 1) {
-                                $reportMember[$member->id]['report']['done'] += $qty;
-                                if ($ticket['complete_time'] <= $ticket['deadline_time']) {
-                                    $reportMember[$member->id]['report']['done_on_time'] += $qty;
-                                } else {
-                                    $reportMember[$member->id]['report']['done_out_time'] += $qty;
+                                if ($ticket['status'] == 1) {
+                                    $reportMember[$member->id]['report']['done'] += $qty;
+                                    if ($ticket['complete_time'] <= $ticket['deadline_time']) {
+                                        $reportMember[$member->id]['report']['done_on_time'] += $qty;
+                                    } else {
+                                        $reportMember[$member->id]['report']['done_out_time'] += $qty;
+                                    }
                                 }
+                                $reportMember[$member->id]['report']['percent'] = !empty($reportMember[$member->id]['report']['total']) ? round($reportMember[$member->id]['report']['done'] / $reportMember[$member->id]['report']['total'] * 100) : 0;
                             }
-                            $reportMember[$member->id]['report']['percent'] = !empty($reportMember[$member->id]['report']['total']) ? round($reportMember[$member->id]['report']['done'] / $reportMember[$member->id]['report']['total'] * 100) : 0;
                         }
                     }
                 }
