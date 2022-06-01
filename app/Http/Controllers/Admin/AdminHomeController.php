@@ -35,6 +35,7 @@ class AdminHomeController extends Controller
 
         $res['success'] = 1;
         $res['html'] = view('admin.home.noty', compact('ticket', 'group', 'new', 'old', 'data'))->render();
+        $res['count'] = ($data->count() + $ticket->count());
         return response()->json($res);
     }
 
