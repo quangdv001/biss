@@ -5,3 +5,4 @@
 
 @yield('lib_css')
 @yield('custom_css')
+@stack('my_css')
