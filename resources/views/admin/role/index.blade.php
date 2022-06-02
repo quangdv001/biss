@@ -191,7 +191,7 @@ Biss
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Báo cáo tài khoản <span class="username font-weight-bold text-primary"></span></h5>
+                <h5 class="modal-title">Báo cáo <span class="username font-weight-bold text-primary"></span></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i aria-hidden="true" class="ki ki-close"></i>
                 </button>
@@ -225,7 +225,7 @@ Biss
                         <th scope="col">#</th>
                         <th scope="col">Tài khoản</th>
                         <th scope="col">Dự án</th>
-                        <th scope="col">Số lượng</th>
+                        <th scope="col">Số lượng HD</th>
                         <th scope="col">Mới</th>
                         <th scope="col">Hết hạn</th>
                         <th scope="col">Hoàn thành</th>
@@ -235,51 +235,6 @@ Biss
                     </tr>
                     </thead>
                     <tbody>
-
-                    <tr>
-                        <th scope="col" rowspan="2">#</th>
-                        <th scope="col" rowspan="2">Tài khoản</th>
-                        <th scope="col">Dự án</th>
-                        <th scope="col">Số lượng</th>
-                        <th scope="col">Mới</th>
-                        <th scope="col">Hết hạn</th>
-                        <th scope="col">Hoàn thành</th>
-                        <th scope="col">Hoàn thành đúng hạn</th>
-                        <th scope="col">Hoàn thành trễ</th>
-                        <th scope="col">Tiến độ</th>
-                    </tr>
-                    <tr>
-                        <th scope="col">Dự án</th>
-                        <th scope="col">Số lượng</th>
-                        <th scope="col">Mới</th>
-                        <th scope="col">Hết hạn</th>
-                        <th scope="col">Hoàn thành</th>
-                        <th scope="col">Hoàn thành đúng hạn</th>
-                        <th scope="col">Hoàn thành trễ</th>
-                        <th scope="col">Tiến độ</th>
-                    </tr>
-                    <tr>
-                        <th scope="col" rowspan="2">#</th>
-                        <th scope="col" rowspan="2">Tài khoản</th>
-                        <th scope="col">Dự án</th>
-                        <th scope="col">Số lượng</th>
-                        <th scope="col">Mới</th>
-                        <th scope="col">Hết hạn</th>
-                        <th scope="col">Hoàn thành</th>
-                        <th scope="col">Hoàn thành đúng hạn</th>
-                        <th scope="col">Hoàn thành trễ</th>
-                        <th scope="col">Tiến độ</th>
-                    </tr>
-                    <tr>
-                        <th scope="col">Dự án</th>
-                        <th scope="col">Số lượng</th>
-                        <th scope="col">Mới</th>
-                        <th scope="col">Hết hạn</th>
-                        <th scope="col">Hoàn thành</th>
-                        <th scope="col">Hoàn thành đúng hạn</th>
-                        <th scope="col">Hoàn thành trễ</th>
-                        <th scope="col">Tiến độ</th>
-                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -345,6 +300,8 @@ Biss
 
     $('.btn-report').click(function(){
         let id = $(this).data('id');
+        let role = data[id];
+        $('#modalReport .username').html(role.name);
         $('#modalReport input[name="id"]').val(id);
         $('#modalReport select[name="project_id"]').val(0).trigger('change');
         reportRole();
@@ -377,7 +334,7 @@ Biss
                                                     <td rowspan="${admin.projects.length}">${($ka+1)}</td>
                                                     <td rowspan="${admin.projects.length}">${admin.admin}</td>
                                                     <td>${project.project}</td>
-                                                    <td>${project.report.total}</td>
+                                                    <td>${project.report.qty}</td>
                                                     <td>${project.report.new}</td>
                                                     <td>${project.report.expired}</td>
                                                     <td>${project.report.done}</td>
@@ -388,7 +345,7 @@ Biss
                                         }else{
                                             html += `<tr>
                                                     <td>${project.project}</td>
-                                                    <td>${project.report.total}</td>
+                                                    <td>${project.report.qty}</td>
                                                     <td>${project.report.new}</td>
                                                     <td>${project.report.expired}</td>
                                                     <td>${project.report.done}</td>

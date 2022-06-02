@@ -120,6 +120,8 @@ class AdminAccountController extends Controller
             $data['report']['done_on_time'] = 0;
             $data['report']['done_out_time'] = 0;
             $data['report']['percent'] = 0;
+            $data['report']['qty'] = 0;
+            $phaseGroupIds  = [];
             if (!empty($tickets)) {
                 foreach ($tickets as $ticket) {
                     $qty = $ticket['qty'] ?? 1;
@@ -139,9 +141,15 @@ class AdminAccountController extends Controller
                             $data['report']['done_out_time'] += $qty;
                         }
                     }
+                    $phaseGroupId = $ticket['group_id'] . '_' . $ticket['phase_id'];
+                    if (!in_array($phaseGroupId, $phaseGroupIds)) {
+                        $phaseGroup = ($ticket->group->phaseGroup ?? collect([]))->where('group_id', $ticket['group_id'])->where('phase_id', $ticket['phase_id'])->first();
+                        $data['report']['qty'] += $phaseGroup->qty ?? 0;
+                        $phaseGroupIds[] = $phaseGroupId;
+                    }
                 }
             }
-            $data['report']['percent'] = !empty($data['report']['total']) ? round($data['report']['done'] / $data['report']['total'] * 100) : 0;
+            $data['report']['percent'] = !empty($data['report']['qty']) ? round($data['report']['done'] / $data['report']['qty'] * 100) : 0;
             return $data;
         })->values()->all();
         return response(['success' => 1, 'data' => $data, 'project' => array_values($projectByAdmin->all())]);

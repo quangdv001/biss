@@ -72,7 +72,7 @@ class AdminRoleController extends Controller
         if (!$user->hasRole(['super_admin', 'account'])) {
             return response(['success' => 0, 'message' => 'Bạn không có quyền quản lý tài khoản']);
         }
-        $id = $request->get('id', '3');
+        $id = $request->get('id', 0);
         $project_id = $request->get('project_id', 0);
         $admin_id = $request->get('admin_id', 0);
         $role = $this->role->first(['id' => $id]);
@@ -83,7 +83,7 @@ class AdminRoleController extends Controller
         $admin_ids = array_keys($admin);
         $start_time = strtotime($request->get('start_time', ''));
         $end_time = strtotime($request->get('end_time', ''));
-        $project = $this->projectRepo->get([])->keyBy('id')->all();
+        $project = $this->projectRepo->getProjectByRole($id)->keyBy('id')->all();
         $data = $this->ticketRepo->getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time)->map(function ($ticket) {
             $ticket->admin_id = $ticket->admin->pluck('id')->all();
             return $ticket;
@@ -100,6 +100,8 @@ class AdminRoleController extends Controller
                 $data['report']['done_on_time'] = 0;
                 $data['report']['done_out_time'] = 0;
                 $data['report']['percent'] = 0;
+                $data['report']['qty'] = 0;
+                $phaseGroupIds  = [];
                 if (!empty($tickets)) {
                     foreach ($tickets as $ticket) {
                         $qty = $ticket['qty'] ?? 1;
@@ -119,9 +121,15 @@ class AdminRoleController extends Controller
                                 $data['report']['done_out_time'] += $qty;
                             }
                         }
+                        $phaseGroupId = $ticket['group_id'] . '_' . $ticket['phase_id'];
+                        if (!in_array($phaseGroupId, $phaseGroupIds)) {
+                            $phaseGroup = ($ticket->group->phaseGroup ?? collect([]))->where('group_id', $ticket['group_id'])->where('phase_id', $ticket['phase_id'])->first();
+                            $data['report']['qty'] += $phaseGroup->qty ?? 0;
+                            $phaseGroupIds[] = $phaseGroupId;
+                        }
                     }
                 }
-                $data['report']['percent'] = !empty($data['report']['total']) ? round($data['report']['done'] / $data['report']['total'] * 100) : 0;
+                $data['report']['percent'] = !empty($data['report']['qty']) ? round($data['report']['done'] / $data['report']['qty'] * 100) : 0;
                 return $data;
             })->values()->all();
             return $data;
@@ -131,6 +139,21 @@ class AdminRoleController extends Controller
         })->map(function ($admin,$admin_id) use ($data){
             $item['admin'] = $admin->username ?? '';
             $item['projects'] = $data[$admin_id]['projects'] ?? [];
+            if(!empty($item['projects'])){
+                $total = collect($item['projects'])->sum('report.total');
+                $qty = collect($item['projects'])->sum('report.qty');
+                $new = collect($item['projects'])->sum('report.new');
+                $expired = collect($item['projects'])->sum('report.expired');
+                $done = collect($item['projects'])->sum('report.done');
+                $done_on_time = collect($item['projects'])->sum('report.done_on_time');
+                $done_out_time = collect($item['projects'])->sum('report.done_out_time');
+                $percent = $qty ? round($done / $qty * 100) : 0;
+                $rowAllProject = [
+                    'project' => 'Tất cả dự án',
+                    'report' => ['total' => $total, 'qty' => $qty, 'new' => $new, 'expired' => $expired, 'done' => $done, 'done_on_time' => $done_on_time, 'done_out_time' => $done_out_time, 'percent' => $percent]
+                ];
+                array_unshift($item['projects'], $rowAllProject);
+            }
             return $item;
         })->values()->all();
         return response(['success' => 1, 'data' => $data, 'project' => array_values($project) ,'admin' =>array_values($admin)]);
