@@ -157,7 +157,7 @@ class TicketRepo
     {
         $query = $this->repo;
         if (!empty($start_time) && !empty($end_time)) {
-            $query = $query->whereBetween('created_time', [$start_time, $end_time]);
+            $query = $query->whereBetween('deadline_time', [$start_time, $end_time]);
         }
         if (!empty($project_id)) {
             $query = $query->where('project_id', $project_id);

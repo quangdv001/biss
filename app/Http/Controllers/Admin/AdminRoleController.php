@@ -83,6 +83,7 @@ class AdminRoleController extends Controller
         $admin_ids = array_keys($admin);
         $start_time = strtotime($request->get('start_time', ''));
         $end_time = strtotime($request->get('end_time', ''));
+        $end_time = $end_time ? strtotime('tomorrow', $end_time) - 1 : false;
         $project = $this->projectRepo->getProjectByRole($id)->keyBy('id')->all();
         $data = $this->ticketRepo->getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time)->map(function ($ticket) {
             $ticket->admin_id = $ticket->admin->pluck('id')->all();

@@ -109,6 +109,7 @@ class AdminAccountController extends Controller
         }
         $start_time =  strtotime($request->get('start_time',''));
         $end_time =  strtotime($request->get('end_time',''));
+        $end_time = $end_time ? strtotime('tomorrow', $end_time) - 1 : false;
         $projectByAdmin = $this->projectRepo->getProjectByAdmin($id)->keyBy('id');
         $admin_ids = [$id];
         $data = $this->ticketRepo->getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time)->groupBy('project_id')->map(function ($tickets, $project_id) use ($projectByAdmin){
