@@ -84,15 +84,20 @@ class AdminRoleController extends Controller
         $start_time = strtotime($request->get('start_time', ''));
         $end_time = strtotime($request->get('end_time', ''));
         $end_time = $end_time ? strtotime('tomorrow', $end_time) - 1 : false;
-        $project = $this->projectRepo->getProjectByRole($id)->keyBy('id')->all();
-        $data = $this->ticketRepo->getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time)->map(function ($ticket) {
+
+        $tickets = $this->ticketRepo->getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time);
+        $project = $this->projectRepo->get(['id' => $tickets->pluck('project_id')->all()])->load('admin')->map(function ($project) {
+            $project->admin_ids = $project->admin->pluck('id')->all();
+            return $project;
+        })->keyBy('id')->all();
+        $data = $tickets->map(function ($ticket) {
             $ticket->admin_id = $ticket->admin->pluck('id')->all();
             return $ticket;
         })->groupBy(['admin_id', function ($item) {
             return $item['project_id'];
         }], true)->map(function ($projects, $admin_id) use ($admin, $project) {
             $data['admin'] = @$admin[$admin_id]['username'];
-            $data['projects'] = $projects->map(function ($tickets, $project_id) use ($project) {
+            $data['projects'] = $projects->map(function ($tickets, $project_id) use ($project, $admin_id) {
                 $data['project'] = @$project[$project_id]['name'];
                 $data['report']['total'] = 0;
                 $data['report']['new'] = 0;
@@ -123,7 +128,7 @@ class AdminRoleController extends Controller
                             }
                         }
                         $phaseGroupId = $ticket['group_id'] . '_' . $ticket['phase_id'];
-                        if (!in_array($phaseGroupId, $phaseGroupIds)) {
+                        if (!in_array($phaseGroupId, $phaseGroupIds) && in_array($admin_id, $project[$project_id]['admin_ids'] ?? [])) {
                             $phaseGroup = ($ticket->group->phaseGroup ?? collect([]))->where('group_id', $ticket['group_id'])->where('phase_id', $ticket['phase_id'])->first();
                             $data['report']['qty'] += $phaseGroup->qty ?? 0;
                             $phaseGroupIds[] = $phaseGroupId;
