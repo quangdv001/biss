@@ -150,6 +150,17 @@
                             <label>Tên nhóm công việc</label>
                             <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" autocomplete="off" required/>
                         </div>
+                        <div class="col-lg-12 mt-4">
+                            <label>Phòng</label>
+                            <select class="form-control" name="role_id">
+                                <option value="0">Mời chọn</option>
+                                @if($role->count() > 0)
+                                @foreach($role as $v)
+                                <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                @endforeach
+                                @endif
+                              </select>
+                        </div>
                         @if(!empty($phase))
                             @foreach($phase as $v)
                                 <div class="col-lg-12 mt-4">
@@ -228,6 +239,17 @@
                             <label>Tên nhóm công việc</label>
                             <input type="text" class="form-control" name="name" placeholder="Tên nhóm công việc" required/>
                         </div>
+                        <div class="col-lg-12 mt-4">
+                            <label>Phòng</label>
+                            <select class="form-control" name="role_id">
+                                <option value="0">Mời chọn</option>
+                                @if($role->count() > 0)
+                                @foreach($role as $v)
+                                <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                @endforeach
+                                @endif
+                              </select>
+                        </div>
                         @if(!empty($phase))
                             @foreach($phase as $v)
                                 <div class="col-lg-12 mt-4">
@@ -263,6 +285,7 @@
         
         $('#modalEditGroup input[name="id"]').val(g.id);
         $('#modalEditGroup input[name="name"]').val(g.name);
+        $('#modalEditGroup select[name="role_id"]').val(g.role_id);
         $('#modalEditGroup input[name="qty"]').val(g.qty);
         $('#modalEditGroup input[type=number]').each(function () {
             let phase_id = $(this).data('phase');

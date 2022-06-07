@@ -195,4 +195,15 @@ class ProjectRepo
         $data = $query->get();
         return $data;
     }
+
+    public function getProjectReport($params){
+        $query = $this->repo;
+        if(isset($params['start_time']) && $params['start_time'] > 0){
+            $query = $query->where('accept_time', '<=', $params['start_time'])->where('expired_time', '>=', $params['start_time']);
+        }
+        $query = $query->with('admin','group.phaseGroup');
+        
+        return $query->get();
+
+    }
 }
