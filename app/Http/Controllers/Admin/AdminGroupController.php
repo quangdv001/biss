@@ -7,6 +7,7 @@ use App\Repo\AdminRepo;
 use App\Repo\GroupRepo;
 use App\Repo\PhaseRepo;
 use App\Repo\ProjectRepo;
+use App\Repo\RoleRepo;
 use Illuminate\Http\Request;
 
 class AdminGroupController extends Controller
@@ -15,13 +16,15 @@ class AdminGroupController extends Controller
     private $groupRepo;
     private $adminRepo;
     private $phase;
+    private $role;
 
-    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo, AdminRepo $adminRepo, PhaseRepo $phase)
+    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo, AdminRepo $adminRepo, PhaseRepo $phase, RoleRepo $role)
     {
         $this->projectRepo = $projectRepo;
         $this->groupRepo = $groupRepo;
         $this->adminRepo = $adminRepo;
         $this->phase = $phase;
+        $this->role = $role;
     }
 
     public function index(Request $request, $id, $pid = 0)
@@ -114,8 +117,8 @@ class AdminGroupController extends Controller
             return $data;
         })->all();
         $reportMember = array_values($reportMember);
-
-        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin', 'isGuest'));
+        $role = $this->role->getRole();
+        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin', 'isGuest', 'role'));
     }
 
     public function create(Request $request){
@@ -123,7 +126,7 @@ class AdminGroupController extends Controller
         if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý nhóm!');
         }
-        $params = $request->only('id', 'project_id', 'name');
+        $params = $request->only('id', 'project_id', 'role_id', 'name');
         $qty = $request->get('qty', []);
         if(isset($params['id'])){
             $group = $this->groupRepo->first(['id' => $params['id']]);

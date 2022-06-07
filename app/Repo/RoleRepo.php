@@ -149,4 +149,10 @@ class RoleRepo
         return $data;
     }
 
+    public function getRole(){
+        $query = $this->repo;
+        $query = $query->whereNotIn('slug', ['super_admin', 'guest'])->get();
+        return $query;
+    }
+
 }

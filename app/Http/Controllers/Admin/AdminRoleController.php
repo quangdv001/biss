@@ -105,8 +105,9 @@ class AdminRoleController extends Controller
                 $data['report']['done'] = 0;
                 $data['report']['done_on_time'] = 0;
                 $data['report']['done_out_time'] = 0;
-                $data['report']['percent'] = 0;
-                $data['report']['qty'] = 0;
+                $data['report']['percent_on_time'] = 0;
+                $data['report']['percent_out_time'] = 0;
+                // $data['report']['qty'] = 0;
                 $phaseGroupIds  = [];
                 if (!empty($tickets)) {
                     foreach ($tickets as $ticket) {
@@ -127,15 +128,16 @@ class AdminRoleController extends Controller
                                 $data['report']['done_out_time'] += $qty;
                             }
                         }
-                        $phaseGroupId = $ticket['group_id'] . '_' . $ticket['phase_id'];
-                        if (!in_array($phaseGroupId, $phaseGroupIds) && in_array($admin_id, $project[$project_id]['admin_ids'] ?? [])) {
-                            $phaseGroup = ($ticket->group->phaseGroup ?? collect([]))->where('group_id', $ticket['group_id'])->where('phase_id', $ticket['phase_id'])->first();
-                            $data['report']['qty'] += $phaseGroup->qty ?? 0;
-                            $phaseGroupIds[] = $phaseGroupId;
-                        }
+                        // $phaseGroupId = $ticket['group_id'] . '_' . $ticket['phase_id'];
+                        // if (!in_array($phaseGroupId, $phaseGroupIds) && in_array($admin_id, $project[$project_id]['admin_ids'] ?? [])) {
+                        //     $phaseGroup = ($ticket->group->phaseGroup ?? collect([]))->where('group_id', $ticket['group_id'])->where('phase_id', $ticket['phase_id'])->first();
+                        //     $data['report']['qty'] += $phaseGroup->qty ?? 0;
+                        //     $phaseGroupIds[] = $phaseGroupId;
+                        // }
                     }
                 }
-                $data['report']['percent'] = !empty($data['report']['qty']) ? round($data['report']['done'] / $data['report']['qty'] * 100) : 0;
+                $data['report']['percent_on_time'] = $data['report']['done'] > 0 ? round($data['report']['done_on_time'] / $data['report']['done'] * 100) : 0;
+                $data['report']['percent_out_time'] = $data['report']['done'] > 0 ? round($data['report']['done_out_time'] / $data['report']['done'] * 100) : 0;
                 return $data;
             })->values()->all();
             return $data;
@@ -147,21 +149,69 @@ class AdminRoleController extends Controller
             $item['projects'] = $data[$admin_id]['projects'] ?? [];
             if(!empty($item['projects'])){
                 $total = collect($item['projects'])->sum('report.total');
-                $qty = collect($item['projects'])->sum('report.qty');
+                // $qty = collect($item['projects'])->sum('report.qty');
                 $new = collect($item['projects'])->sum('report.new');
                 $expired = collect($item['projects'])->sum('report.expired');
                 $done = collect($item['projects'])->sum('report.done');
                 $done_on_time = collect($item['projects'])->sum('report.done_on_time');
                 $done_out_time = collect($item['projects'])->sum('report.done_out_time');
-                $percent = $qty ? round($done / $qty * 100) : 0;
+                $percent_on_time = $done > 0 ? round(($done_on_time/$done)*100) : 0;
+                $percent_out_time = $done > 0 ? round(($done_out_time/$done)*100) : 0;
+                // $percent = $qty ? round($done / $qty * 100) : 0;
                 $rowAllProject = [
                     'project' => 'Tất cả dự án',
-                    'report' => ['total' => $total, 'qty' => $qty, 'new' => $new, 'expired' => $expired, 'done' => $done, 'done_on_time' => $done_on_time, 'done_out_time' => $done_out_time, 'percent' => $percent]
+                    'report' => ['total' => $total, 'new' => $new, 'expired' => $expired, 'done' => $done, 'done_on_time' => $done_on_time, 'done_out_time' => $done_out_time, 'percent_on_time' => $percent_on_time, 'percent_out_time' => $percent_out_time]
                 ];
                 array_unshift($item['projects'], $rowAllProject);
             }
             return $item;
         })->values()->all();
+        // dd($data);
         return response(['success' => 1, 'data' => $data, 'project' => array_values($project) ,'admin' =>array_values($admin)]);
+    }
+
+    public function report2(Request $request)
+    {
+        $user = auth('admin')->user();
+        if (!$user->hasRole(['super_admin', 'account'])) {
+            return response(['success' => 0, 'message' => 'Bạn không có quyền quản lý tài khoản']);
+        }
+        $id = $request->get('id', 0);
+        $admin_id = $request->get('admin_id', 0);
+        $role = $this->role->first(['id' => $id]);
+        if (empty($role)) {
+            return response(['success' => 0, 'message' => 'Không tìm thấy chức vụ!']);
+        }
+        $admin = $role->admin->keyBy('id')->all();
+        $arrAdmin = $admin_id ? [$admin_id] : array_keys($admin);
+        $params['start_time'] = $request->get('start_time', '') ? strtotime($request->get('start_time', '')) : time();
+        $projects = $this->projectRepo->getProjectReport($params);
+        $temp = $projects->map(function ($project) {
+            $project->admin_id = $project->admin->pluck('id')->all();
+            return $project;
+        })->groupBy('admin_id');
+        $data = [];
+        if($temp->count() > 0){
+            foreach($temp as $k => $v){
+                if(in_array($k, $arrAdmin)){
+
+                    $proj = [];
+                    if($v->count() > 0){
+                        foreach($v as $val){
+                            $proj[] = [
+                                'name' => $val->name,
+                                'qty' => $val->group->where('role_id', $id)->first() ? $val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty : 0
+                            ];
+                        }
+                    }
+                    $data[] = [
+                        'admin' => @$admin[$k]['username'],
+                        'projects' => $proj,
+                        'total' => collect($proj)->sum('qty')
+                    ];
+                }
+            }
+        }
+        return response(['success' => 1, 'data' => $data ,'admin' =>array_values($admin)]);
     }
 }

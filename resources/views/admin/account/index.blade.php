@@ -387,13 +387,14 @@ Biss
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Dự án</th>
-                        <th scope="col">Số lượng HD</th>
+                        <th scope="col">SL</th>
                         <th scope="col">Mới</th>
                         <th scope="col">Hết hạn</th>
                         <th scope="col">Hoàn thành</th>
                         <th scope="col">Hoàn thành đúng hạn</th>
                         <th scope="col">Hoàn thành trễ</th>
-                        <th scope="col">Tiến độ</th>
+                        <th scope="col">Tỉ lệ đúng hạn</th>
+                        <th scope="col">Tỉ lệ trễ</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -519,17 +520,30 @@ Biss
                     let html = '', htmlSelect = '';
                     if(res.success){
                         if(res.data.length > 0){
+                            html = `<tr class="bg-success text-light">
+                                            <td scope="row">Tổng</td>
+                                            <td>${ res.data.length }</td>
+                                            <td>${res.total.total}</td>
+                                            <td>${res.total.new}</td>
+                                            <td>${res.total.expired}</td>
+                                            <td>${res.total.done}</td>
+                                            <td>${res.total.done_on_time}</td>
+                                            <td>${res.total.done_out_time}</td>
+                                            <td>${res.total.done > 0 ? Math.round((res.total.done_on_time/res.total.done)*100) : 0} %</td>
+                                            <td>${res.total.done > 0 ? Math.round((res.total.done_out_time/res.total.done)*100) : 0} %</td>
+                                        </tr>`;
                             res.data.forEach(function ($project, $k) {
                                 html += `<tr>
                                             <td scope="row">${($k+1)}</td>
                                             <td>${$project.project}</td>
-                                            <td>${$project.report.qty}</td>
+                                            <td>${$project.report.total}</td>
                                             <td>${$project.report.new}</td>
                                             <td>${$project.report.expired}</td>
                                             <td>${$project.report.done}</td>
                                             <td>${$project.report.done_on_time}</td>
                                             <td>${$project.report.done_out_time}</td>
-                                            <td>${$project.report.percent} %</td>
+                                            <td>${$project.report.done > 0 ? Math.round(($project.report.done_on_time/$project.report.done)*100) : 0} %</td>
+                                            <td>${$project.report.done > 0 ? Math.round(($project.report.done_out_time/$project.report.done)*100) : 0} %</td>
                                         </tr>`;
                             });
                         }

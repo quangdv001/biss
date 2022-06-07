@@ -84,7 +84,8 @@ class AdminTicketController extends Controller
             return $ticket;
         });
         $notes = $this->note->get(['group_id' => $gid, 'phase_id' => $pid], ['id' => 'DESC'], ['admin']);
-        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes'));
+        $role = $this->role->getRole();
+        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes', 'role'));
     }
 
     public function create(Request $request){

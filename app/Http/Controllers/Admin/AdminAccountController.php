@@ -116,8 +116,15 @@ class AdminAccountController extends Controller
             $project->admin_ids = $project->admin->pluck('id')->all();
             return $project;
         })->keyBy('id')->all();
-
-        $data = $tickets->groupBy('project_id')->map(function ($tickets, $project_id) use ($project, $id){
+        $total = [
+            'total' => 0,
+            'new' => 0,
+            'expired' => 0,
+            'done' => 0,
+            'done_on_time' => 0,
+            'done_out_time' => 0,
+        ];
+        $data = $tickets->groupBy('project_id')->map(function ($tickets, $project_id) use ($project, $id, &$total){
             $data['project'] = @$project[$project_id]['name'];
             $data['report']['total'] = 0;
             $data['report']['new'] = 0;
@@ -125,39 +132,45 @@ class AdminAccountController extends Controller
             $data['report']['done'] = 0;
             $data['report']['done_on_time'] = 0;
             $data['report']['done_out_time'] = 0;
-            $data['report']['percent'] = 0;
-            $data['report']['qty'] = 0;
-            $phaseGroupIds  = [];
+            // $data['report']['percent'] = 0;
+            // $data['report']['qty'] = 0;
+            // $phaseGroupIds  = [];
             if (!empty($tickets)) {
                 foreach ($tickets as $ticket) {
                     $qty = $ticket['qty'] ?? 1;
                     $data['report']['total'] += $qty;
+                    $total['total'] += $qty;
                     if ($ticket['status'] == 0) {
                         if (time() > $ticket['deadline_time']) {
                             $data['report']['expired'] += $qty;
+                            $total['expired'] += $qty;
                         } else {
                             $data['report']['new'] += $qty;
+                            $total['new'] += $qty;
                         }
                     }
                     if ($ticket['status'] == 1) {
                         $data['report']['done'] += $qty;
+                        $total['done'] += $qty;
                         if ($ticket['complete_time'] <= $ticket['deadline_time']) {
                             $data['report']['done_on_time'] += $qty;
+                            $total['done_on_time'] += $qty;
                         } else {
                             $data['report']['done_out_time'] += $qty;
+                            $total['done_out_time'] += $qty;
                         }
                     }
-                    $phaseGroupId = $ticket['group_id'] . '_' . $ticket['phase_id'];
-                    if (!in_array($phaseGroupId, $phaseGroupIds) && in_array($id, $project[$project_id]['admin_ids'] ?? [])) {
-                        $phaseGroup = ($ticket->group->phaseGroup ?? collect([]))->where('group_id', $ticket['group_id'])->where('phase_id', $ticket['phase_id'])->first();
-                        $data['report']['qty'] += $phaseGroup->qty ?? 0;
-                        $phaseGroupIds[] = $phaseGroupId;
-                    }
+                    // $phaseGroupId = $ticket['group_id'] . '_' . $ticket['phase_id'];
+                    // if (!in_array($phaseGroupId, $phaseGroupIds) && in_array($id, $project[$project_id]['admin_ids'] ?? [])) {
+                    //     $phaseGroup = ($ticket->group->phaseGroup ?? collect([]))->where('group_id', $ticket['group_id'])->where('phase_id', $ticket['phase_id'])->first();
+                    //     $data['report']['qty'] += $phaseGroup->qty ?? 0;
+                    //     $phaseGroupIds[] = $phaseGroupId;
+                    // }
                 }
             }
-            $data['report']['percent'] = !empty($data['report']['qty']) ? round($data['report']['done'] / $data['report']['qty'] * 100) : 0;
+            // $data['report']['percent'] = !empty($data['report']['qty']) ? round($data['report']['done'] / $data['report']['qty'] * 100) : 0;
             return $data;
         })->values()->all();
-        return response(['success' => 1, 'data' => $data, 'project' => array_values($project)]);
+        return response(['success' => 1, 'data' => $data, 'project' => array_values($project), 'total' => $total]);
     }
 }
