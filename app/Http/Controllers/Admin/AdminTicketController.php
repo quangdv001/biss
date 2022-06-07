@@ -9,6 +9,7 @@ use App\Repo\NoteRepo;
 use App\Repo\NotyRepo;
 use App\Repo\PhaseRepo;
 use App\Repo\ProjectRepo;
+use App\Repo\RoleRepo;
 use App\Repo\TicketRepo;
 use Illuminate\Http\Request;
 
@@ -21,8 +22,9 @@ class AdminTicketController extends Controller
     private $phase;
     private $noty;
     private $note;
+    private $role;
 
-    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase, NotyRepo $noty, NoteRepo $note)
+    public function __construct(ProjectRepo $projectRepo,GroupRepo $groupRepo,TicketRepo $ticketRepo, AdminRepo $adminRepo, PhaseRepo $phase, NotyRepo $noty, NoteRepo $note, RoleRepo $role)
     {
         $this->projectRepo = $projectRepo;
         $this->groupRepo = $groupRepo;
@@ -31,6 +33,7 @@ class AdminTicketController extends Controller
         $this->phase = $phase;
         $this->noty = $noty;
         $this->note = $note;
+        $this->role = $role;
     }
 
     public function index(Request $request, $gid, $pid = 0){
