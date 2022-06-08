@@ -200,7 +200,7 @@ class AdminRoleController extends Controller
                         foreach($v as $val){
                             $proj[] = [
                                 'name' => $val->name,
-                                'qty' => $val->group->where('role_id', $id)->first() ? $val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty : 0
+                                'qty' => $val->group->where('role_id', $id)->first() ? round(($val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty)/$val->payment_month) : 0
                             ];
                         }
                     }
