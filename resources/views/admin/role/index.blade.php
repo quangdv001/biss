@@ -9,6 +9,13 @@ Biss
 @section('lib_js')
 <script src="/assets/admin/themes/assets/plugins/custom/datatables/datatables.bundle.js"></script>
 @endsection
+@section('custom_css')
+<style>
+.hiddenRow {
+    padding: 0 !important;
+}
+</style>
+@endsection
 @section('content')
 <!--begin::Subheader-->
 <div class="subheader py-2 py-lg-6 " id="kt_subheader">
@@ -250,7 +257,7 @@ Biss
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Báo cáo SLHĐ<span class="username font-weight-bold text-primary"></span></h5>
+                <h5 class="modal-title">Báo cáo SLHĐ <span class="username font-weight-bold text-primary"></span></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i aria-hidden="true" class="ki ki-close"></i>
                 </button>
@@ -384,7 +391,7 @@ Biss
                                 if(admin.projects.length> 0){
                                     admin.projects.forEach(function (project , $kp) {
                                         if(!!!$kp){
-                                            html += `<tr class="bg-success text-white">
+                                            html += `<tr class="bg-success text-white accordion-toggle" data-toggle="collapse" data-target="#demo${$ka}">
                                                     <td >${($ka+1)}</td>
                                                     <td >${admin.admin}</td>
                                                     <td>${admin.projects.length - 1}</td>
@@ -398,8 +405,27 @@ Biss
                                                     <td>${project.report.percent_out_time} %</td>
                                                 </tr>`;
                                         }else{
+                                            if($kp == 1){
+                                                html += `<tr>
+                                                        <td colspan="11" class="hiddenRow">
+                                                            <div class="accordian-body collapse" id="demo${$ka}"> 
+                                                                <table class="table">
+                                                                    <thead>
+                                                                        <tr class="info">
+                                                                            <th scope="col">Dự án</th>
+                                                                            <th scope="col">SL</th>
+                                                                            <th scope="col">Mới</th>
+                                                                            <th scope="col">Hết hạn</th>
+                                                                            <th scope="col">Hoàn thành</th>
+                                                                            <th scope="col">Hoàn thành đúng hạn</th>
+                                                                            <th scope="col">Hoàn thành trễ</th>
+                                                                            <th scope="col">Tỉ lệ đúng hạn</th>
+                                                                            <th scope="col">Tỉ lệ trễ</th>
+                                                                        </tr>
+                                                                    </thead>	
+                                                                    <tbody>`;
+                                            }
                                             html += `<tr>
-                                                    <td colspan="2"></td>
                                                     <td>${project.project}</td>
                                                     <td>${project.report.total}</td>
                                                     <td>${project.report.new}</td>
@@ -410,6 +436,14 @@ Biss
                                                     <td>${project.report.percent_on_time} %</td>
                                                     <td>${project.report.percent_out_time} %</td>
                                                 </tr>`;
+
+                                            if($kp === admin.projects.length - 1){
+                                                html += `</tbody>
+                                                                </table>
+                                                            </div> 
+                                                        </td>
+                                                    </tr>`;
+                                            }
                                         }
                                     });
                                 } else {
@@ -486,26 +520,36 @@ Biss
                 },
                 success: function(res){
                     let html = '', htmlSelect = '';
+                    
                     if(res.success){
                         if(res.data.length > 0){
                             res.data.forEach(function (v, $ka) {
-                                if(v.projects.length> 0){
-                                    v.projects.forEach(function (project , $kp) {
-                                        if(!!!$kp){
-                                            html += `<tr class="bg-success text-white">
+                                html += `<tr class="bg-success text-white accordion-toggle" data-toggle="collapse" data-target="#dome${$ka}">
                                                     <td >${($ka+1)}</td>
                                                     <td >${v.admin}</td>
                                                     <td>${v.projects.length}</td>
                                                     <td>${v.total}</td>
-                                                </tr>`;
+                                                </tr>
+                                                <tr>
+                                                        <td colspan="4" class="hiddenRow">
+                                                            <div class="accordian-body collapse" id="dome${$ka}"> 
+                                                                <table class="table">
+                                                                    <thead>
+                                                                        <tr class="info">
+                                                                            <th scope="col">Dự án</th>
+                                                                            <th scope="col">SLHĐ</th>
+                                                                        </tr>
+                                                                    </thead>	
+                                                                    <tbody>`;
+                                if(v.projects.length> 0){
+                                    v.projects.forEach(function (project , $kp) {
+                                        if(!!!$kp){
                                                 html += `<tr>
-                                                        <td colspan="2"></td>
                                                         <td>${project.name}</td>
                                                         <td>${project.qty}</td>
                                                     </tr>`;
                                         }else{
                                             html += `<tr>
-                                                    <td colspan="2"></td>
                                                     <td>${project.name}</td>
                                                     <td>${project.qty}</td>
                                                 </tr>`;
@@ -519,6 +563,11 @@ Biss
                                                     <td>0</td>
                                                 </tr>`;
                                 }
+                                html += `</tbody>
+                                                                </table>
+                                                            </div> 
+                                                        </td>
+                                                    </tr>`;
                             });
                         }
                         $('#modalReport2 tbody').html(html);
