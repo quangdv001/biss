@@ -98,10 +98,13 @@ class AdminAccountController extends Controller
     public function report(Request $request)
     {
         $user = auth('admin')->user();
-        if(!$user->hasRole(['super_admin', 'account'])){
-            return response(['success' => 0, 'message' => 'Bạn không có quyền quản lý tài khoản']);
-        }
         $id = $request->get('id', '');
+        // if(!$user->hasRole(['super_admin', 'account'])){
+        //     if($id != $user->id){
+        //         return response(['success' => 0, 'message' => 'Bạn không có quyền quản lý tài khoản']);
+        //     }
+        // }
+        
         $project_id = $request->get('project_id', 0);
         $account = $this->admin->first(['id' => $id]);
         if (empty($account)) {

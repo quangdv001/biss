@@ -116,6 +116,24 @@
                             </div>
                         </a>
                         <!--end::Item-->
+                        <!--begin::Item-->
+                        <a href="javascript:void(0);" data-id="{{ auth('admin')->user()->id }}"
+                            class="navi-item px-8 btn-report-me">
+                            <div class="navi-link">
+                                <div class="navi-icon mr-2">
+                                    <i class="flaticon2-hourglass text-primary"></i>
+                                </div>
+                                <div class="navi-text">
+                                    <div class="font-weight-bold">
+                                        Báo cáo cá nhân
+                                    </div>
+                                    <div class="text-muted">
+                                        theo ngày
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <!--end::Item-->
 
                         <!--begin::Footer-->
                         <div class="navi-separator mt-3"></div>
@@ -212,3 +230,136 @@
     </div>
 </div>
 <!--end::Header Menu Wrapper-->
+<div class="modal fade" id="modalReportMe" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Báo cáo tài khoản <span class="username font-weight-bold text-primary"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id">
+                <div class="row text-nowrap mb-4">
+                        <div class="col-xl-3 d-flex align-items-center mb-2">
+                            <div class="mr-2">Dự án: </div>
+                            <select name="project_id" class="select-project form-control"></select>
+                        </div>
+                        <div class="col-xl-3 d-flex align-items-center mb-2">
+                            <div class="mr-2">Ngày bắt đầu: </div>
+                            <input type="date" class="form-control" name="start_time">
+                        </div>
+                        <div class="col-xl-3 d-flex align-items-center mb-2">
+                            <div class="mr-2">Ngày kết thúc: </div>
+                            <input type="date" class="form-control" name="end_time">
+                        </div>
+                        <div class="col-xl-3 ml-auto d-flex">
+                            <a href="javascript:void(0)" class="btn btn-light-primary mb-2 ml-auto" onclick="reportMe()">Tìm kiếm</a>
+                        </div>
+                </div>
+                <table class="table text-center">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Dự án</th>
+                        <th scope="col">SL</th>
+                        <th scope="col">Mới</th>
+                        <th scope="col">Hết hạn</th>
+                        <th scope="col">Hoàn thành</th>
+                        <th scope="col">Hoàn thành đúng hạn</th>
+                        <th scope="col">Hoàn thành trễ</th>
+                        <th scope="col">Tỉ lệ đúng hạn</th>
+                        <th scope="col">Tỉ lệ trễ</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@push('custom_js')
+<script>
+    $(document).on('click', '.btn-report-me', function(){
+        let id = $(this).data('id');
+        let admin = @json(auth('admin')->user());
+        $('#modalReportMe .username').html(admin.username);
+        $('#modalReportMe input[name="id"]').val(id);
+        $('#modalReportMe select[name="project_id"]').val(0).trigger('change');
+        reportMe();
+        $('#modalReportMe').modal('show');
+    });
+
+    function reportMe() {
+        let id = $('#modalReportMe input[name="id"]').val();
+        let start_time = $('#modalReportMe input[name="start_time"]').val();
+        let end_time = $('#modalReportMe input[name="end_time"]').val();
+        let project_id = $('#modalReportMe select[name="project_id"]').val() ?? 0;
+        if(!init.conf.ajax_sending){
+            $.ajax({
+                type: 'GET',
+                url: "{{ route('admin.account.report') }}",
+                data: {id, start_time, end_time, project_id},
+                beforeSend: function(){
+                    init.conf.ajax_sending = true;
+                },
+                success: function(res){
+                    let html = '', htmlSelect = '';
+                    if(res.success){
+                        if(res.data.length > 0){
+                            html = `<tr class="bg-success text-light">
+                                            <td scope="row">Tổng</td>
+                                            <td>${ res.data.length }</td>
+                                            <td>${res.total.total}</td>
+                                            <td>${res.total.new}</td>
+                                            <td>${res.total.expired}</td>
+                                            <td>${res.total.done}</td>
+                                            <td>${res.total.done_on_time}</td>
+                                            <td>${res.total.done_out_time}</td>
+                                            <td>${res.total.done > 0 ? Math.round((res.total.done_on_time/res.total.done)*100) : 0} %</td>
+                                            <td>${res.total.done > 0 ? Math.round((res.total.done_out_time/res.total.done)*100) : 0} %</td>
+                                        </tr>`;
+                            res.data.forEach(function ($project, $k) {
+                                html += `<tr>
+                                            <td scope="row">${($k+1)}</td>
+                                            <td>${$project.project}</td>
+                                            <td>${$project.report.total}</td>
+                                            <td>${$project.report.new}</td>
+                                            <td>${$project.report.expired}</td>
+                                            <td>${$project.report.done}</td>
+                                            <td>${$project.report.done_on_time}</td>
+                                            <td>${$project.report.done_out_time}</td>
+                                            <td>${$project.report.done > 0 ? Math.round(($project.report.done_on_time/$project.report.done)*100) : 0} %</td>
+                                            <td>${$project.report.done > 0 ? Math.round(($project.report.done_out_time/$project.report.done)*100) : 0} %</td>
+                                        </tr>`;
+                            });
+                        }
+                        $('#modalReportMe tbody').html(html);
+
+                        if ($('.select-project').hasClass("select2-hidden-accessible")) {
+                            $('.select-project').select2('destroy');
+                        }
+                        if(res.project.length > 0){
+                            htmlSelect += `<option value="0" ${project_id == 0? 'selected' : ''}>Tất cả dự án</option>`
+                            res.project.forEach(function ($project, $k) {
+                                htmlSelect += `<option value="${$project.id}" ${project_id == $project.id? 'selected' : ''}>${$project.name}</option>`
+                            });
+                        }
+                        $('.select-project').html(htmlSelect);
+                        $('.select-project').select2({
+                            placeholder: 'Chọn dự án',
+                            minimumResultsForSearch:-1,
+                        });
+                    } else {
+                        init.showNoty('Có lỗi xảy ra!', 'error');
+                    }
+                },
+                complete: function(){
+                    init.conf.ajax_sending = false;
+                }
+            })
+        }
+    }
+</script>
+@endpush
