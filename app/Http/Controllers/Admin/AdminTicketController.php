@@ -102,6 +102,8 @@ class AdminTicketController extends Controller
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
         $params['priority'] = !empty($params['priority']) ? (int)$params['priority'] : 2;
         $admins = $request->get('admin',[]);
+        $resA['success'] = 0;
+        $resA['mess'] = 'Có lỗi xảy ra!';
         if(isset($params['id'])){
             $ticket = $this->ticketRepo->first(['id' => $params['id']]);
             if($ticket){
@@ -119,7 +121,10 @@ class AdminTicketController extends Controller
                 $res = $this->ticketRepo->update($ticket, $params);
                 if($res){
                     $res->admin()->sync($admins);
-                    return back()->with('success_message', 'Cập nhật ticket thành công!');
+                    $resA['success'] = 1;
+                    $resA['mess'] = 'Cập nhật ticket thành công!';
+                    return response()->json($resA);
+                    // return back()->with('success_message', 'Cập nhật ticket thành công!');
                 }
             }
         } else {
@@ -134,10 +139,14 @@ class AdminTicketController extends Controller
             if($res){
                 $res->admin()->sync($admins);
                 // $this->createNoty($admins, $res);
-                return back()->with('success_message', 'Tạo ticket thành công!');
+                $resA['success'] = 1;
+                $resA['mess'] = 'Tạo ticket thành công!';
+                return response()->json($resA);
+                // return back()->with('success_message', 'Tạo ticket thành công!');
             }
         }
-        return back()->with('error_message', 'Có lỗi xảy ra!');
+        return response()->json($resA);
+        // return back()->with('error_message', 'Có lỗi xảy ra!');
     }
 
     public function editNote(Request $request){
