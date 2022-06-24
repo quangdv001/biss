@@ -455,9 +455,9 @@
 @endsection
 @section('custom_js')
 <script>
-$('#kt_datatable').DataTable({
+let table = $('#kt_datatable').DataTable({
     responsive: true,
-    pageLength: 100,
+    pageLength: 25,
     paging: true,
     columns:[
         {},
@@ -475,6 +475,13 @@ $('#kt_datatable').DataTable({
         {"className": "none"},
         {"className": "none"},
     ],
+    bStateSave: true,
+    fnStateSave: function (oSettings, oData) {
+        localStorage.setItem('offersDataTables', JSON.stringify(oData));
+    },
+    fnStateLoad: function (oSettings) {
+        return JSON.parse(localStorage.getItem('offersDataTables'));
+    }
 });
 var data = @json($data->keyBy('id'));
 let user_id = @json(auth('admin')->user()->id);
