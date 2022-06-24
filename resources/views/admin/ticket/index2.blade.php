@@ -252,7 +252,7 @@
                 </button>
             </div>
             <!--begin::Form-->
-            <form method="post" action="{{ route('admin.ticket.create') }}">
+            <form method="post" action="{{ route('admin.ticket.create') }}" id="formEdit">
                 @csrf
                 <input type="hidden" name="id" value="">
                 <input type="hidden" name="project_id" value="{{ $project->id }}">
@@ -457,7 +457,7 @@
 <script>
 $('#kt_datatable').DataTable({
     responsive: true,
-    pageLength: 25,
+    pageLength: 100,
     paging: true,
     columns:[
         {},
@@ -623,6 +623,39 @@ $("#formCreate").submit(function(e) {
                     $('#modalCreate input[name="input"]').val('');
                     $('#modalCreate input[name="output"]').val('');
                     init.showNoty('Tạo ticket thành công!', 'success');
+                } else {
+                    init.showNoty(res.mess, 'error');
+                }
+            },
+            complete: function(){
+                init.conf.ajax_sending = false;
+            }
+        });
+    }
+
+});
+
+$("#formEdit").submit(function(e) {
+    //prevent Default functionality
+    e.preventDefault();
+
+    //get the action-url of the form
+    var actionurl = e.currentTarget.action;
+    //do your own request an handle the results
+    if(!init.conf.ajax_sending){
+        $.ajax({
+            url: actionurl,
+            type: 'post',
+            data: $("#formEdit").serialize(),
+            beforeSend: function(){
+                init.conf.ajax_sending = true;
+            },
+            success: function(res) {
+                if(res.success){
+                    init.showNoty(res.mess, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
                     init.showNoty(res.mess, 'error');
                 }
