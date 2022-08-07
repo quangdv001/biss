@@ -91,6 +91,7 @@
                                 <th data-priority="2">Người xử lý</th>
                                 <th data-priority="2">Người tạo</th>
                                 <th data-priority="2">Mô tả</th>
+                                <th data-priority="2">Thời gian tạo</th>
                                 <th data-priority="2">Hành động</th>
                             </tr>
                         </thead>
@@ -124,6 +125,7 @@
                                 <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
                                 <td>{{ @$v->creator->username }}</td>
                                 <td>{{ $v->description }}</td>
+                                <th>{{ $v->created_at->format('d/m/y') }}</th>
                                 <td nowrap>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-note"
                                         title="Ghi chú" data-id="{{ $v->id }}">
@@ -469,6 +471,7 @@ let table = $('#kt_datatable').DataTable({
         {},
         {},
         {},
+        {"className": "none"},
         {"className": "none"},
         {"className": "none"},
         {"className": "none"},
