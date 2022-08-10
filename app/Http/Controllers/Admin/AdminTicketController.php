@@ -56,9 +56,9 @@ class AdminTicketController extends Controller
         if(empty($project)){
             return back()->with('success_message', 'Không tìm thấy dự án!');
         }
-        if (!$isAdmin && !in_array($user->id, $project->admin->pluck('id')->all())) {
-            return back()->with('error_message', 'Bạn không có quyền vào nhóm!');
-        }
+        // if (!$isAdmin && !in_array($user->id, $project->admin->pluck('id')->all())) {
+        //     return back()->with('error_message', 'Bạn không có quyền vào nhóm!');
+        // }
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
         $allAdmins = $this->adminRepo->get();
