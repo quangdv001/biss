@@ -45,9 +45,9 @@ class AdminGroupController extends Controller
             $gr->phase_qty = $gr->phaseGroup->sum('qty');
         })->keyBy('id');
         $admins = $project->admin ?? [];
-        if (!$isAdmin && !in_array($user->id, $project->admin->pluck('id')->all())) {
-            return back()->with('error_message', 'Bạn không có quyền vào dự án!');
-        }
+        // if (!$isAdmin && !in_array($user->id, $project->admin->pluck('id')->all())) {
+        //     return back()->with('error_message', 'Bạn không có quyền vào dự án!');
+        // }
         $reportMember = $project->admin->map(function ($member) {
             $data = $member->toArray();
             $data['report']['total'] = 0;
