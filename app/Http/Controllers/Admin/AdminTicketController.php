@@ -63,6 +63,7 @@ class AdminTicketController extends Controller
         $pid = $pid > 0 ? $pid : $phase->first()->id;
         $allAdmins = $this->adminRepo->get();
         $admins = $user->hasRole(['super_admin']) ? $allAdmins : ($project->admin ?? []);
+        $admins = $admins->where('id', $user->id)->first() ? $admins : $admins->push($user);
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
