@@ -158,7 +158,7 @@ class ProjectRepo
         if (!empty($params['name'])) {
             $query = $query->where('name', 'like', '%' . $params['name'] . '%');
         }
-        if(!empty($params['status'])){
+        if(isset($params['status']) && $params['status'] > 0){
             $query = $query->where('status',$params['status']);
         }
         if (!empty($params['field'])) {
