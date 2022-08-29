@@ -135,7 +135,7 @@ type="text/css" /> --}}
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="status">
-                                        <option value="1" @if(old('status') == 0) selected @endif>Tất cả</option>
+                                        <option value="0" @if(old('status') == 0) selected @endif>Tất cả</option>
                                         <option value="1" @if(old('status') == 1) selected @endif>Hoạt động</option>
                                         <option value="2" @if(old('status') == 2) selected @endif>Hoàn thành</option>
                                     </select>
