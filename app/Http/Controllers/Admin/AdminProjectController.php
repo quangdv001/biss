@@ -27,7 +27,12 @@ class AdminProjectController extends Controller
         $limit = $request->get('limit', 20);
         $name = $request->get('name', '');
         $field = $request->get('field', '');
-        $condition['status'] = $request->get('status', 1);
+        $status = $request->get('status', 0);
+        $orderBy = $request->get('order', 'id');
+        $condition = [];
+        if($status > 0){
+            $condition['status'] = $request->get('status', 0);
+        }
         if(!empty($name)){
             $condition['name'] = $name;
         }
@@ -38,9 +43,9 @@ class AdminProjectController extends Controller
         $isAdmin = $user->hasRole(['super_admin','account']);
         $isGuest = $user->hasRole(['guest']);
         if($user->hasRole(['super_admin'])){
-            $data = $this->projectRepo->paginate($condition, $limit, ['status' => 'ASC', 'id' => 'DESC'], ['planer', 'executive', 'admin']);
+            $data = $this->projectRepo->paginate($condition, $limit, [$orderBy => 'DESC'], ['planer', 'executive', 'admin']);
         } else {
-            $data = $this->projectRepo->search($condition, $limit, $user->id);
+            $data = $this->projectRepo->search($condition, $limit, $user->id, $orderBy);
         }
         $data->load('ticket')->map(function ($project){
             $project->has_late = false;

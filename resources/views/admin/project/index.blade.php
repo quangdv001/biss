@@ -120,23 +120,34 @@ type="text/css" /> --}}
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-md-2 my-2 my-md-0">
+                                <div class="d-flex align-items-center">
+                                    <label class="mr-2 mb-0 d-none d-md-block"></label>
+                                    <select class="form-control" name="order" id="select-limit">
+                                        <option value="id" @if(old('order') == 'id') selected @endif>Dự án mới</option>
+                                        <option value="expired_time" @if(old('order') == 'expired_time') selected @endif>Ngày hết hạn</option>
+                                        <option value="accept_time" @if(old('order') == 'accept_time') selected @endif>Ngày bắt đầu</option>
+                                    </select>
+                                </div>
+                            </div>
 
                             <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="status">
+                                        <option value="1" @if(old('status') == 0) selected @endif>Tất cả</option>
                                         <option value="1" @if(old('status') == 1) selected @endif>Hoạt động</option>
                                         <option value="2" @if(old('status') == 2) selected @endif>Hoàn thành</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4 my-2 my-md-0">
+                            <div class="col-md-3 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
                                 </div>
                             </div>
-                            <div class="col-md-4 my-2 my-md-0">
+                            <div class="col-md-3 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="field" placeholder="Lĩnh vực" value="{{ old('field') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>

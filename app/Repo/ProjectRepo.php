@@ -153,7 +153,7 @@ class ProjectRepo
         return $data;
     }
 
-    public function search($params, $limit, $userId){
+    public function search($params, $limit, $userId, $orderBy = ''){
         $query = $this->repo;
         if (!empty($params['name'])) {
             $query = $query->where('name', 'like', '%' . $params['name'] . '%');
@@ -168,8 +168,9 @@ class ProjectRepo
             })->orwhere('planer_id', $userId);
         });
         $query = $query->with(['planer', 'executive', 'admin']);
-        $query = $query->orderBy('status', 'ASC');
-        $query = $query->orderBy('id', 'DESC');
+        if($orderBy){
+            $query = $query->orderBy($orderBy, 'DESC');
+        }
         $query = $query->paginate($limit);
         return $query;
     }
