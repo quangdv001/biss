@@ -197,7 +197,7 @@ class AdminRoleController extends Controller
             $ticket->admin_id = $ticket->admin->pluck('id')->all();
             return $ticket;
         })->groupBy(['admin_id', function ($item) {
-            return $item['project_id'];
+            return $item['group_id'];
         }], true);
         $data = [];
         if($temp->count() > 0){
@@ -210,7 +210,7 @@ class AdminRoleController extends Controller
                             $proj[] = [
                                 'name' => $val->name,
                                 'qty' => $val->group->where('role_id', $id)->first() ? ceil(($val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)) : 0,
-                                'complete' => isset($tickets[$k][$val->id]) ? $tickets[$k][$val->id]->count() : 0
+                                'complete' => isset($tickets[$k][$val->group->where('role_id', $id)->first()->id]) ? $tickets[$k][$val->group->where('role_id', $id)->first()->id]->count() : 0
                             ];
                         }
                     }
