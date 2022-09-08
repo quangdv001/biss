@@ -185,12 +185,20 @@ class AdminRoleController extends Controller
         }
         $admin = $role->admin->keyBy('id')->all();
         $arrAdmin = $admin_id ? [$admin_id] : array_keys($admin);
-        $params['start_time'] = $request->get('start_time', '') ? strtotime($request->get('start_time', '')) : time();
+        $params['start_time'] = $request->get('start_time', '') ? strtotime($request->get('start_time', '')) : time() - 2592000;
+        $params['end_time'] = $request->get('end_time', '') ? strtotime($request->get('end_time', '')) : time();
         $projects = $this->projectRepo->getProjectReport($params);
         $temp = $projects->map(function ($project) {
             $project->admin_id = $project->admin->pluck('id')->all();
             return $project;
         })->groupBy('admin_id');
+        $tickets = $this->ticketRepo->getTicketByAdmin($temp->keys(), 0, $params['start_time'], $params['end_time']);
+        $tickets = $tickets->where('status', 1)->map(function ($ticket) {
+            $ticket->admin_id = $ticket->admin->pluck('id')->all();
+            return $ticket;
+        })->groupBy(['admin_id', function ($item) {
+            return $item['project_id'];
+        }], true);
         $data = [];
         if($temp->count() > 0){
             foreach($temp as $k => $v){
@@ -201,14 +209,16 @@ class AdminRoleController extends Controller
                         foreach($v as $val){
                             $proj[] = [
                                 'name' => $val->name,
-                                'qty' => $val->group->where('role_id', $id)->first() ? ceil(($val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)) : 0
+                                'qty' => $val->group->where('role_id', $id)->first() ? ceil(($val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)) : 0,
+                                'complete' => isset($tickets[$k][$val->id]) ? $tickets[$k][$val->id]->count() : 0
                             ];
                         }
                     }
                     $data[] = [
                         'admin' => @$admin[$k]['username'],
                         'projects' => $proj,
-                        'total' => collect($proj)->sum('qty')
+                        'total' => collect($proj)->sum('qty'),
+                        'total_complete' => collect($proj)->sum('complete'),
                     ];
                 }
             }
