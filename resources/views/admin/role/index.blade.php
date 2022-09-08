@@ -270,8 +270,12 @@ Biss
                         <select name="admin_id" class="select-admin form-control"></select>
                     </div>
                     <div class="col-xl-3 d-flex align-items-center mb-2">
-                        <div class="mr-2">Ngày: </div>
+                        <div class="mr-2">Ngày bắt đầu: </div>
                         <input type="date" class="form-control" name="start_time">
+                    </div>
+                    <div class="col-xl-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Ngày kết thúc: </div>
+                        <input type="date" class="form-control" name="end_time">
                     </div>
                     <div class="col-xl-3 ml-auto d-flex">
                         <a href="javascript:void(0)" class="btn btn-light-primary mb-2 ml-auto" onclick="reportRole2()">Tìm kiếm</a>
@@ -284,6 +288,7 @@ Biss
                         <th scope="col">Tài khoản</th>
                         <th scope="col">Dự án</th>
                         <th scope="col">SLHĐ</th>
+                        <th scope="col">Hoàn thành</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -509,12 +514,13 @@ Biss
     function reportRole2() {
         let id = $('#modalReport2 input[name="id"]').val();
         let start_time = $('#modalReport2 input[name="start_time"]').val();
+        let end_time = $('#modalReport2 input[name="end_time"]').val();
         let admin_id = $('#modalReport2 select[name="admin_id"]').val() ?? 0;
         if(!init.conf.ajax_sending){
             $.ajax({
                 type: 'GET',
                 url: "{{ route('admin.role.report2') }}",
-                data: {id, start_time, admin_id},
+                data: {id, start_time, end_time, admin_id},
                 beforeSend: function(){
                     init.conf.ajax_sending = true;
                 },
@@ -529,6 +535,7 @@ Biss
                                                     <td >${v.admin}</td>
                                                     <td>${v.projects.length}</td>
                                                     <td>${v.total}</td>
+                                                    <td>${v.total_complete}</td>
                                                 </tr>
                                                 <tr>
                                                         <td colspan="4" class="hiddenRow">
@@ -538,6 +545,7 @@ Biss
                                                                         <tr class="info">
                                                                             <th scope="col">Dự án</th>
                                                                             <th scope="col">SLHĐ</th>
+                                                                            <th scope="col">Hoàn thành</th>
                                                                         </tr>
                                                                     </thead>	
                                                                     <tbody>`;
@@ -547,11 +555,13 @@ Biss
                                                 html += `<tr>
                                                         <td>${project.name}</td>
                                                         <td>${project.qty}</td>
+                                                        <td>${project.complete}</td>
                                                     </tr>`;
                                         }else{
                                             html += `<tr>
                                                     <td>${project.name}</td>
                                                     <td>${project.qty}</td>
+                                                    <td>${project.complete}</td>
                                                 </tr>`;
                                         }
                                     });
@@ -559,6 +569,7 @@ Biss
                                     html += `<tr class="bg-success text-white">
                                                     <td>${($ka + 1)}</td>
                                                     <td>${v.admin}</td>
+                                                    <td>0</td>
                                                     <td>0</td>
                                                     <td>0</td>
                                                 </tr>`;

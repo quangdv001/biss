@@ -201,8 +201,8 @@ class ProjectRepo
 
     public function getProjectReport($params){
         $query = $this->repo;
-        if(isset($params['start_time']) && $params['start_time'] > 0){
-            $query = $query->where('accept_time', '<=', $params['start_time'])->where('expired_time', '>=', $params['start_time']);
+        if(isset($params['end_time']) && $params['end_time'] > 0){
+            $query = $query->where('accept_time', '<=', $params['end_time'])->where('expired_time', '>=', $params['end_time']);
         }
         $query = $query->with('admin','group.phaseGroup');
         
