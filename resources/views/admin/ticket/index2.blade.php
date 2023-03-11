@@ -99,7 +99,7 @@
                         <tbody>
                             
                             @foreach($data as $k => $v)
-                            <tr>
+                            <tr class="@if($v->id == $id) bg-danger @endif">
                                 <td>{{ $k + 1 }}</td>
                                 <td >{{ $v->name }}</td>
                                 <td>{{ $v->note }}</td>
@@ -458,6 +458,9 @@
 @section('custom_js')
 <script>
 let table = $('#kt_datatable').DataTable({
+    scrollY: '50vh',
+    scrollX: true,
+    scrollCollapse: true,
     responsive: true,
     pageLength: 25,
     paging: true,
