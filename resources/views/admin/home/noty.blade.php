@@ -40,18 +40,18 @@
                 data-height="300" data-mobile-height="200">
                 @foreach($new as $k => $v)
                 <!--begin::Item-->
-                <a href="javascript:void(0);" class="navi-item noty-item" data-id="{{ $k }}">
+                <a href="javascript:void(0);" class="navi-item noty-item" data-id="{{ $v->id }}">
                     <div class="navi-link">
                         <div class="navi-icon mr-2">
                             <i class="flaticon2-paper-plane text-success"></i>
                         </div>
                         <div class="navi-text">
                             <div class="font-weight-bold">
-                                Bạn có ({{ $v }}) Task mới ở dự án "{{ @$group[$k]->project->name }}" nhóm "{{ @$group[$k]->name }}"
+                                Bạn có Task mới "{{ $v->name }}" ở dự án "{{ @$v->project->name }}" nhóm "{{ @$v->group->name }}"
                             </div>
-                            {{-- <div class="text-muted">
-                                {{ $v->updated_at->diffForHumans() }}
-                            </div> --}}
+                            <div class="text-muted">
+                                {{-- {{ $v->name }} --}}
+                            </div>
                         </div>
                     </div>
                 </a>
@@ -77,14 +77,15 @@
                 data-height="300" data-mobile-height="200">
                 @foreach($old as $k => $v)
                 <!--begin::Item-->
-                <a href="javascript:void(0);" class="navi-item noty-item" data-id="{{ $k }}">
+                <a href="javascript:void(0);" class="navi-item noty-item" data-id="{{ $v->id }}">
                     <div class="navi-link">
                         <div class="navi-icon mr-2">
                             <i class="flaticon2-paper-plane text-danger"></i>
                         </div>
                         <div class="navi-text">
                             <div class="font-weight-bold">
-                                Bạn có ({{ $v }}) Task trễ hạn ở dự án "{{ @$group[$k]->project->name }}" nhóm "{{ @$group[$k]->name }}"
+                                {{-- Bạn có ({{ $v }}) Task trễ hạn ở dự án "{{ @$group[$k]->project->name }}" nhóm "{{ @$group[$k]->name }}" --}}
+                                Bạn có Task trễ "{{ $v->name }}" ở dự án "{{ @$v->project->name }}" nhóm "{{ @$v->group->name }}"
                             </div>
                             {{-- <div class="text-muted">
                                 {{ $v->updated_at->diffForHumans() }}

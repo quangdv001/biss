@@ -29,10 +29,10 @@ class AdminHomeController extends Controller
         $time = time();
         $ticket = $tickets->where('status', 0);
         $group = $this->group->get(['id' => $ticket->pluck('group_id')->toArray()], [], ['project'])->keyBy('id');
-        $new = $ticket->where('status', 0)->where('deadline_time', '>', $time)->pluck('group_id')->countBy();
-        $old = $ticket->where('status', 0)->where('deadline_time', '<=', $time)->pluck('group_id')->countBy();
+        $new = $ticket->where('status', 0)->where('deadline_time', '>', $time);
+        $old = $ticket->where('status', 0)->where('deadline_time', '<=', $time);
         $data = $this->noty->get(['admin_id' => $user->id, 'status' => 1], ['updated_at' => 'DESC'], ['project', 'group', 'admin', 'adminc']);
-
+        // dd($new, $old);
         $res['success'] = 1;
         $res['html'] = view('admin.home.noty', compact('ticket', 'group', 'new', 'old', 'data'))->render();
         $res['count'] = ($data->count() + $ticket->count());
@@ -41,8 +41,9 @@ class AdminHomeController extends Controller
 
     public function detailNoty(Request $request){
         $id = $request->input('id', 0);
+        $ticket = $this->ticket->first(['id' => $id]);
         $res['success'] = 1;
-        $res['url'] = route('admin.ticket.index', ['gid' => $id]);
+        $res['url'] = route('admin.ticket.index', ['gid' => $ticket->group_id, 'pid' => $ticket->phase_id, 'id' => $id]);
 
         return response()->json($res);
     }
