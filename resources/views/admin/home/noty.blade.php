@@ -77,10 +77,10 @@
                 data-height="300" data-mobile-height="200">
                 @foreach($old as $k => $v)
                 <!--begin::Item-->
-                <a href="javascript:void(0);" class="navi-item noty-item {{ $v->priority == 1 ? 'bg-info' : ($v->priority == 2 ? 'bg-warning' : 'bg-danger') }}" data-id="{{ $v->id }}">
+                <a href="javascript:void(0);" class="navi-item noty-item {{ $v->priority == 1 ? 'bg-success' : ($v->priority == 2 ? 'bg-warning' : 'bg-danger') }}" data-id="{{ $v->id }}">
                     <div class="navi-link">
                         <div class="navi-icon mr-2">
-                            <i class="flaticon2-paper-plane text-danger"></i>
+                            <i class="flaticon2-paper-plane text-info"></i>
                         </div>
                         <div class="navi-text">
                             <div class="font-weight-bold">
