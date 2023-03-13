@@ -99,7 +99,7 @@
                         <tbody>
                             
                             @foreach($data as $k => $v)
-                            <tr class="@if($v->id == $id) bg-danger @endif">
+                            <tr class="@if($v->id == $id) bg-secondary @endif">
                                 <td>{{ $k + 1 }}</td>
                                 <td >{{ $v->name }}</td>
                                 <td>{{ $v->note }}</td>
