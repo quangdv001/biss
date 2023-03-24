@@ -202,8 +202,8 @@
                         <div class="col-lg-4">
                             <label>Độ ưu tiên</label>
                             <select class="form-control select2" name="priority" style="width: 100%">
-                                <option value="1">Thấp</option>
-                                <option value="2" selected>Trung bình</option>
+                                <option value="1" selected>Thấp</option>
+                                <option value="2">Trung bình</option>
                                 <option value="3">Cao</option>
                             </select>
                         </div>
