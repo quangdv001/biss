@@ -149,4 +149,14 @@ class AdminRepo
         return $data;
     }
 
+    public function getAdmin() {
+        $query = $this->repo;
+        $query = $query->with('roles');
+        // dd($query->get());
+        $query = $query->whereHas('roles', function ($q) {
+            $q->whereIn('slug', ['super_admin', 'account']); // where in for array
+        })->get();
+        return $query;
+    }
+
 }

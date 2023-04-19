@@ -44,4 +44,8 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('ticket/remove', 'AdminTicketController@remove')->name('ticket.remove');
     Route::post('ticket/createNote', 'AdminTicketController@createNote')->name('ticket.createNote');
     Route::post('ticket/editNote', 'AdminTicketController@editNote')->name('ticket.editNote');
+
+    Route::get('customer', 'AdminCustomerController@index')->name('customer.index');
+    Route::post('customer/create', 'AdminCustomerController@create')->name('customer.create');
+    Route::post('customer/remove', 'AdminCustomerController@remove')->name('customer.remove');
 });
