@@ -180,6 +180,7 @@ type="text/css" /> --}}
                                 <th scope="col">Tên</th>
                                 <th scope="col">SĐT</th>
                                 <th scope="col">Email</th>
+                                <th scope="col">Nguồn</th>
                                 <th scope="col">Bắt đầu</th>
                                 <th scope="col">Trạng thái</th>
                                 <th scope="col">Phụ trách</th>
@@ -198,6 +199,7 @@ type="text/css" /> --}}
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->phone }}</td>
                                 <td>{{ $v->email }}</td>
+                                <td>{{ @$source[$v->source] }}</td>
                                 <td>{{ $v->start_time ? date('d/m/Y', $v->start_time) : '' }}</td>
                                 <td nowrap>
                                     <span class="label label-lg font-weight-bold label-light-{{ @$status[$v->status]['class'] }} label-inline">{{ @$status[$v->status]['text'] }}</span>
@@ -336,6 +338,16 @@ type="text/css" /> --}}
                               </select>
                             </div>
                         </div>
+                        <div class="col-lg-4 mb-3">
+                            <label>Nguồn:</label>
+                            <div class="form-group">
+                              <select class="form-control" name="source" id="">
+                                @foreach ($source as $k => $v)
+                                <option value="{{ $k }}">{{ $v }}</option>
+                                @endforeach
+                              </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -424,6 +436,16 @@ type="text/css" /> --}}
                               </select>
                             </div>
                         </div>
+                        <div class="col-lg-4 mb-3">
+                            <label>Nguồn:</label>
+                            <div class="form-group">
+                              <select class="form-control" name="source" id="">
+                                @foreach ($source as $k => $v)
+                                <option value="{{ $k }}">{{ $v }}</option>
+                                @endforeach
+                              </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -469,6 +491,7 @@ type="text/css" /> --}}
         
         $('#modalEdit select[name="admin_id"]').val(customer.admin_id);
         $('#modalEdit select[name="status"]').val(customer.status);
+        $('#modalEdit select[name="source"]').val(customer.source);
         $('#modalEdit').modal('show');
     });
 

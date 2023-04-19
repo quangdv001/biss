@@ -18,7 +18,7 @@ class AdminCustomerController extends Controller
 
     public function index(Request $request){
         $request->flash();
-        $params = $request->only('name', 'phone', 'admin_id', 'source');
+        $params = $request->only('name', 'phone', 'admin_id', 'source', 'status');
         $limit = $request->input('limit', 50);
         if (!empty($params)) {
             foreach ($params as $k => $v) {
@@ -50,7 +50,8 @@ class AdminCustomerController extends Controller
                 'text' => 'Hủy'
             ],
         ];
-        return view('admin.customer.index', compact('data', 'admins', 'status'));
+        $source = ['CRM', 'Cuộc gọi mới', 'Khách hàng hiện tại', 'Tự tìm', 'Nhân viên', 'Đối tác', 'Quan hệ công chúng', 'Thư trực tiếp', 'Hội nghị', 'Triển lãm thương mại', 'Website', 'Truyền thông', 'Facebook', 'Google', 'SEO', 'Khác'];
+        return view('admin.customer.index', compact('data', 'admins', 'status', 'source'));
     }
 
     public function create(Request $request){
@@ -58,7 +59,7 @@ class AdminCustomerController extends Controller
         if (!$user->hasRole(['super_admin', 'account'])) {
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
-        $params = $request->only('id','name', 'description', 'note', 'response', 'phone', 'email', 'province', 'title', 'company', 'admin_id', 'start_time', 'status');
+        $params = $request->only('id','name', 'description', 'note', 'response', 'phone', 'email', 'province', 'title', 'company', 'admin_id', 'start_time', 'status', 'source');
         $params['start_time'] = $params['start_time'] ? strtotime($params['start_time']) : null;
         if (isset($params['id'])) {
             $customer = $this->customer->find($params['id']);
