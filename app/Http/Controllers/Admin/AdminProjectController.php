@@ -28,10 +28,15 @@ class AdminProjectController extends Controller
         $name = $request->get('name', '');
         $field = $request->get('field', '');
         $status = $request->get('status', 0);
+        $type = $request->get('type', 0);
         $orderBy = $request->get('order', 'id');
         $condition = [];
         if($status > 0){
-            $condition['status'] = $request->get('status', 0);
+            $condition['status'] = $status;
+        }
+
+        if($type > 0){
+            $condition['type'] = $type;
         }
         if(!empty($name)){
             $condition['name'] = $name;
@@ -59,7 +64,21 @@ class AdminProjectController extends Controller
             return $project;
         });
         $admins = $this->adminRepo->get();
-        return view('admin.project.index', compact('data', 'admins', 'isAdmin', 'isGuest'));
+        $type = [
+            1 => [
+                'class' => 'primary',
+                'text' => 'Marketing'
+            ],
+            2 => [
+                'class' => 'success',
+                'text' => 'Branding'
+            ],
+            3 => [
+                'class' => 'info',
+                'text' => 'Video'
+            ],
+        ];
+        return view('admin.project.index', compact('data', 'admins', 'isAdmin', 'isGuest', 'type'));
     }
 
     public function create(Request $request){
@@ -67,7 +86,7 @@ class AdminProjectController extends Controller
         if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
-        $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'extra_link', 'accept_time', 'expired_time', 'created_time', 'status', 'field');
+        $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'extra_link', 'accept_time', 'expired_time', 'created_time', 'status', 'field', 'type');
         $params['status'] = isset($params['status']) ? 1 : 2;
         $params['accept_time'] = $params['accept_time'] ? strtotime($params['accept_time']) : null;
         $params['expired_time'] = $params['expired_time'] ? (strtotime($params['expired_time']) + 86399) : null;

@@ -27,7 +27,21 @@ class AdminRoleController extends Controller
             return back()->with('error_message', 'Bạn không có quyền quản lý chức vụ!');
         }
         $data = $this->role->get();
-        return view('admin.role.index', compact('data'));
+        $type = [
+            1 => [
+                'class' => 'primary',
+                'text' => 'Marketing'
+            ],
+            2 => [
+                'class' => 'success',
+                'text' => 'Branding'
+            ],
+            3 => [
+                'class' => 'info',
+                'text' => 'Video'
+            ],
+        ];
+        return view('admin.role.index', compact('data', 'type'));
     }
 
     public function create(Request $request){
@@ -209,6 +223,7 @@ class AdminRoleController extends Controller
                         foreach($v as $val){
                             $proj[] = [
                                 'name' => $val->name,
+                                'type' => $val->type,
                                 'qty' => $val->group->where('role_id', $id)->first() ? ceil(($val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)) : 0,
                                 'complete' => isset($val->group->where('role_id', $id)->first()->id) && isset($tickets[$k][$val->group->where('role_id', $id)->first()->id]) ? $tickets[$k][$val->group->where('role_id', $id)->first()->id]->count() : 0
                             ];
@@ -219,6 +234,7 @@ class AdminRoleController extends Controller
                         'projects' => $proj,
                         'total' => collect($proj)->sum('qty'),
                         'total_complete' => collect($proj)->sum('complete'),
+                        'total_branding' => collect($proj)->where('type', 2)->count(),
                     ];
                 }
             }

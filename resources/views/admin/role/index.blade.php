@@ -287,6 +287,7 @@ Biss
                         <th scope="col">#</th>
                         <th scope="col">Tài khoản</th>
                         <th scope="col">Dự án</th>
+                        <th scope="col">Branding</th>
                         <th scope="col">SLHĐ</th>
                         <th scope="col">Hoàn thành</th>
                     </tr>
@@ -526,7 +527,7 @@ Biss
                 },
                 success: function(res){
                     let html = '', htmlSelect = '';
-                    
+                    let type = @json($type);
                     if(res.success){
                         if(res.data.length > 0){
                             res.data.forEach(function (v, $ka) {
@@ -534,6 +535,7 @@ Biss
                                                     <td >${($ka+1)}</td>
                                                     <td >${v.admin}</td>
                                                     <td>${v.projects.length}</td>
+                                                    <td>${v.total_branding}</td>
                                                     <td>${v.total}</td>
                                                     <td>${v.total_complete}</td>
                                                 </tr>
@@ -546,6 +548,7 @@ Biss
                                                                             <th scope="col">Dự án</th>
                                                                             <th scope="col">SLHĐ</th>
                                                                             <th scope="col">Hoàn thành</th>
+                                                                            <th scope="col">Loại dự án</th>
                                                                         </tr>
                                                                     </thead>	
                                                                     <tbody>`;
@@ -556,12 +559,14 @@ Biss
                                                         <td>${project.name}</td>
                                                         <td>${project.qty}</td>
                                                         <td>${project.complete}</td>
+                                                        <td>${type[project.type].text}</td>
                                                     </tr>`;
                                         }else{
                                             html += `<tr>
                                                     <td>${project.name}</td>
                                                     <td>${project.qty}</td>
                                                     <td>${project.complete}</td>
+                                                    <td>${type[project.type].text}</td>
                                                 </tr>`;
                                         }
                                     });

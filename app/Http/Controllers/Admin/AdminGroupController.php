@@ -160,20 +160,54 @@ class AdminGroupController extends Controller
         if(!$user->hasRole(['super_admin', 'account'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý phase!');
         }
-        $params = $request->only('project_id', 'start_time', 'end_time', 'name');
+        $params = $request->only('id', 'project_id', 'start_time', 'end_time', 'name');
         $params['start_time'] = $params['start_time'] ? strtotime($params['start_time']) : null;
         $params['end_time'] = $params['end_time'] ? strtotime($params['end_time']) + 86399 : null;
-        $res = $this->phase->create($params);
-        if($res){
-            $project = $this->projectRepo->first(['id' => $res->project_id]);
-            if($project){
-                $paramsP['accept_time'] = $res->start_time;
-                $paramsP['expired_time'] = $res->end_time;
-                $this->projectRepo->update($project, $paramsP);
+        if (isset($params['id'])) {
+            $phases = $this->phase->get(['project_id' => $params['project_id']])->keyBy('id');
+            $max = $phases->max('id');
+            $res = $this->phase->update($phases[$params['id']], $params);
+            if($res){
+                $project = $this->projectRepo->first(['id' => $res->project_id]);
+                if($project && $max == $res->id){
+                    $paramsP['accept_time'] = $res->start_time;
+                    $paramsP['expired_time'] = $res->end_time;
+                    $this->projectRepo->update($project, $paramsP);
+                }
+                return redirect()->route('admin.group.index', ['id' => $res->project_id, 'pid' => $res->id])->with('success_message', 'Sửa phase thành công!');
             }
-            return redirect()->route('admin.group.index', ['id' => $res->project_id])->with('success_message', 'Tạo phase thành công!');
+        } else {
+
+            $res = $this->phase->create($params);
+            if($res){
+                $project = $this->projectRepo->first(['id' => $res->project_id]);
+                if($project){
+                    $paramsP['accept_time'] = $res->start_time;
+                    $paramsP['expired_time'] = $res->end_time;
+                    $this->projectRepo->update($project, $paramsP);
+                }
+                return redirect()->route('admin.group.index', ['id' => $res->project_id])->with('success_message', 'Tạo phase thành công!');
+            }
         }
         return back()->with('error_message', 'Có lỗi xảy ra!');
+    }
+
+    public function removePhase(Request $request) {
+        $params = $request->only('project_id', 'id');
+        $phases = $this->phase->get(['project_id' => $params['project_id']]);
+        $res['success'] = 0;
+        if ($phases->count() > 1) {
+            $this->phase->remove($params['id']);
+            $phase = $this->phase->first(['project_id' => $params['project_id']], ['id' => 'DESC']);
+            $project = $this->projectRepo->first(['id' => $params['project_id']]);
+            if($project){
+                $paramsP['accept_time'] = $phase->start_time;
+                $paramsP['expired_time'] = $phase->end_time;
+                $this->projectRepo->update($project, $paramsP);
+            }
+            $res['success'] = 1;
+        }
+        return response()->json($res);
     }
 
     public function remove(Request $request){

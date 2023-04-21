@@ -30,6 +30,7 @@ class CreateProjectTable extends Migration
             $table->integer('expired_time')->nullable();
             $table->integer('created_time')->nullable();
             $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('type')->default(1);
             $table->timestamps();
         });
     }

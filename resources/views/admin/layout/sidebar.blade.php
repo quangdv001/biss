@@ -60,6 +60,24 @@
                                     <path d="M11,11 L11,7 C11,6.44771525 11.4477153,6 12,6 C12.5522847,6 13,6.44771525 13,7 L13,11 L17,11 C17.5522847,11 18,11.4477153 18,12 C18,12.5522847 17.5522847,13 17,13 L13,13 L13,17 C13,17.5522847 12.5522847,18 12,18 C11.4477153,18 11,17.5522847 11,17 L11,13 L7,13 C6.44771525,13 6,12.5522847 6,12 C6,11.4477153 6.44771525,11 7,11 L11,11 Z" fill="#000000"/>
                                 </g>
                             </svg><!--end::Svg Icon--></span></a>
+                            
+                            <a href="javascript:void(0);"  class="{{$isAdmin?'':'d-none'}} edit_phase" data-id="{{ $pid }}">
+                                <span class="svg-icon"><!--begin::Svg Icon | path:C:\wamp64\www\keenthemes\themes\metronic\theme\html\demo8\dist/../src/media/svg/icons\Code\Thunder-circle.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <rect x="0" y="0" width="24" height="24"/>
+                                    <circle fill="#000000" opacity="0.3" cx="12" cy="12" r="10"/>
+                                    <path d="M12.4208204,17.1583592 L15.4572949,11.0854102 C15.6425368,10.7149263 15.4923686,10.2644215 15.1218847,10.0791796 C15.0177431,10.0271088 14.9029083,10 14.7864745,10 L12,10 L12,7.17705098 C12,6.76283742 11.6642136,6.42705098 11.25,6.42705098 C10.965921,6.42705098 10.7062236,6.58755277 10.5791796,6.84164079 L7.5427051,12.9145898 C7.35746316,13.2850737 7.50763142,13.7355785 7.87811529,13.9208204 C7.98225687,13.9728912 8.09709167,14 8.21352549,14 L11,14 L11,16.822949 C11,17.2371626 11.3357864,17.572949 11.75,17.572949 C12.034079,17.572949 12.2937764,17.4124472 12.4208204,17.1583592 Z" fill="#000000"/>
+                                </g>
+                            </svg><!--end::Svg Icon--></span></a>
+
+                            <a href="javascript:void(0);" data-toggle="modal" class="{{$isAdmin?'':'d-none'}} remove_phase" data-id="{{ $pid }}">
+                            <span class="svg-icon"><!--begin::Svg Icon | path:C:\wamp64\www\keenthemes\themes\metronic\theme\html\demo8\dist/../src/media/svg/icons\Code\Error-circle.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <rect x="0" y="0" width="24" height="24"/>
+                                    <circle fill="#000000" opacity="0.3" cx="12" cy="12" r="10"/>
+                                    <path d="M12.0355339,10.6213203 L14.863961,7.79289322 C15.2544853,7.40236893 15.8876503,7.40236893 16.2781746,7.79289322 C16.6686989,8.18341751 16.6686989,8.81658249 16.2781746,9.20710678 L13.4497475,12.0355339 L16.2781746,14.863961 C16.6686989,15.2544853 16.6686989,15.8876503 16.2781746,16.2781746 C15.8876503,16.6686989 15.2544853,16.6686989 14.863961,16.2781746 L12.0355339,13.4497475 L9.20710678,16.2781746 C8.81658249,16.6686989 8.18341751,16.6686989 7.79289322,16.2781746 C7.40236893,15.8876503 7.40236893,15.2544853 7.79289322,14.863961 L10.6213203,12.0355339 L7.79289322,9.20710678 C7.40236893,8.81658249 7.40236893,8.18341751 7.79289322,7.79289322 C8.18341751,7.40236893 8.81658249,7.40236893 9.20710678,7.79289322 L12.0355339,10.6213203 Z" fill="#000000"/>
+                                </g>
+                            </svg><!--end::Svg Icon--></span></a>
                         </div>
                     </div>
                 </div>
@@ -220,6 +238,47 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="modalEditPhase" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xs modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa phase</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <!--begin::Form-->
+            <form method="post" action="{{ route('admin.group.createPhase') }}">
+                @csrf
+                <input type="hidden" name="id" value="{{ $pid }}">
+                <input type="hidden" name="project_id" value="{{ $project->id }}">
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-lg-12">
+                            <label>Tên phase</label>
+                            <input type="text" class="form-control" name="name"
+                                placeholder="Tên phase" required/>
+                        </div>
+                        <div class="col-lg-12 mt-3">
+                            <label>Ngày bắt đầu:</label>
+                            <input type="date" class="form-control" name="start_time" placeholder="Ngày bắt đầu" required/>
+                        </div>
+                        <div class="col-lg-12 mt-3">
+                            <label>Ngày kết thúc:</label>
+                            <input type="date" class="form-control" name="end_time" placeholder="Ngày kết thúc" required/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+            <!--end::Form-->
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="modalEditGroup" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog modal-xs modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -274,7 +333,7 @@
 @push('custom_js')
 <script>
     var group = @json(collect($project->group ?? [])->keyBy('id'));
-
+    var phase = @json($phase[$pid]);
     $('.select2').select2({
         placeholder: 'Chọn',
     });
@@ -340,6 +399,70 @@
 
             }
         });
+    });
+
+    $('.remove_phase').click(function () {
+        let id = @json($pid);
+        let project_id = @json($project->id);
+        Swal.fire({
+            title: "Bạn chắc chắn muốn xóa?",
+            text: "Sau khi xóa sẽ không thể khôi phục",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy",
+        }).then(function (result) {
+            if (result.value) {
+                if (!init.conf.ajax_sending) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ route('admin.group.removePhase') }}",
+                        data: {
+                            id, project_id
+                        },
+                        beforeSend: function () {
+                            init.conf.ajax_sending = true;
+                        },
+                        success: function (res) {
+                            if (res.success) {
+                                init.showNoty('Xóa thành công!', 'success');
+                                setTimeout(() => {
+                                    window.location.href = @json(route('admin.group.index', ['id' => $project->id]));
+                                }, 500);
+                            } else {
+                                init.showNoty('Có lỗi xảy ra!', 'error');
+                            }
+                        },
+                        complete: function () {
+                            init.conf.ajax_sending = false;
+                        }
+                    })
+                }
+
+            }
+        });
+    });
+
+    $('.edit_phase').click(function () {
+        $('#modalEditPhase input[name="name"]').val(phase.name);
+        let timestampA = phase.start_time ? phase.start_time * 1000 : null;
+        let tzoffset = (new Date()).getTimezoneOffset() * 60000;
+        if (timestampA) {
+            let dateA = new Date(timestampA - tzoffset).toISOString().split('T')[0];
+            $('#modalEditPhase input[name="start_time"]').val(dateA);
+        } else {
+            $('#modalEditPhase input[name="start_time"]').val('');
+        }
+
+        let timestampE = phase.end_time ? phase.end_time * 1000 : null;
+        if (timestampE) {
+            let dateE = new Date(timestampE - tzoffset).toISOString().split('T')[0];
+            $('#modalEditPhase input[name="end_time"]').val(dateE);
+        } else {
+            $('#modalEditPhase input[name="end_time"]').val('');
+        }
+
+        $('#modalEditPhase').modal('show');
     });
 </script>
 @endpush

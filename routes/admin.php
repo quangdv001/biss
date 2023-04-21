@@ -37,6 +37,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('group/create', 'AdminGroupController@create')->name('group.create');
     Route::post('group/createPhase', 'AdminGroupController@createPhase')->name('group.createPhase');
     Route::post('group/remove', 'AdminGroupController@remove')->name('group.remove');
+    Route::post('group/removePhase', 'AdminGroupController@removePhase')->name('group.removePhase');
     
     Route::get('ticket/{gid}/{pid?}', 'AdminTicketController@index')->name('ticket.index');
     Route::post('ticket/create', 'AdminTicketController@create')->name('ticket.create');
@@ -48,4 +49,6 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('customer', 'AdminCustomerController@index')->name('customer.index');
     Route::post('customer/create', 'AdminCustomerController@create')->name('customer.create');
     Route::post('customer/remove', 'AdminCustomerController@remove')->name('customer.remove');
+    Route::get('customer/export', 'AdminCustomerController@export')->name('customer.export');
+    Route::post('customer/import', 'AdminCustomerController@import')->name('customer.import');
 });

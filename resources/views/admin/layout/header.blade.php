@@ -216,29 +216,7 @@
                                     <span class="menu-text">Phòng</span>
                                 </a>
                             </li>
-                            <li class="menu-item menu-item-submenu @if(Route::is('admin.customer.*')) menu-item-open menu-item-here @endif">
-                                <a href="{{ route('admin.customer.index') }}" class="menu-link">
-                                    <span class="svg-icon menu-icon">
-                                        <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Dial-numbers.svg-->
-                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                <rect x="0" y="0" width="24" height="24"></rect>
-                                                <rect fill="#000000" opacity="0.3" x="4" y="4" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="4" y="10" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="10" y="4" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="10" y="10" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="16" y="4" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="16" y="10" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="4" y="16" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="10" y="16" width="4" height="4" rx="2"></rect>
-                                                <rect fill="#000000" x="16" y="16" width="4" height="4" rx="2"></rect>
-                                            </g>
-                                        </svg>
-                                        <!--end::Svg Icon-->
-                                    </span>
-                                    <span class="menu-text">Khách hàng</span>
-                                </a>
-                            </li>
+                            
                         </ul>
                     </div>
                 </li>
@@ -246,6 +224,13 @@
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is(['admin.project.*', 'admin.group.*', 'admin.ticket.*'])) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.project.index') }}" class="menu-link"><span class="menu-text">Dự án</span></a>
                 </li>
+                @if(auth('admin')->user()->hasRole(['super_admin','account']))
+                <li class="menu-item menu-item-submenu menu-item-rel @if(Route::is('admin.customer.*')) menu-item-open menu-item-here @endif">
+                    <a href="{{ route('admin.customer.index') }}" class="menu-link">
+                        <span class="menu-text">Khách hàng</span>
+                    </a>
+                </li>
+                @endif
             </ul>
             <!--end::Header Nav-->
         </div>

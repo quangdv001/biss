@@ -14,6 +14,7 @@ class Project extends Model
         'name',
         'description',
         'project_id',
+        'type'
     ];
     protected $dates = ['created_at', 'updated_at'];
 
