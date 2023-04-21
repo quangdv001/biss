@@ -141,13 +141,24 @@ type="text/css" /> --}}
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-3 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
+                                <div class="d-flex align-items-center">
+                                    <label class="mr-3 mb-0 d-none d-md-block"></label>
+                                    <select class="form-control" name="type">
+                                        <option value="0" @if(old('type') == 0) selected @endif>Loại dự án</option>
+                                        <option value="1" @if(old('type') == 1) selected @endif>Marketing</option>
+                                        <option value="2" @if(old('type') == 2) selected @endif>Branding</option>
+                                        <option value="3" @if(old('type') == 3) selected @endif>Video</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
                                 </div>
                             </div>
-                            <div class="col-md-3 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="field" placeholder="Lĩnh vực" value="{{ old('field') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
@@ -171,12 +182,13 @@ type="text/css" /> --}}
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col" style="width: 20%">Tên</th>
+                                <th scope="col" style="width: 16%">Tên</th>
                                 <th scope="col">Lĩnh vực</th>
                                 <th scope="col">Gói</th>
                                 <th scope="col">Thanh toán</th>
                                 <th scope="col">Ngày nhận</th>
                                 <th scope="col">Ngày hết hạn</th>
+                                <th scope="col">Loại</th>
                                 <th scope="col">Trạng thái</th>
                                 @if(!$isGuest)
                                 <th scope="col">Ticket trễ hạn</th>
@@ -204,6 +216,9 @@ type="text/css" /> --}}
                                 <td>{{ $v->payment_month }}</td>
                                 <td>{{ date('d/m/Y', $v->accept_time) }}</td>
                                 <td>{{ date('d/m/Y', $v->expired_time) }}</td>
+                                <td nowrap>
+                                    <span class="label label-lg font-weight-bold label-light-{{ $type[$v->type]['class'] }} label-inline">{{ $type[$v->type]['text'] }}</span>
+                                </td>
                                 <td nowrap>
                                     <span class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? ($time > $v->expired_time ? 'danger' : ($time < $v->expired_time - 604800 ? 'success' : 'warning')) : 'success' }} label-inline">{{ $v->status == 1 ? 'Hoạt động' : 'Hoàn thành' }}</span>
                                 </td>
@@ -383,6 +398,14 @@ type="text/css" /> --}}
                                 <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
                             </div>
                         </div>
+                        <div class="col-lg-4">
+                            <label>Loại dự án:</label>
+                            <select class="form-control" name="type" style="width: 100%">
+                                @foreach($type as $k => $v)
+                                <option value="{{ $k }}" >{{ $v['text'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-lg-12">
                             <label>Nhân sự:</label>
                             <select class="form-control select2" name="admin_project[]" multiple="multiple"
@@ -500,6 +523,14 @@ type="text/css" /> --}}
                                 <input data-switch="true" type="checkbox" name="status" checked="checked" data-on-text="Hoạt động" data-off-text="Hoàn thành" data-on-color="primary"/>
                             </div>
                         </div>
+                        <div class="col-lg-4">
+                            <label>Loại dự án:</label>
+                            <select class="form-control" name="type" style="width: 100%">
+                                @foreach($type as $k => $v)
+                                <option value="{{ $k }}">{{ $v['text'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-lg-12">
                             <label>Nhân sự:</label>
                             <select class="form-control select2" name="admin_project[]" multiple="multiple"
@@ -570,6 +601,7 @@ type="text/css" /> --}}
         $('#modalEdit select[name="admin_project[]"]').val(admin).trigger('change');
         $('#modalEdit select[name="planer_id"]').val(project.planer_id).trigger('change');
         $('#modalEdit select[name="executive_id"]').val(project.executive_id).trigger('change');
+        $('#modalEdit select[name="type"]').val(project.type);
         // $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
         $('#modalEdit').modal('show');
     });

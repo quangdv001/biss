@@ -15,6 +15,7 @@ class Customer extends Model
         'source',
         'response',
         'start_time',
+        'created_time',
         'name',
         'title',
         'company',

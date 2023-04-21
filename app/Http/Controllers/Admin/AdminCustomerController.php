@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\Customer\CustomerExport;
 use App\Http\Controllers\Controller;
+use App\Imports\Customer\CustomerImport;
 use App\Repo\AdminRepo;
 use App\Repo\CustomerRepo;
 use Illuminate\Http\Request;
-
+use Maatwebsite\Excel\Facades\Excel;
 class AdminCustomerController extends Controller
 {
     private $customer, $admin;
@@ -16,9 +18,10 @@ class AdminCustomerController extends Controller
         $this->admin = $admin;
     }
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $request->flash();
-        $params = $request->only('name', 'phone', 'admin_id', 'source', 'status');
+        $params = $request->only('name', 'phone', 'admin_id', 'start_time', 'status');
         $limit = $request->input('limit', 50);
         if (!empty($params)) {
             foreach ($params as $k => $v) {
@@ -31,10 +34,23 @@ class AdminCustomerController extends Controller
                     unset($params[$k]);
                     $params[] = $search;
                 }
+
+                if ($k == 'start_time') {
+                    $arrTime = explode(' - ', $v);
+                    if ($arrTime[0] == $arrTime[1]) {
+                        unset($params[$k]);
+                    } else {
+                        $start = strtotime($arrTime[0]);
+                        $end = strtotime($arrTime[1]) + 86399;
+                        unset($params[$k]);
+                        $params[] = ['created_time', '>=', $start]; 
+                        $params[] = ['created_time', '<=', $end];
+                    }
+                }
             }
         }
 
-        $data = $this->customer->paginate($params, $limit, ['id' => 'DESC'], ['admin']);
+        $data = $this->customer->paginate($params, $limit, ['created_time' => 'DESC'], ['admin']);
         $admins = $this->admin->getAdmin();
         $status = [
             1 => [
@@ -54,7 +70,8 @@ class AdminCustomerController extends Controller
         return view('admin.customer.index', compact('data', 'admins', 'status', 'source'));
     }
 
-    public function create(Request $request){
+    public function create(Request $request)
+    {
         $user = auth('admin')->user();
         if (!$user->hasRole(['super_admin', 'account'])) {
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
@@ -79,7 +96,8 @@ class AdminCustomerController extends Controller
         return back()->with('error_message', 'Có lỗi xảy ra!');
     }
 
-    public function remove(Request $request){
+    public function remove(Request $request)
+    {
         $user = auth('admin')->user();
         if(!$user->hasRole(['super_admin', 'account'])){
             return response(['success' => 0]);
@@ -92,4 +110,45 @@ class AdminCustomerController extends Controller
         }
         return response()->json($res);
     }
+
+    public function export(Request $request)
+    {
+        $params = $request->only('name', 'phone', 'admin_id', 'start_time', 'status');
+        if (!empty($params)) {
+            foreach ($params as $k => $v) {
+                if (!$v) {
+                    unset($params[$k]);
+                }
+
+                if (in_array($k, ['name', 'phone'])) {
+                    $search = [$k, 'like', '%' . $v . '%'];
+                    unset($params[$k]);
+                    $params[] = $search;
+                }
+
+                if ($k == 'start_time') {
+                    $arrTime = explode(' - ', $v);
+                    if ($arrTime[0] == $arrTime[1]) {
+                        unset($params[$k]);
+                    } else {
+                        $start = strtotime($arrTime[0]);
+                        $end = strtotime($arrTime[1]) + 86399;
+                        unset($params[$k]);
+                        $params[] = ['created_time', '>=', $start]; 
+                        $params[] = ['created_time', '<=', $end];
+                    }
+                }
+            }
+        }
+
+        return Excel::download(new CustomerExport($params), 'Khách hàng.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        Excel::import(new CustomerImport, request()->file('file'));
+        $res['success'] = 1;
+        return response()->json($res);
+    }
+    
 }

@@ -81,6 +81,51 @@ type="text/css" /> --}}
             </div>
             <div class="card-toolbar">
                 <!--begin::Button-->
+                <label href="javascript:void(0);" class="btn btn-light-info font-weight-bolder mr-3 mt-2" for="inp-import">
+                    <input type="file" id="inp-import" class="d-none" onchange="importFile(this.files)">
+                    <span class="svg-icon svg-icon-md">
+                        <!--begin::Svg Icon | path:assets/media/svg/icons/Design/PenAndRuller.svg--><svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
+                            height="24px" viewBox="0 0 24 24" version="1.1">
+                            <g stroke="none" stroke-width="1" fill="none"
+                                fill-rule="evenodd">
+                                <rect x="0" y="0" width="24" height="24" />
+                                <path
+                                    d="M3,16 L5,16 C5.55228475,16 6,15.5522847 6,15 C6,14.4477153 5.55228475,14 5,14 L3,14 L3,12 L5,12 C5.55228475,12 6,11.5522847 6,11 C6,10.4477153 5.55228475,10 5,10 L3,10 L3,8 L5,8 C5.55228475,8 6,7.55228475 6,7 C6,6.44771525 5.55228475,6 5,6 L3,6 L3,4 C3,3.44771525 3.44771525,3 4,3 L10,3 C10.5522847,3 11,3.44771525 11,4 L11,19 C11,19.5522847 10.5522847,20 10,20 L4,20 C3.44771525,20 3,19.5522847 3,19 L3,16 Z"
+                                    fill="#000000" opacity="0.3" />
+                                <path
+                                    d="M16,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,15.2485298 C21,15.7329761 20.8241635,16.200956 20.5051534,16.565539 L17.8762883,19.5699562 C17.6944473,19.7777745 17.378566,19.7988332 17.1707477,19.6169922 C17.1540423,19.602375 17.1383289,19.5866616 17.1237117,19.5699562 L14.4948466,16.565539 C14.1758365,16.200956 14,15.7329761 14,15.2485298 L14,5 C14,3.8954305 14.8954305,3 16,3 Z"
+                                    fill="#000000" />
+                            </g>
+                        </svg>
+                        <!--end::Svg Icon-->
+                    </span> Import
+                </label>
+                <!--end::Button-->
+                <!--begin::Button-->
+                <a href="javascript:void(0);" class="btn btn-light-primary font-weight-bolder mr-3 btn-export">
+                    <span class="svg-icon svg-icon-md">
+                        <!--begin::Svg Icon | path:assets/media/svg/icons/Design/PenAndRuller.svg--><svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
+                            height="24px" viewBox="0 0 24 24" version="1.1">
+                            <g stroke="none" stroke-width="1" fill="none"
+                                fill-rule="evenodd">
+                                <rect x="0" y="0" width="24" height="24" />
+                                <path
+                                    d="M3,16 L5,16 C5.55228475,16 6,15.5522847 6,15 C6,14.4477153 5.55228475,14 5,14 L3,14 L3,12 L5,12 C5.55228475,12 6,11.5522847 6,11 C6,10.4477153 5.55228475,10 5,10 L3,10 L3,8 L5,8 C5.55228475,8 6,7.55228475 6,7 C6,6.44771525 5.55228475,6 5,6 L3,6 L3,4 C3,3.44771525 3.44771525,3 4,3 L10,3 C10.5522847,3 11,3.44771525 11,4 L11,19 C11,19.5522847 10.5522847,20 10,20 L4,20 C3.44771525,20 3,19.5522847 3,19 L3,16 Z"
+                                    fill="#000000" opacity="0.3" />
+                                <path
+                                    d="M16,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,15.2485298 C21,15.7329761 20.8241635,16.200956 20.5051534,16.565539 L17.8762883,19.5699562 C17.6944473,19.7777745 17.378566,19.7988332 17.1707477,19.6169922 C17.1540423,19.602375 17.1383289,19.5866616 17.1237117,19.5699562 L14.4948466,16.565539 C14.1758365,16.200956 14,15.7329761 14,15.2485298 L14,5 C14,3.8954305 14.8954305,3 16,3 Z"
+                                    fill="#000000" />
+                            </g>
+                        </svg>
+                        <!--end::Svg Icon-->
+                    </span> Export
+                </a>
+                <!--end::Button-->
+                <!--begin::Button-->
                 <a href="javascript:void(0);" class="btn btn-primary font-weight-bolder" data-toggle="modal"
                     data-target="#modalCreate">
                     <span class="svg-icon svg-icon-md">
@@ -95,7 +140,8 @@ type="text/css" /> --}}
                                     fill="#000000" opacity="0.3" />
                             </g>
                         </svg>
-                        <!--end::Svg Icon--></span> Thêm khách hàng
+                        <!--end::Svg Icon-->
+                    </span> Thêm khách hàng
                 </a>
                 <!--end::Button-->
             </div>
@@ -121,7 +167,7 @@ type="text/css" /> --}}
                                 </div>
                             </div> --}}
 
-                            <div class="col-md-3 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="status">
@@ -131,7 +177,7 @@ type="text/css" /> --}}
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-3 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="admin_id">
@@ -144,7 +190,9 @@ type="text/css" /> --}}
                                     </select>
                                 </div>
                             </div>
-
+                            <div class="col-md-2 my-2 my-md-0">
+                                <input type='text' class="form-control" id="kt_daterangepicker_1" readonly placeholder="Chọn thời gian" name="start_time" type="text" value=""/>
+                            </div>
                             <div class="col-md-3 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên Khách hàng" value="{{ old('name') }}"/>
@@ -157,10 +205,12 @@ type="text/css" /> --}}
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
                     <div class="col-lg-3 col-xl-2 mt-5 mt-lg-0">
                         <button type="submit" class="btn btn-light-primary px-6 font-weight-bold">Tìm kiếm</button>
+                        <a href="{{ route('admin.customer.index') }}" role="button" class="btn btn-light-success px-6 font-weight-bold">Reset</a>
                     </div>
                 </div>
                 </form>
@@ -175,15 +225,14 @@ type="text/css" /> --}}
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col">Tiêu đề</th>
-                                <th scope="col">Tổ chức</th>
                                 <th scope="col">Tên</th>
                                 <th scope="col">SĐT</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Nguồn</th>
-                                <th scope="col">Bắt đầu</th>
                                 <th scope="col">Trạng thái</th>
                                 <th scope="col">Phụ trách</th>
+                                <th scope="col">Mô tả</th>
+                                <th scope="col">Thời gian tạo</th>
                                 <th scope="col">Hành động</th>
                             </tr>
                         </thead>
@@ -194,17 +243,16 @@ type="text/css" /> --}}
                             @foreach($data as $k => $v)
                             <tr>
                                 <th scope="row" nowrap><a href="javascript:void(0);" data-toggle="collapse"  class="accordion-toggle" data-target="#collapse{{ $k }}"><i class="la la-angle-down text-success mr-1"></i> {{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</a> </th>
-                                <td>{{ $v->title }}</td>
-                                <td>{{ $v->company }}</td>
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->phone }}</td>
                                 <td>{{ $v->email }}</td>
                                 <td>{{ @$source[$v->source] }}</td>
-                                <td>{{ $v->start_time ? date('d/m/Y', $v->start_time) : '' }}</td>
                                 <td nowrap>
                                     <span class="label label-lg font-weight-bold label-light-{{ @$status[$v->status]['class'] }} label-inline">{{ @$status[$v->status]['text'] }}</span>
                                 </td>
                                 <td>{{ @$v->admin->username }}</td>
+                                <td>{{ $v->description }}</td>
+                                <td>{{ date('d/m/Y', $v->created_time) }}</td>
                                 <td nowrap>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
@@ -213,13 +261,19 @@ type="text/css" /> --}}
                                         <i class="la la-trash"></i>
                                     </a>
                                 </td>
-                                
-                                
                             </tr>
                             <tr>
                                 <td colspan="10" class="hiddenRow text-left">
                                     <div class="accordian-body collapse" id="collapse{{ $k }}">
                                         <ul class="dtr-details pt-4">
+                                            <li>
+                                                <span class="dtr-title">Tiêu đề:</span>
+                                                <span class="dtr-data">{{ $v->title }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="dtr-title">Tổ chức:</span>
+                                                <span class="dtr-data">{{ $v->company }}</span>
+                                            </li>
                                             <li>
                                                 <span class="dtr-title">Thành phố:</span>
                                                 <span class="dtr-data">{{ $v->province }}</span>
@@ -228,19 +282,15 @@ type="text/css" /> --}}
                                                 <span class="dtr-title">Phản hồi:</span>
                                                 <span class="dtr-data">{{ $v->response }}</span>
                                             </li>
-                                           
-                                            <li>
-                                                <span class="dtr-title">Mô tả:</span>
-                                                <span class="dtr-data">{{ $v->description }}</span>
-                                            </li>
                                             <li>
                                                 <span class="dtr-title">Ghi chú:</span>
                                                 <span class="dtr-data">{{ $v->note }}</span>
                                             </li>
                                             <li>
-                                                <span class="dtr-title">Tạo lúc:</span>
-                                                <span class="dtr-data">{{ $v->created_at ? $v->created_at->format('d/m/Y H:i:s') : '' }}</span>
+                                                <span class="dtr-title">Bắt đầu:</span>
+                                                <span class="dtr-data">{{ $v->start_time ? date('d/m/Y', $v->start_time) : '' }}</span>
                                             </li>
+                                            
                                         </ul>
                                     </div>
                                 </td>
@@ -544,6 +594,58 @@ type="text/css" /> --}}
     //     url.searchParams.set("name", name);
     //     window.location.href = url.href;
     // })
+    let now = @json(date('m/d/Y', time()));
+    let arrDate = [now, now]; 
+    let date = @json(old('start_time'));
+    if (date) {
+        arrDate = date.split(' - ');
+    }
 
+    $('#kt_daterangepicker_1').daterangepicker({
+        buttonClasses: ' btn',
+        applyClass: 'btn-primary',
+        cancelClass: 'btn-secondary',
+        startDate: moment(arrDate[0]),
+        endDate: moment(arrDate[1]),
+    });
+
+    $('.btn-export').click(function() {
+        let data = $('#form-search').serialize();
+        console.log(@json(route('admin.customer.export')) + '?' + data);
+        window.location.href = @json(route('admin.customer.export')) + '?' + data;
+    });
+
+
+
+    function importFile(file) {
+        var file_data = file[0];
+        var type = file_data.type;
+        console.log(type);
+        // var match = ["image/png", "image/jpg", "image/jpeg"];
+        // if (type == match[0] || type == match[1] || type == match[2] || type == match[3]) {
+            var form_data = new FormData();
+                //thêm files vào trong form data
+                form_data.append('file', file_data);
+                //sử dụng ajax post
+                $.ajax({
+                    url: @json(route('admin.customer.import')), // gửi đến file upload.php 
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: form_data,
+                    type: 'post',
+                    success: function (res) {
+                        if (res.success == 1) {
+                            // window.location.reload();
+                        } else {
+                            init.showNoty(res.mess, 'error');
+                        }
+                    }
+                });
+        // } else {
+        //     init.showNoty('Sai định dạng!', 'error');
+        //         return false;
+        // }
+    }
 </script>
 @endsection
