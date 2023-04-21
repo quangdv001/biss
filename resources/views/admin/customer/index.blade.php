@@ -636,7 +636,7 @@ type="text/css" /> --}}
                     type: 'post',
                     success: function (res) {
                         if (res.success == 1) {
-                            // window.location.reload();
+                            window.location.reload();
                         } else {
                             init.showNoty(res.mess, 'error');
                         }
