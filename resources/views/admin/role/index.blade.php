@@ -286,8 +286,9 @@ Biss
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Tài khoản</th>
-                        <th scope="col">Dự án</th>
-                        <th scope="col">Branding</th>
+                        <th scope="col">DA Marketing</th>
+                        <th scope="col">DA Branding</th>
+                        <th scope="col">DA Video</th>
                         <th scope="col">SLHĐ</th>
                         <th scope="col">Hoàn thành</th>
                     </tr>
@@ -534,13 +535,14 @@ Biss
                                 html += `<tr class="bg-success text-white accordion-toggle" data-toggle="collapse" data-target="#dome${$ka}">
                                                     <td >${($ka+1)}</td>
                                                     <td >${v.admin}</td>
-                                                    <td>${v.projects.length}</td>
+                                                    <td>${v.total_mkt}</td>
                                                     <td>${v.total_branding}</td>
+                                                    <td>${v.total_video}</td>
                                                     <td>${v.total}</td>
                                                     <td>${v.total_complete}</td>
                                                 </tr>
                                                 <tr>
-                                                        <td colspan="4" class="hiddenRow">
+                                                        <td colspan="7" class="hiddenRow">
                                                             <div class="accordian-body collapse" id="dome${$ka}"> 
                                                                 <table class="table">
                                                                     <thead>
@@ -548,7 +550,6 @@ Biss
                                                                             <th scope="col">Dự án</th>
                                                                             <th scope="col">SLHĐ</th>
                                                                             <th scope="col">Hoàn thành</th>
-                                                                            <th scope="col">Loại dự án</th>
                                                                         </tr>
                                                                     </thead>	
                                                                     <tbody>`;
@@ -559,14 +560,12 @@ Biss
                                                         <td>${project.name}</td>
                                                         <td>${project.qty}</td>
                                                         <td>${project.complete}</td>
-                                                        <td>${type[project.type].text}</td>
                                                     </tr>`;
                                         }else{
                                             html += `<tr>
                                                     <td>${project.name}</td>
                                                     <td>${project.qty}</td>
                                                     <td>${project.complete}</td>
-                                                    <td>${type[project.type].text}</td>
                                                 </tr>`;
                                         }
                                     });
@@ -574,6 +573,8 @@ Biss
                                     html += `<tr class="bg-success text-white">
                                                     <td>${($ka + 1)}</td>
                                                     <td>${v.admin}</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
                                                     <td>0</td>
                                                     <td>0</td>
                                                     <td>0</td>
@@ -596,7 +597,6 @@ Biss
                             res.admin.forEach(function ($admin, $k) {
                                 htmlSelect += `<option value="${$admin.id}" ${admin_id == $admin.id? 'selected' : ''}>${$admin.username}</option>`
                             });
-                            console.log(htmlSelect)
                         }
                         $('#modalReport2 .select-admin').html(htmlSelect);
                         $('#modalReport2 .select-admin').select2({

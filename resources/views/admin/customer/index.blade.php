@@ -177,6 +177,7 @@ type="text/css" /> --}}
                                     </select>
                                 </div>
                             </div>
+                            @if ($isSuperAdmin)
                             <div class="col-md-2 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
@@ -190,6 +191,7 @@ type="text/css" /> --}}
                                     </select>
                                 </div>
                             </div>
+                            @endif
                             <div class="col-md-2 my-2 my-md-0">
                                 <input type='text' class="form-control" id="kt_daterangepicker_1" readonly placeholder="Chọn thời gian" name="start_time" type="text" value=""/>
                             </div>
@@ -224,11 +226,11 @@ type="text/css" /> --}}
                     <table class="table table-responsive-md table-separate">
                         <thead>
                             <tr>
+                                <th scope="col">Chọn</th>
                                 <th scope="col">#</th>
                                 <th scope="col">Tên</th>
                                 <th scope="col">SĐT</th>
                                 <th scope="col">Email</th>
-                                <th scope="col">Nguồn</th>
                                 <th scope="col">Trạng thái</th>
                                 <th scope="col">Phụ trách</th>
                                 <th scope="col">Mô tả</th>
@@ -242,11 +244,11 @@ type="text/css" /> --}}
                             @endphp
                             @foreach($data as $k => $v)
                             <tr>
+                                <th><span style="width: 20px;"><label class="checkbox checkbox-single"><input type="checkbox" class="select_record" name="ids[]" value="{{ $v->id }}">&nbsp;<span></span></label></span></th>
                                 <th scope="row" nowrap><a href="javascript:void(0);" data-toggle="collapse"  class="accordion-toggle" data-target="#collapse{{ $k }}"><i class="la la-angle-down text-success mr-1"></i> {{ ($data->currentpage()-1) * $data->perpage() + $loop->index + 1 }}</a> </th>
                                 <td>{{ $v->name }}</td>
                                 <td>{{ $v->phone }}</td>
                                 <td>{{ $v->email }}</td>
-                                <td>{{ @$source[$v->source] }}</td>
                                 <td nowrap>
                                     <span class="label label-lg font-weight-bold label-light-{{ @$status[$v->status]['class'] }} label-inline">{{ @$status[$v->status]['text'] }}</span>
                                 </td>
@@ -266,9 +268,13 @@ type="text/css" /> --}}
                                 <td colspan="10" class="hiddenRow text-left">
                                     <div class="accordian-body collapse" id="collapse{{ $k }}">
                                         <ul class="dtr-details pt-4">
-                                            <li>
+                                            {{-- <li>
                                                 <span class="dtr-title">Tiêu đề:</span>
                                                 <span class="dtr-data">{{ $v->title }}</span>
+                                            </li> --}}
+                                            <li>
+                                                <span class="dtr-title">Nguồn</span>
+                                                <span class="dtr-data">{{ @$source[$v->source] }}</span>
                                             </li>
                                             <li>
                                                 <span class="dtr-title">Tổ chức:</span>
@@ -278,18 +284,18 @@ type="text/css" /> --}}
                                                 <span class="dtr-title">Thành phố:</span>
                                                 <span class="dtr-data">{{ $v->province }}</span>
                                             </li>
-                                            <li>
+                                            {{-- <li>
                                                 <span class="dtr-title">Phản hồi:</span>
                                                 <span class="dtr-data">{{ $v->response }}</span>
-                                            </li>
+                                            </li> --}}
                                             <li>
                                                 <span class="dtr-title">Ghi chú:</span>
                                                 <span class="dtr-data">{{ $v->note }}</span>
                                             </li>
-                                            <li>
+                                            {{-- <li>
                                                 <span class="dtr-title">Bắt đầu:</span>
                                                 <span class="dtr-data">{{ $v->start_time ? date('d/m/Y', $v->start_time) : '' }}</span>
-                                            </li>
+                                            </li> --}}
                                             
                                         </ul>
                                     </div>
@@ -609,13 +615,29 @@ type="text/css" /> --}}
         endDate: moment(arrDate[1]),
     });
 
+    const customer = {
+        ids: []
+    }
+
     $('.btn-export').click(function() {
-        let data = $('#form-search').serialize();
-        console.log(@json(route('admin.customer.export')) + '?' + data);
-        window.location.href = @json(route('admin.customer.export')) + '?' + data;
+        if (customer.ids.length) {
+            let data = $.param({id: customer.ids});
+            window.location.href = @json(route('admin.customer.export')) + '?' + data
+        } else {
+            let data = $('#form-search').serialize();
+            window.location.href = @json(route('admin.customer.export')) + '?' + data;
+        }
     });
 
+    $('.select_record').change(function () {
+        let ids = [];
+        $('.select_record:checked').each(function () {
+            let val = $(this).val();
+            ids.push(val);
+        });
 
+        customer.ids = ids;
+    });
 
     function importFile(file) {
         var file_data = file[0];

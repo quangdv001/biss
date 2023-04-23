@@ -25,7 +25,7 @@ class CustomerExport implements FromView
     public function view(): View
     {
         $repo = app(CustomerRepo::class);
-        $data = $repo->get($this->params, ['id' => 'DESC'], ['admin']);
+        $data = $repo->get($this->params, ['created_time' => 'DESC'], ['admin']);
         $status = [
             1 => [
                 'class' => 'info',
