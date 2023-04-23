@@ -49,7 +49,11 @@ class AdminCustomerController extends Controller
                 }
             }
         }
-
+        $user = auth('admin')->user();
+        $isSuperAdmin = $user->hasRole(['super_admin']);
+        if(!$user->hasRole(['super_admin'])) {
+            $params['admin_id'] = $user->id;
+        }
         $data = $this->customer->paginate($params, $limit, ['created_time' => 'DESC'], ['admin']);
         $admins = $this->admin->getAdmin();
         $status = [
@@ -67,7 +71,7 @@ class AdminCustomerController extends Controller
             ],
         ];
         $source = ['CRM', 'Cuộc gọi mới', 'Khách hàng hiện tại', 'Tự tìm', 'Nhân viên', 'Đối tác', 'Quan hệ công chúng', 'Thư trực tiếp', 'Hội nghị', 'Triển lãm thương mại', 'Website', 'Truyền thông', 'Facebook', 'Google', 'SEO', 'Khác'];
-        return view('admin.customer.index', compact('data', 'admins', 'status', 'source'));
+        return view('admin.customer.index', compact('data', 'admins', 'status', 'source', 'isSuperAdmin'));
     }
 
     public function create(Request $request)
@@ -113,7 +117,7 @@ class AdminCustomerController extends Controller
 
     public function export(Request $request)
     {
-        $params = $request->only('name', 'phone', 'admin_id', 'start_time', 'status');
+        $params = $request->only('id', 'name', 'phone', 'admin_id', 'start_time', 'status');
         if (!empty($params)) {
             foreach ($params as $k => $v) {
                 if (!$v) {

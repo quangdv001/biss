@@ -235,6 +235,8 @@ class AdminRoleController extends Controller
                         'total' => collect($proj)->sum('qty'),
                         'total_complete' => collect($proj)->sum('complete'),
                         'total_branding' => collect($proj)->where('type', 2)->count(),
+                        'total_mkt' => collect($proj)->where('type', 1)->count(),
+                        'total_video' => collect($proj)->where('type', 3)->count(),
                     ];
                 }
             }
