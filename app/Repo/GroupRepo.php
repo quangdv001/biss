@@ -171,4 +171,10 @@ class GroupRepo
         }
     }
 
+    public function deletePhaseGroup($groupId, $phaseId)
+    {
+        PhaseGroup::where('group_id', $groupId)->where('phase_id', $phaseId)->delete();
+        return true;
+    }
+
 }

@@ -109,8 +109,8 @@
                         </div>
                     </div>
                 </div>
-                @if(!empty($project->group))
-                @foreach($project->group as $group)
+                @if(!empty($phase[$pid]->group))
+                @foreach($phase[$pid]->group as $group)
                 <div class="navi-item mb-2 ml-6">
                     <div class="navi-link py-4 d-flex justify-content-between @if(Route::is('admin.ticket.index') && $group->id == $gid) active @endif">
                         <a href="{{ route('admin.ticket.index', ['gid' => $group->id, 'pid' => $pid]) }}"
@@ -362,6 +362,7 @@
 
     $('.btn-remove-group').click(function () {
         let id = $(this).data('id');
+        let pid = @json($pid);
         Swal.fire({
             title: "Bạn chắc chắn muốn xóa?",
             text: "Sau khi xóa sẽ không thể khôi phục",
@@ -376,7 +377,7 @@
                         type: 'POST',
                         url: "{{ route('admin.group.remove') }}",
                         data: {
-                            id
+                            id, pid
                         },
                         beforeSend: function () {
                             init.conf.ajax_sending = true;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PhaseGroup;
 use App\Repo\AdminRepo;
 use App\Repo\GroupRepo;
 use App\Repo\NoteRepo;
@@ -175,6 +176,15 @@ class AdminTicketController extends Controller
             return response()->json($res);
         }
         $params = $request->only('id', 'name', 'description', 'note', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
+        $phaseGroup = PhaseGroup::where('phase_id', $params['phase_id'])->where('group_id', $params['group_id'])->first();
+        if ($phaseGroup) {
+            $count = $this->ticketRepo->get(['phase_id' => $params['phase_id'], 'group_id' => $params['group_id']])->count();
+            if ($count >= $phaseGroup->qty) {
+                $res['mess'] = 'Quá số lượng hợp đồng';
+                return response()->json($res);
+            }
+        }
+        
         $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
