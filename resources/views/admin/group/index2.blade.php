@@ -91,8 +91,8 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @if(!empty($project->group))
-                                            @foreach($project->group as $k => $gr)
+                                        @if(!empty($phase[$pid]->group))
+                                            @foreach($phase[$pid]->group as $k => $gr)
                                                 <tr>
                                                     <td scope="row">{{$k + 1}}</td>
                                                     <td class="text-left">{{$gr['name']}}</td>

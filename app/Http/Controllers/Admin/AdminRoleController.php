@@ -243,4 +243,51 @@ class AdminRoleController extends Controller
         }
         return response(['success' => 1, 'data' => $data ,'admin' =>array_values($admin)]);
     }
+
+    public function report3(Request $request)
+    {
+        $user = auth('admin')->user();
+        if (!$user->hasRole(['super_admin', 'account'])) {
+            return response(['success' => 0, 'message' => 'Bạn không có quyền quản lý tài khoản']);
+        }
+        $id = $request->get('id', 0);
+        $admin_id = $request->get('admin_id', 0);
+        $role = $this->role->first(['id' => $id]);
+        if (empty($role)) {
+            return response(['success' => 0, 'message' => 'Không tìm thấy chức vụ!']);
+        }
+        $admin = $role->admin->keyBy('id')->all();
+        $arrAdmin = $admin_id ? [$admin_id] : array_keys($admin);
+        $now = time();
+        $params['start_time'] = $request->get('start_time', '') ? strtotime($request->get('start_time', '')) : ($now - 2592000);
+        // $params['end_time'] = $request->get('end_time', '') ? strtotime($request->get('end_time', '')) : time();
+        $projects = $this->projectRepo->getProjectExpired($params);
+        $temp = $projects->map(function ($project) {
+            $project->admin_id = $project->admin->pluck('id')->all();
+            return $project;
+        })->groupBy('admin_id');
+        $data = [];
+        if($temp->count() > 0){
+            foreach($temp as $k => $v){
+                if(in_array($k, $arrAdmin)){
+
+                    $proj = [];
+                    if($v->count() > 0){
+                        foreach($v as $val){
+                            $proj[] = [
+                                'name' => $val->name,
+                                'expired_time' => date('d/m/Y', $val->expired_time),
+                            ];
+                        }
+                    }
+                    $data[] = [
+                        'admin' => @$admin[$k]['username'],
+                        'projects' => $proj,
+                        'total' => count($proj),
+                    ];
+                }
+            }
+        }
+        return response(['success' => 1, 'data' => $data ,'admin' =>array_values($admin)]);
+    }
 }

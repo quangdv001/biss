@@ -135,10 +135,12 @@
                                         title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
                                     </a>
+                                    @if ($isSuperAdmin)
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove"
                                         title="Xóa thành viên" data-id="{{ $v->id }}">
                                         <i class="la la-trash"></i>
                                     </a>
+                                    @endif
                                 </td>
                                 @endforeach
                                 

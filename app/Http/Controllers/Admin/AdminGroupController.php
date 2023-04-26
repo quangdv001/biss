@@ -216,7 +216,8 @@ class AdminGroupController extends Controller
             return response(['success' => 0]);
         }
         $id = $request->input('id');
-        $resR = $this->groupRepo->remove($id);
+        $pid = $request->input('pid');
+        $resR = $this->groupRepo->deletePhaseGroup($id, $pid);
         $res['success'] = 0;
         if($resR){
             $res['success'] = 1;

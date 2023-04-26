@@ -21,4 +21,9 @@ class Phase extends Model
     {
         return $this->hasMany(Ticket::class, 'phase_id', 'id');
     }
+
+    public function group()
+    {
+        return $this->belongsToMany(Group::class, 'phase_group');
+    }
 }

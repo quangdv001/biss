@@ -209,4 +209,17 @@ class ProjectRepo
         return $query->get();
 
     }
+
+    public function getProjectExpired($params)
+    {
+        $query = $this->repo;
+        $now = time();
+        if(isset($params['start_time']) && $params['start_time'] > 0){
+            $query = $query->where('accept_time', '>=', $params['start_time'])->where('expired_time', '<', $now);
+        }
+        $query = $query->where('status', 1);
+        $query = $query->with('admin','group.phaseGroup');
+        
+        return $query->get();
+    }
 }
