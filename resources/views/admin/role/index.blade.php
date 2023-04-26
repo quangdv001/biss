@@ -116,6 +116,9 @@ Biss
                             <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-report2" title="Báo cáo SLHĐ" data-id="{{ $v->id }}">
                                 <i class="la la-chart-bar"></i>
                             </a>
+                            <a href="javascript:void(0);" class="btn btn-sm btn-clean btn-icon btn-report3" title="Báo cáo Dự án trễ" data-id="{{ $v->id }}">
+                                <i class="la la-chart-area"></i>
+                            </a>
                         </td>
                         @endforeach
                         @endif
@@ -300,6 +303,50 @@ Biss
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalReport3" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Báo cáo Dự án trễ <span class="username font-weight-bold text-primary"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id">
+                <div class="row text-nowrap mb-4">
+                    <div class="col-xl-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Tài khoản: </div>
+                        <select name="admin_id" class="select-admin form-control"></select>
+                    </div>
+                    <div class="col-xl-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Ngày bắt đầu: </div>
+                        <input type="date" class="form-control" name="start_time">
+                    </div>
+                    {{-- <div class="col-xl-3 d-flex align-items-center mb-2">
+                        <div class="mr-2">Ngày kết thúc: </div>
+                        <input type="date" class="form-control" name="end_time">
+                    </div> --}}
+                    <div class="col-xl-3 ml-auto d-flex">
+                        <a href="javascript:void(0)" class="btn btn-light-primary mb-2 ml-auto" onclick="reportRole3()">Tìm kiếm</a>
+                    </div>
+                </div>
+                <table class="table text-center">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tài khoản</th>
+                        <th scope="col">Dự án trễ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('custom_js')
 <script>
@@ -374,6 +421,16 @@ Biss
         $('#modalReport2 select[name="project_id"]').val(0).trigger('change');
         reportRole2();
         $('#modalReport2').modal('show');
+    });
+
+    $('.btn-report3').click(function(){
+        let id = $(this).data('id');
+        let role = data[id];
+        $('#modalReport3 .username').html(role.name);
+        $('#modalReport3 input[name="id"]').val(id);
+        $('#modalReport3 select[name="project_id"]').val(0).trigger('change');
+        reportRole3();
+        $('#modalReport3').modal('show');
     });
 
     function reportRole() {
@@ -600,6 +657,96 @@ Biss
                         }
                         $('#modalReport2 .select-admin').html(htmlSelect);
                         $('#modalReport2 .select-admin').select2({
+                            placeholder: 'Chọn tài khoản',
+                            minimumResultsForSearch:-1,
+                        });
+                    } else {
+                        init.showNoty('Có lỗi xảy ra!', 'error');
+                    }
+                },
+                complete: function(){
+                    init.conf.ajax_sending = false;
+                }
+            })
+        }
+    }
+
+    function reportRole3() {
+        let id = $('#modalReport3 input[name="id"]').val();
+        let start_time = $('#modalReport3 input[name="start_time"]').val();
+        // let end_time = $('#modalReport2 input[name="end_time"]').val();
+        let admin_id = $('#modalReport3 select[name="admin_id"]').val() ?? 0;
+        if(!init.conf.ajax_sending){
+            $.ajax({
+                type: 'GET',
+                url: "{{ route('admin.role.report3') }}",
+                data: {id, start_time, admin_id},
+                beforeSend: function(){
+                    init.conf.ajax_sending = true;
+                },
+                success: function(res){
+                    let html = '', htmlSelect = '';
+                    let type = @json($type);
+                    if(res.success){
+                        if(res.data.length > 0){
+                            res.data.forEach(function (v, $ka) {
+                                html += `<tr class="bg-success text-white accordion-toggle" data-toggle="collapse" data-target="#domex${$ka}">
+                                                    <td >${($ka+1)}</td>
+                                                    <td >${v.admin}</td>
+                                                    <td>${v.total}</td>
+                                                </tr>
+                                                <tr>
+                                                        <td colspan="3" class="hiddenRow">
+                                                            <div class="accordian-body collapse" id="domex${$ka}"> 
+                                                                <table class="table">
+                                                                    <thead>
+                                                                        <tr class="info">
+                                                                            <th scope="col">Dự án</th>
+                                                                            <th scope="col">Ngày hết hạn</th>
+                                                                        </tr>
+                                                                    </thead>	
+                                                                    <tbody>`;
+                                if(v.projects.length> 0){
+                                    v.projects.forEach(function (project , $kp) {
+                                        if(!!!$kp){
+                                                html += `<tr>
+                                                        <td>${project.name}</td>
+                                                        <td>${project.expired_time}</td>
+                                                    </tr>`;
+                                        }else{
+                                            html += `<tr>
+                                                    <td>${project.name}</td>
+                                                    <td>${project.expired_time}</td>
+                                                </tr>`;
+                                        }
+                                    });
+                                } else {
+                                    html += `<tr class="bg-success text-white">
+                                                    <td>${($ka + 1)}</td>
+                                                    <td>${v.admin}</td>
+                                                    <td>0</td>
+                                                </tr>`;
+                                }
+                                html += `</tbody>
+                                                                </table>
+                                                            </div> 
+                                                        </td>
+                                                    </tr>`;
+                            });
+                        }
+                        $('#modalReport3 tbody').html(html);
+                        if ($('#modalReport3 .select-admin').hasClass("select2-hidden-accessible")) {
+                            $('#modalReport3 .select-admin').select2('destroy');
+                        }
+                        htmlSelect = '';
+                        if(res.admin.length > 0){
+                            htmlSelect += `<option value="0" ${admin_id == 0? 'selected' : ''}>Tất cả tài khoản</option>`
+                            res.admin.forEach(function ($admin, $k) {
+                                htmlSelect += `<option value="${$admin.id}" ${admin_id == $admin.id? 'selected' : ''}>${$admin.username}</option>`
+                            });
+                        }
+                        $('#modalReport3 .select-admin').html(htmlSelect);
+                        $('#modalReport3 .select-admin').select2({
                             placeholder: 'Chọn tài khoản',
                             minimumResultsForSearch:-1,
                         });
