@@ -96,7 +96,7 @@
                                                 <tr>
                                                     <td scope="row">{{$k + 1}}</td>
                                                     <td class="text-left">{{$gr['name']}}</td>
-                                                    <td>{{$gr['phase_qty'] ?? 0}} </td>
+                                                    <td>{{$phaseGroup[@$gr['id']]->qty ?? 0}} </td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['new'] ?? 0}}</td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['expired'] ?? 0}}</td>
                                                     <td>{{$reportGroup[@$gr['id']]['report']['done'] ?? 0}}</td>
