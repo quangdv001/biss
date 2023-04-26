@@ -37,8 +37,10 @@ class AdminGroupController extends Controller
         if (empty($project)) {
             return back()->with('error_message', 'Không tìm thấy dự án!');
         }
-        $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
+        $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'], ['phaseGroup', 'group'])->keyBy('id');
+        
         $pid = $pid > 0 ? $pid : $phase->first()->id;
+        $phaseGroup = $phase[$pid]->phaseGroup->keyBy('group_id');
         $project->group->load(['phaseGroup' => function ($query) use ($pid) {
             $query->where('phase_id', $pid);
         }])->map(function ($gr) {
@@ -60,7 +62,7 @@ class AdminGroupController extends Controller
             return $data;
         })->keyBy('id')->all();
         $group = $project->group->keyBy('id');
-        $reportGroup = $project->ticket->where('phase_id', $pid)->groupBy('group_id')->map(function ($tickets, $group_id) use ($group, &$reportMember) {
+        $reportGroup = $project->ticket->where('phase_id', $pid)->groupBy('group_id')->map(function ($tickets, $group_id) use ($group, &$reportMember, $phaseGroup) {
             $data['report']['total'] = 0;
             $data['report']['new'] = 0;
             $data['report']['expired'] = 0;
@@ -113,12 +115,12 @@ class AdminGroupController extends Controller
                     }
                 }
             }
-            $data['report']['percent'] = !empty($group[$group_id]['phase_qty']) ? round($data['report']['done'] / $group[$group_id]['phase_qty'] * 100) : 0;
+            $data['report']['percent'] = !empty($phaseGroup[$group_id]['qty']) ? round($data['report']['done'] / $phaseGroup[$group_id]['qty'] * 100) : 0;
             return $data;
         })->all();
         $reportMember = array_values($reportMember);
         $role = $this->role->getRole();
-        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin', 'isGuest', 'role'));
+        return view('admin.group.index2', compact('project', 'admins', 'phase', 'pid', 'id', 'gid', 'reportGroup', 'reportMember', 'isAdmin', 'isGuest', 'role', 'phaseGroup'));
     }
 
     public function create(Request $request){
