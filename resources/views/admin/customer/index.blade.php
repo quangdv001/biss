@@ -192,16 +192,22 @@ type="text/css" /> --}}
                                 </div>
                             </div>
                             @endif
-                            <div class="col-md-2 my-2 my-md-0">
+                            {{-- <div class="col-md-2 my-2 my-md-0">
                                 <input type='text' class="form-control" id="kt_daterangepicker_1" readonly placeholder="Chọn thời gian" name="start_time" type="text" value=""/>
+                            </div> --}}
+                            <div class="col-md-2 my-2 my-md-0">
+                                <input type="date" class="form-control" name="start_time" placeholder="Bắt đầu" value="{{ old('start_time') }}"/>
                             </div>
-                            <div class="col-md-3 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
+                                <input type="date" class="form-control" name="end_time" placeholder="Kết thúc" value="{{ old('end_time') }}"/>
+                            </div>
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="name" placeholder="Tên Khách hàng" value="{{ old('name') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
                                 </div>
                             </div>
-                            <div class="col-md-3 my-2 my-md-0">
+                            <div class="col-md-2 my-2 my-md-0">
                                 <div class="input-icon">
                                     <input type="text" class="form-control" name="phone" placeholder="SĐT" value="{{ old('phone') }}"/>
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
@@ -600,20 +606,21 @@ type="text/css" /> --}}
     //     url.searchParams.set("name", name);
     //     window.location.href = url.href;
     // })
-    let now = @json(date('m/d/Y', time()));
-    let arrDate = [now, now]; 
-    let date = @json(old('start_time'));
-    if (date) {
-        arrDate = date.split(' - ');
-    }
+    // let now = @json(date('m/d/Y', time()));
+    // let arrDate = [now, now]; 
+    // let date = @json(old('start_time'));
+    // if (date) {
+    //     arrDate = date.split(' - ');
+    // }
 
-    $('#kt_daterangepicker_1').daterangepicker({
-        buttonClasses: ' btn',
-        applyClass: 'btn-primary',
-        cancelClass: 'btn-secondary',
-        startDate: moment(arrDate[0]),
-        endDate: moment(arrDate[1]),
-    });
+    // $('#kt_daterangepicker_1').daterangepicker({
+    //     autoUpdateInput: false,
+    //     buttonClasses: ' btn',
+    //     applyClass: 'btn-primary',
+    //     cancelClass: 'btn-secondary',
+    //     // startDate: moment(arrDate[0]),
+    //     // endDate: moment(arrDate[1]),
+    // });
 
     const customer = {
         ids: []
