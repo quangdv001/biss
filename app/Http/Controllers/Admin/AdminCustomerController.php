@@ -21,32 +21,32 @@ class AdminCustomerController extends Controller
     public function index(Request $request)
     {
         $request->flash();
-        $params = $request->only('name', 'phone', 'admin_id', 'start_time', 'status');
+        $params = $request->only('name', 'phone', 'admin_id', 'start_time', 'end_time', 'status');
         $limit = $request->input('limit', 50);
         if (!empty($params)) {
             foreach ($params as $k => $v) {
                 if (!$v) {
                     unset($params[$k]);
-                }
+                } else {
 
-                if (in_array($k, ['name', 'phone'])) {
-                    $search = [$k, 'like', '%' . $v . '%'];
-                    unset($params[$k]);
-                    $params[] = $search;
-                }
-
-                if ($k == 'start_time') {
-                    $arrTime = explode(' - ', $v);
-                    // if ($arrTime[0] == $arrTime[1]) {
-                    //     unset($params[$k]);
-                    // } else {
-                        $start = strtotime($arrTime[0]);
-                        $end = strtotime($arrTime[1]) + 86399;
+                    if (in_array($k, ['name', 'phone'])) {
+                        $search = [$k, 'like', '%' . $v . '%'];
                         unset($params[$k]);
+                        $params[] = $search;
+                    }
+    
+                    if ($k == 'start_time') {
+                        $start = strtotime($v);
                         $params[] = ['created_time', '>=', $start]; 
+                        unset($params[$k]);
+                    }
+                    if ($k == 'end_time') {
+                        $end = strtotime($v) + 86399;
                         $params[] = ['created_time', '<=', $end];
-                    // }
+                        unset($params[$k]);
+                    }
                 }
+
             }
         }
         $user = auth('admin')->user();
