@@ -608,19 +608,19 @@ type="text/css" /> --}}
     // })
     // let now = @json(date('m/d/Y', time()));
     // let arrDate = [now, now]; 
-    let date = @json(old('start_time'));
-    if (date) {
-        arrDate = date.split(' - ');
-    }
+    // let date = @json(old('start_time'));
+    // if (date) {
+    //     arrDate = date.split(' - ');
+    // }
 
-    $('#kt_daterangepicker_1').daterangepicker({
-        autoUpdateInput: false,
-        buttonClasses: ' btn',
-        applyClass: 'btn-primary',
-        cancelClass: 'btn-secondary',
-        // startDate: moment(arrDate[0]),
-        // endDate: moment(arrDate[1]),
-    });
+    // $('#kt_daterangepicker_1').daterangepicker({
+    //     autoUpdateInput: false,
+    //     buttonClasses: ' btn',
+    //     applyClass: 'btn-primary',
+    //     cancelClass: 'btn-secondary',
+    //     // startDate: moment(arrDate[0]),
+    //     // endDate: moment(arrDate[1]),
+    // });
 
     const customer = {
         ids: []
