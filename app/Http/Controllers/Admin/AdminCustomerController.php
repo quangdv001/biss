@@ -54,7 +54,7 @@ class AdminCustomerController extends Controller
         if(!$user->hasRole(['super_admin'])) {
             $params['admin_id'] = $user->id;
         }
-        $data = $this->customer->paginate($params, $limit, ['created_time' => 'DESC'], ['admin']);
+        $data = $this->customer->paginate($params, $limit, ['updated_at' => 'DESC', 'start_time' => 'DESC'], ['admin']);
         $admins = $this->admin->getAdmin();
         $status = [
             1 => [
