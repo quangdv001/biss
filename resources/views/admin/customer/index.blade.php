@@ -240,7 +240,7 @@ type="text/css" /> --}}
                                 <th scope="col">Trạng thái</th>
                                 <th scope="col">Phụ trách</th>
                                 <th scope="col">Mô tả</th>
-                                <th scope="col">Thời gian tạo</th>
+                                <th scope="col">Bắt đầu</th>
                                 <th scope="col">Hành động</th>
                             </tr>
                         </thead>
@@ -260,7 +260,7 @@ type="text/css" /> --}}
                                 </td>
                                 <td>{{ @$v->admin->username }}</td>
                                 <td>{{ $v->description }}</td>
-                                <td>{{ date('d/m/Y', $v->created_time) }}</td>
+                                <td>{{ $v->start_time ? date('d/m/Y', $v->start_time) : '' }}</td>
                                 <td nowrap>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
@@ -298,10 +298,10 @@ type="text/css" /> --}}
                                                 <span class="dtr-title">Ghi chú:</span>
                                                 <span class="dtr-data">{{ $v->note }}</span>
                                             </li>
-                                            {{-- <li>
-                                                <span class="dtr-title">Bắt đầu:</span>
-                                                <span class="dtr-data">{{ $v->start_time ? date('d/m/Y', $v->start_time) : '' }}</span>
-                                            </li> --}}
+                                            <li>
+                                                <span class="dtr-title">Thời gian tạo:</span>
+                                                <span class="dtr-data">{{ date('d/m/Y', $v->created_time) }}</span>
+                                            </li>
                                             
                                         </ul>
                                     </div>
