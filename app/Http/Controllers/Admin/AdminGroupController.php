@@ -125,7 +125,7 @@ class AdminGroupController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole(['super_admin', 'account'])){
+        if(!$user->hasRole(['super_admin'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý nhóm!');
         }
         $params = $request->only('id', 'project_id', 'role_id', 'name');
@@ -159,7 +159,7 @@ class AdminGroupController extends Controller
 
     public function createPhase(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole(['super_admin', 'account'])){
+        if(!$user->hasRole(['super_admin'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý phase!');
         }
         $params = $request->only('id', 'project_id', 'start_time', 'end_time', 'name');
@@ -214,7 +214,7 @@ class AdminGroupController extends Controller
 
     public function remove(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole(['super_admin', 'account'])){
+        if(!$user->hasRole(['super_admin'])){
             return response(['success' => 0]);
         }
         $id = $request->input('id');

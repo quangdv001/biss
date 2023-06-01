@@ -92,7 +92,7 @@ class AdminTicketController extends Controller
         $notes = $this->note->get(['group_id' => $gid, 'phase_id' => $pid], ['id' => 'DESC'], ['admin']);
         $role = $this->role->getRole();
         $id = $request->input('id', 0);
-        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes', 'role', 'id', 'isSuperAdmin'));
+        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes', 'role', 'id', 'isSuperAdmin', 'user'));
     }
 
     public function create(Request $request){
@@ -125,6 +125,19 @@ class AdminTicketController extends Controller
                 $res = $this->ticketRepo->update($ticket, $params);
                 if($res){
                     $res->admin()->sync($admins);
+                    unset($params['group_id']);
+                    unset($params['id']);
+                    if ($res->parent_id > 0) {
+                        $parent = $this->ticketRepo->first(['id' => $res->parent_id]);
+                        if ($parent) {
+                            $resP = $this->ticketRepo->update($parent, $params);
+                        }
+                    } else {
+                        $child = $this->ticketRepo->first(['parent_id' => $res->parent_id]);
+                        if ($child) {
+                            $resP = $this->ticketRepo->update($child, $params);
+                        }
+                    }
                     $resA['success'] = 1;
                     $resA['mess'] = 'Cập nhật ticket thành công!';
                     return response()->json($resA);
@@ -203,7 +216,23 @@ class AdminTicketController extends Controller
         $res['success'] = 0;
         $res['mess'] = 'Có lỗi xảy ra!';
         if($resC){
+            $req = $request->only('is_order');
+            $isOrder = isset($req['is_order']) ? 1 : 0;
             $resC->admin()->sync($admins);
+            if ($isOrder) {
+                $handle = $request->input('design_handle', []);
+                $role = $this->role->first(['slug' => 'Design']);
+                $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id]);
+                if ($group) {
+
+                    $params['parent_id'] = $resC->id;
+                    $params['group_id'] = $group->id;
+                    $resChild = $this->ticketRepo->create($params);
+                    if ($resChild) {
+                        $resChild->admin()->sync($handle);
+                    }
+                }
+            }
             $res['success'] = 1;
             $res['mess'] = 'Tạo thành công!';
         }

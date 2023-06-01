@@ -215,7 +215,13 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-lg-8">
+                        <div class="col-lg-6">
+                            <label>Trạng thái:</label>
+                            <div>
+                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
                             <label>Người xử lý</label>
                             <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
                                 @if(!empty($admins))
@@ -225,16 +231,27 @@
                                 @endif
                             </select>
                         </div>
-                        <div class="col-lg-4">
-                            <label>Trạng thái:</label>
+                    </div>
+                    @if ($user->hasRole(['super_admin', 'account', 'content']))
+                    <div class="form-group row">
+                        <div class="col-lg-6">
+                            <label>Order Thiết kế:</label>
                             <div>
-                                <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                                <input class="is_order" data-switch="true" type="checkbox" name="is_order" data-on-text="Bật" data-off-text="Tắt" data-on-color="primary"/>
                             </div>
                         </div>
-                        
+                        <div class="col-lg-6 design_handle d-none">
+                            <label>Thiết kế xử lý:</label>
+                            <select class="form-control select2" name="design_handle[]" style="width: 100%">
+                                @if(!empty($admins))
+                                @foreach($admins as $v)
+                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                @endforeach
+                                @endif
+                            </select>
+                        </div>
                     </div>
-                    
-                    
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -689,6 +706,15 @@ $("#modalCreate").on('hide.bs.modal', function () {
 
 if(window.location.href.indexOf('#modalNote') != -1) {
     $('#modalNote').modal('show');
-  }
+};
+
+$('.is_order').on('switchChange.bootstrapSwitch', function (e, data) {
+    let inp = $(this).parent().parent().parent().parent().parent().find('.design_handle');
+    if (e.target.checked) {
+        inp.removeClass('d-none');
+    } else {
+        inp.addClass('d-none');
+    }
+});
 </script>
 @endsection
