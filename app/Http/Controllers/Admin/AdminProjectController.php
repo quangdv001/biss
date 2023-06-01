@@ -83,7 +83,7 @@ class AdminProjectController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if(!$user->hasRole(['super_admin', 'account'])){
+        if(!$user->hasRole(['super_admin'])){
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
         $params = $request->only( 'id','name', 'description', 'note', 'planer_id', 'executive_id', 'package', 'payment_month', 'fanpage', 'website', 'extra_link', 'accept_time', 'expired_time', 'created_time', 'status', 'field', 'type');

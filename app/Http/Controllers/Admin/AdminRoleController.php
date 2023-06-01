@@ -100,7 +100,7 @@ class AdminRoleController extends Controller
         $end_time = strtotime($request->get('end_time', ''));
         $end_time = $end_time ? strtotime('tomorrow', $end_time) - 1 : false;
 
-        $tickets = $this->ticketRepo->getTicketByAdmin($admin_ids, $project_id, $start_time, $end_time);
+        $tickets = $this->ticketRepo->getTicketByAdminReport($admin_ids, $project_id, $start_time, $end_time);
         $project = $this->projectRepo->get(['id' => $tickets->pluck('project_id')->all()])->load('admin')->map(function ($project) {
             $project->admin_ids = $project->admin->pluck('id')->all();
             return $project;

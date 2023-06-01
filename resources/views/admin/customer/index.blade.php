@@ -298,10 +298,10 @@ type="text/css" /> --}}
                                                 <span class="dtr-title">Ghi chú:</span>
                                                 <span class="dtr-data">{{ $v->note }}</span>
                                             </li>
-                                            <li>
+                                            {{-- <li>
                                                 <span class="dtr-title">Thời gian tạo:</span>
                                                 <span class="dtr-data">{{ date('d/m/Y', $v->created_time) }}</span>
-                                            </li>
+                                            </li> --}}
                                             
                                         </ul>
                                     </div>

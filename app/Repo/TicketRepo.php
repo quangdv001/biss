@@ -172,4 +172,27 @@ class TicketRepo
         });
         return $result;
     }
+
+    public function getTicketByAdminReport($admin_ids, $project_id, $start_time, $end_time)
+    {
+        $query = $this->repo;
+        if (!empty($start_time) && !empty($end_time)) {
+            $query = $query->whereBetween('deadline_time', [$start_time, $end_time]);
+        }
+        if (!empty($project_id)) {
+            $query = $query->where('project_id', $project_id);
+        }
+        $query = $query->with('admin','group.phaseGroup', 'project');
+        $query = $query->whereHas('project', function ($query) {
+            $query->whereIn('type', [0, 1, 3]);
+        });
+        $query = $query->whereHas('admin', function ($query) use ($admin_ids) {
+            $query->whereIn('id', $admin_ids);
+        });
+        $result = collect([]);
+        $query->chunkById(200, function ($data) use (&$result) {
+            $result = $result->merge($data->all());
+        });
+        return $result;
+    }
 }

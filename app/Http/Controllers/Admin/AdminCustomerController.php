@@ -117,7 +117,7 @@ class AdminCustomerController extends Controller
 
     public function export(Request $request)
     {
-        $params = $request->only('id', 'name', 'phone', 'admin_id', 'start_time', 'status');
+        $params = $request->only('id', 'name', 'phone', 'admin_id', 'start_time', 'end_time', 'status');
         if (!empty($params)) {
             foreach ($params as $k => $v) {
                 if (!$v) {
@@ -130,21 +130,18 @@ class AdminCustomerController extends Controller
                     $params[] = $search;
                 }
 
-                if ($k == 'start_time') {
-                    $arrTime = explode(' - ', $v);
-                    if ($arrTime[0] == $arrTime[1]) {
-                        unset($params[$k]);
-                    } else {
-                        $start = strtotime($arrTime[0]);
-                        $end = strtotime($arrTime[1]) + 86399;
-                        unset($params[$k]);
-                        $params[] = ['created_time', '>=', $start]; 
-                        $params[] = ['created_time', '<=', $end];
-                    }
+                if ($k == 'start_time' && $v) {
+                    $start = strtotime($v);
+                    $params[] = ['start_time', '>=', $start]; 
+                    unset($params[$k]);
+                }
+                if ($k == 'end_time' && $v) {
+                    $end = strtotime($v) + 86399;
+                    $params[] = ['start_time', '<=', $end];
+                    unset($params[$k]);
                 }
             }
         }
-
         return Excel::download(new CustomerExport($params), 'Khách hàng.xlsx');
     }
 
