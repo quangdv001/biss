@@ -337,6 +337,26 @@
                         </div>
                         
                     </div>
+                    @if ($user->hasRole(['super_admin', 'account', 'content']))
+                    <div class="form-group row check-content">
+                        <div class="col-lg-6">
+                            <label>Order Thiết kế:</label>
+                            <div>
+                                <input class="is_order" data-switch="true" type="checkbox" name="is_order" data-on-text="Bật" data-off-text="Tắt" data-on-color="primary"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 design_handle d-none">
+                            <label>Thiết kế xử lý:</label>
+                            <select class="form-control select2" name="design_handle[]" style="width: 100%">
+                                @if(!empty($admins))
+                                @foreach($admins as $v)
+                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                @endforeach
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -512,6 +532,7 @@ var data = @json($data->keyBy('id'));
 let user_id = @json(auth('admin')->user()->id);
 let is_admin = @json(auth('admin')->user()->hasRole(['super_admin', 'account']));
 let is_guest = @json(auth('admin')->user()->hasRole(['guest']));
+let is_content = @json($user->hasRole(['super_admin', 'account', 'content']));
 $(document).on('click', '.btn-edit', function(){
     let id = $(this).data('id');
     let ticket = data[id];
@@ -545,7 +566,19 @@ $(document).on('click', '.btn-edit', function(){
     }
     $('#modalEdit select[name="admin[]"]').val(admin).trigger('change');
     $('#modalEdit input[name="status"]').prop('checked', ticket.status == 1 ? true : false).trigger('change');
-
+    if (is_content) {
+        $('#modalEdit input[name="is_order"]').prop('checked', ticket.child ? true : false).trigger('change');
+        if (ticket.child) {
+            $('#modalEdit .design_handle').removeClass('d-none');
+            let child_admin = [];
+            if(ticket.child.admin.length > 0){
+                $.each(ticket.child.admin, function(i, v){
+                    child_admin.push(v.id);
+                });
+            }
+            $('#modalEdit select[name="design_handle[]"]').val(child_admin).trigger('change');
+        }
+    }
 
     if(is_guest){
         $('#modalEdit input').attr("readonly", true);

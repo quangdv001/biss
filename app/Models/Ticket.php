@@ -46,4 +46,9 @@ class Ticket extends Model
     {
         return $this->belongsTo(Project::class,'project_id','id');
     }
+
+    public function child()
+    {
+        return $this->hasOne(Ticket::class, 'parent_id', 'id');
+    }
 }
