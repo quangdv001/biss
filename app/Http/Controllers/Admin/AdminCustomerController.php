@@ -37,12 +37,12 @@ class AdminCustomerController extends Controller
     
                     if ($k == 'start_time') {
                         $start = strtotime($v);
-                        $params[] = ['start_time', '>=', $start]; 
+                        $params[] = ['created_time', '>=', $start]; 
                         unset($params[$k]);
                     }
                     if ($k == 'end_time') {
                         $end = strtotime($v) + 86399;
-                        $params[] = ['start_time', '<=', $end];
+                        $params[] = ['created_time', '<=', $end];
                         unset($params[$k]);
                     }
                 }
@@ -132,12 +132,12 @@ class AdminCustomerController extends Controller
 
                 if ($k == 'start_time' && $v) {
                     $start = strtotime($v);
-                    $params[] = ['start_time', '>=', $start]; 
+                    $params[] = ['created_time', '>=', $start]; 
                     unset($params[$k]);
                 }
                 if ($k == 'end_time' && $v) {
                     $end = strtotime($v) + 86399;
-                    $params[] = ['start_time', '<=', $end];
+                    $params[] = ['created_time', '<=', $end];
                     unset($params[$k]);
                 }
             }

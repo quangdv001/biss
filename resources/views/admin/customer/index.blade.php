@@ -240,7 +240,7 @@ type="text/css" /> --}}
                                 <th scope="col">Trạng thái</th>
                                 <th scope="col">Phụ trách</th>
                                 <th scope="col">Mô tả</th>
-                                <th scope="col">Bắt đầu</th>
+                                <th scope="col">Thời gian tạo</th>
                                 <th scope="col">Hành động</th>
                             </tr>
                         </thead>
@@ -260,7 +260,7 @@ type="text/css" /> --}}
                                 </td>
                                 <td>{{ @$v->admin->username }}</td>
                                 <td>{{ $v->description }}</td>
-                                <td>{{ $v->start_time ? date('d/m/Y', $v->start_time) : '' }}</td>
+                                <td>{{ date('d/m/Y', $v->created_time) }}</td>
                                 <td nowrap>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit" title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>

@@ -69,7 +69,7 @@ class AdminTicketController extends Controller
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
-        $data = $this->ticketRepo->get($params, ['deadline_time' => 'asc'], ['admin','creator'])->map(function ($ticket){
+        $data = $this->ticketRepo->get($params, ['deadline_time' => 'asc'], ['admin','creator', 'child.admin'])->map(function ($ticket){
             if ($ticket->status == 0) {
                 if ($ticket->deadline_time > time()) {
                     $ticket->status_lb = 'Mới';
@@ -133,9 +133,14 @@ class AdminTicketController extends Controller
                             $resP = $this->ticketRepo->update($parent, $params);
                         }
                     } else {
-                        $child = $this->ticketRepo->first(['parent_id' => $res->parent_id]);
+                        $childAdmin = $request->get('design_handle',[]);
+                        
+                        $child = $this->ticketRepo->first(['parent_id' => $res->id]);
                         if ($child) {
                             $resP = $this->ticketRepo->update($child, $params);
+                            if ($resP) {
+                                $resP->admin()->sync($childAdmin);
+                            }
                         }
                     }
                     $resA['success'] = 1;
@@ -222,7 +227,7 @@ class AdminTicketController extends Controller
             if ($isOrder) {
                 $handle = $request->input('design_handle', []);
                 $role = $this->role->first(['slug' => 'Design']);
-                $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id]);
+                $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
                 if ($group) {
 
                     $params['parent_id'] = $resC->id;
