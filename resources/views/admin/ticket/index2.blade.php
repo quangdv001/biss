@@ -566,6 +566,7 @@ $(document).on('click', '.btn-edit', function(){
     }
     $('#modalEdit select[name="admin[]"]').val(admin).trigger('change');
     $('#modalEdit input[name="status"]').prop('checked', ticket.status == 1 ? true : false).trigger('change');
+    console.log(is_content, ticket, ticket.child ? true : false);
     if (is_content) {
         $('#modalEdit input[name="is_order"]').prop('checked', ticket.child ? true : false).trigger('change');
         if (ticket.child) {
