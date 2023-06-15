@@ -127,6 +127,10 @@ class AdminTicketController extends Controller
                     $res->admin()->sync($admins);
                     unset($params['group_id']);
                     unset($params['id']);
+
+                    $req = $request->only('is_order');
+                    $isOrder = isset($req['is_order']) ? 1 : 0;
+                    
                     if ($res->parent_id > 0) {
                         $parent = $this->ticketRepo->first(['id' => $res->parent_id]);
                         if ($parent) {
@@ -141,8 +145,27 @@ class AdminTicketController extends Controller
                             if ($resP) {
                                 $resP->admin()->sync($childAdmin);
                             }
+                        } else {
+                            if ($isOrder) {
+                                $handle = $request->input('design_handle', []);
+                                $role = $this->role->first(['slug' => 'Design']);
+                                $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
+                                if ($group) {
+                                    $params['created_time'] = time();
+                                    $params['admin_id_c'] = $user->id;
+                                    $params['parent_id'] = $res->id;
+                                    $params['group_id'] = $group->id;
+                                    $resChild = $this->ticketRepo->create($params);
+                                    if ($resChild) {
+                                        $resChild->admin()->sync($handle);
+                                    }
+                                }
+                            }
                         }
                     }
+                        
+                    
+                    
                     $resA['success'] = 1;
                     $resA['mess'] = 'Cập nhật ticket thành công!';
                     return response()->json($resA);
@@ -221,9 +244,9 @@ class AdminTicketController extends Controller
         $res['success'] = 0;
         $res['mess'] = 'Có lỗi xảy ra!';
         if($resC){
+            $resC->admin()->sync($admins);
             $req = $request->only('is_order');
             $isOrder = isset($req['is_order']) ? 1 : 0;
-            $resC->admin()->sync($admins);
             if ($isOrder) {
                 $handle = $request->input('design_handle', []);
                 $role = $this->role->first(['slug' => 'Design']);
