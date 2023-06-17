@@ -234,21 +234,54 @@
                     </div>
                     @if ($user->hasRole(['super_admin', 'account', 'content']))
                     <div class="form-group row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-12">
                             <label>Order Thiết kế:</label>
                             <div>
                                 <input class="is_order" data-switch="true" type="checkbox" name="is_order" data-on-text="Bật" data-off-text="Tắt" data-on-color="primary"/>
                             </div>
                         </div>
-                        <div class="col-lg-6 design_handle d-none">
-                            <label>Thiết kế xử lý:</label>
-                            <select class="form-control select2" name="design_handle[]" style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
+                        <div class="px-3 mt-3 row design_handle d-none">
+
+                            <div class="col-lg-6 mb-2">
+                                <label>Thiết kế xử lý:</label>
+                                <select class="form-control select2" name="design_handle[]" style="width: 100%">
+                                    @if(!empty($admins))
+                                    @foreach($admins as $v)
+                                    <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-lg-6 mb-2">
+                                <label>Trạng thái:</label>
+                                <div>
+                                    <input data-switch="true" type="checkbox" name="child_status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-2">
+                                <label>Khách Duyệt</label>
+                                <input type="text" class="form-control" name="child_input" placeholder="Khách Duyệt"/>
+                            </div>
+                            <div class="col-lg-6 mb-2">
+                                <label>Sản phẩm</label>
+                                <input type="text" class="form-control" name="child_output" placeholder="Sản phẩm"/>
+                            </div>
+                            <div class="col-lg-4 mb-2">
+                                <label>Khối lượng</label>
+                                <input type="number" class="form-control" name="child_qty" placeholder="Khối lượng công việc" value="1" min="1"/>
+                            </div>
+                            <div class="col-lg-4 mb-2">
+                                <label>Độ ưu tiên</label>
+                                <select class="form-control select2" name="child_priority" style="width: 100%">
+                                    <option value="1" selected>Thấp</option>
+                                    <option value="2">Trung bình</option>
+                                    <option value="3">Cao</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-4 mb-2">
+                                <label>Deadline:</label>
+                                <input type="date" class="form-control" name="child_deadline_time" placeholder="Deadline"/>
+                            </div>
                         </div>
                     </div>
                     @endif
@@ -339,21 +372,53 @@
                     </div>
                     @if ($user->hasRole(['super_admin', 'account', 'content']))
                     <div class="form-group row check-content">
-                        <div class="col-lg-6">
+                        <div class="col-lg-12">
                             <label>Order Thiết kế:</label>
                             <div>
                                 <input class="is_order" data-switch="true" type="checkbox" name="is_order" data-on-text="Bật" data-off-text="Tắt" data-on-color="primary"/>
                             </div>
                         </div>
-                        <div class="col-lg-6 design_handle d-none">
-                            <label>Thiết kế xử lý:</label>
-                            <select class="form-control select2" name="design_handle[]" style="width: 100%">
-                                @if(!empty($admins))
-                                @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
-                                @endforeach
-                                @endif
-                            </select>
+                        <div class="px-3 mt-3 row design_handle d-none">
+                            <div class="col-lg-6 ">
+                                <label>Thiết kế xử lý:</label>
+                                <select class="form-control select2" name="design_handle[]" style="width: 100%">
+                                    @if(!empty($admins))
+                                    @foreach($admins as $v)
+                                    <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-lg-6">
+                                <label>Trạng thái:</label>
+                                <div>
+                                    <input data-switch="true" type="checkbox" name="child_status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <label>Khách Duyệt</label>
+                                <input type="text" class="form-control" name="child_input" placeholder="Khách Duyệt"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <label>Sản phẩm</label>
+                                <input type="text" class="form-control" name="child_output" placeholder="Sản phẩm"/>
+                            </div>
+                            <div class="col-lg-4">
+                                <label>Khối lượng</label>
+                                <input type="number" class="form-control" name="child_qty" placeholder="Khối lượng công việc" value="1" min="1"/>
+                            </div>
+                            <div class="col-lg-4">
+                                <label>Độ ưu tiên</label>
+                                <select class="form-control select2" name="child_priority" style="width: 100%">
+                                    <option value="1" selected>Thấp</option>
+                                    <option value="2">Trung bình</option>
+                                    <option value="3">Cao</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-4">
+                                <label>Deadline:</label>
+                                <input type="date" class="form-control" name="child_deadline_time" placeholder="Deadline"/>
+                            </div>
                         </div>
                     </div>
                     @endif
@@ -577,6 +642,19 @@ $(document).on('click', '.btn-edit', function(){
                 });
             }
             $('#modalEdit select[name="design_handle[]"]').val(child_admin).trigger('change');
+            $('#modalEdit input[name="child_status"]').prop('checked', ticket.child.status == 1 ? true : false).trigger('change');
+            $('#modalEdit input[name="child_input"]').val(ticket.child.input);
+            $('#modalEdit input[name="child_output"]').val(ticket.child.output);
+            $('#modalEdit input[name="child_qty"]').val(ticket.child.qty);
+            $('#modalEdit select[name="child_priority"]').val(ticket.child.priority).trigger('change');
+            let child_timestamp = ticket.child.deadline_time ? ticket.child.deadline_time*1000 : null;
+            if(child_timestamp){
+                let child_tzoffset = (new Date()).getTimezoneOffset() * 60000;
+                let child_date = new Date(child_timestamp - child_tzoffset).toISOString().split('T')[0];
+                $('#modalEdit input[name="child_deadline_time"]').val(child_date).trigger('change');
+            } else {
+                $('#modalEdit input[name="child_deadline_time"]').val('').trigger('change');
+            }
         }
     }
 
