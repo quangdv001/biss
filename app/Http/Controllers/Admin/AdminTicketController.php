@@ -111,6 +111,11 @@ class AdminTicketController extends Controller
         if(isset($params['id'])){
             $ticket = $this->ticketRepo->first(['id' => $params['id']]);
             if($ticket){
+                if ($user->hasRole(['Design'])) {
+                    $status = $params['status'];
+                    $params = [];
+                    $params['status'] = $status;
+                }
                 $ticket->load('admin');
                 // $isAdmin = $user->hasRole(['super_admin', 'account']);
                 
@@ -131,33 +136,38 @@ class AdminTicketController extends Controller
                     $req = $request->only('is_order');
                     $isOrder = isset($req['is_order']) ? 1 : 0;
                     
-                    if ($res->parent_id > 0) {
-                        $parent = $this->ticketRepo->first(['id' => $res->parent_id]);
-                        if ($parent) {
-                            $resP = $this->ticketRepo->update($parent, $params);
-                        }
-                    } else {
+                    if ($res->parent_id == 0) {
                         $childAdmin = $request->get('design_handle',[]);
                         
                         $child = $this->ticketRepo->first(['parent_id' => $res->id]);
+                        $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
+                        $paramsC['input'] = $paramsChild['child_input'];
+                        $paramsC['output'] = $paramsChild['child_output'];
+                        $paramsC['status'] = isset($paramsChild['child_status']) ? 1 : 0;
+                        $paramsC['qty'] = $paramsChild['child_qty'];
+                        $paramsC['priority'] = $paramsChild['child_priority'];
+                        $paramsC['deadline_time'] =  !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : null;
                         if ($child) {
-                            $resP = $this->ticketRepo->update($child, $params);
+                            $resP = $this->ticketRepo->update($child, $paramsC);
                             if ($resP) {
                                 $resP->admin()->sync($childAdmin);
                             }
                         } else {
                             if ($isOrder) {
-                                $handle = $request->input('design_handle', []);
                                 $role = $this->role->first(['slug' => 'Design']);
                                 $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
                                 if ($group) {
-                                    $params['created_time'] = time();
-                                    $params['admin_id_c'] = $user->id;
-                                    $params['parent_id'] = $res->id;
-                                    $params['group_id'] = $group->id;
-                                    $resChild = $this->ticketRepo->create($params);
+                                    $paramsC['name'] = $params['name'];
+                                    $paramsC['description'] = $params['description'];
+                                    $paramsC['project_id'] = $params['project_id'];
+                                    $paramsC['phase_id'] = $params['phase_id'];
+                                    $paramsC['created_time'] = time();
+                                    $paramsC['parent_id'] = $res->id;
+                                    $paramsC['group_id'] = $group->id;
+                                    $paramsC['admin_id_c'] = $user->id;
+                                    $resChild = $this->ticketRepo->create($paramsC);
                                     if ($resChild) {
-                                        $resChild->admin()->sync($handle);
+                                        $resChild->admin()->sync($childAdmin);
                                     }
                                 }
                             }
@@ -171,23 +181,6 @@ class AdminTicketController extends Controller
                     return response()->json($resA);
                     // return back()->with('success_message', 'Cập nhật ticket thành công!');
                 }
-            }
-        } else {
-            if ($params['status'] == 1) {
-                $params['complete_time'] = time();
-            } else {
-                $params['complete_time'] = null;
-            }
-            $params['created_time'] = time();
-            $params['admin_id_c'] = $user->id;
-            $res = $this->ticketRepo->create($params);
-            if($res){
-                $res->admin()->sync($admins);
-                // $this->createNoty($admins, $res);
-                $resA['success'] = 1;
-                $resA['mess'] = 'Tạo ticket thành công!';
-                return response()->json($resA);
-                // return back()->with('success_message', 'Tạo ticket thành công!');
             }
         }
         return response()->json($resA);
@@ -211,7 +204,7 @@ class AdminTicketController extends Controller
 
     public function createAjax(Request $request){
         $user = auth('admin')->user();
-        if($user->hasRole(['guest'])){
+        if($user->hasRole(['guest', 'Design'])){
             $res['success'] = 0;
             $res['mess'] = 'Bạn không có quyền!';
             return response()->json($res);
@@ -252,10 +245,24 @@ class AdminTicketController extends Controller
                 $role = $this->role->first(['slug' => 'Design']);
                 $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
                 if ($group) {
+                    $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
 
-                    $params['parent_id'] = $resC->id;
-                    $params['group_id'] = $group->id;
-                    $resChild = $this->ticketRepo->create($params);
+                    $paramsC['name'] = $params['name'];
+                    $paramsC['description'] = $params['description'];
+                    $paramsC['project_id'] = $params['project_id'];
+                    $paramsC['phase_id'] = $params['phase_id'];
+                    $paramsC['created_time'] = $params['created_time'];
+                    $paramsC['input'] = $paramsChild['child_input'];
+                    $paramsC['output'] = $paramsChild['child_output'];
+                    $paramsC['status'] = isset($paramsChild['child_status']) ? 1 : 0;
+                    $paramsC['qty'] = $paramsChild['child_qty'];
+                    $paramsC['priority'] = $paramsChild['child_priority'];
+                    $paramsC['deadline_time'] =  !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : null;
+                    $paramsC['parent_id'] = $resC->id;
+                    $paramsC['group_id'] = $group->id;
+                    $paramsC['admin_id_c'] = $user->id;
+                    
+                    $resChild = $this->ticketRepo->create($paramsC);
                     if ($resChild) {
                         $resChild->admin()->sync($handle);
                     }
