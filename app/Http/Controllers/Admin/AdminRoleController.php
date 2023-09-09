@@ -224,7 +224,7 @@ class AdminRoleController extends Controller
                             $proj[] = [
                                 'name' => $val->name,
                                 'type' => $val->type,
-                                'qty' => $val->group->where('role_id', $id)->first() ? ceil(($val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)) : 0,
+                                'qty' => $val->group->where('role_id', $id)->first() ? ceil((@$val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty ?? 0)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)) : 0,
                                 'complete' => isset($val->group->where('role_id', $id)->first()->id) && isset($tickets[$k][$val->group->where('role_id', $id)->first()->id]) ? $tickets[$k][$val->group->where('role_id', $id)->first()->id]->count() : 0
                             ];
                         }
