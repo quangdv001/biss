@@ -27,12 +27,18 @@ class AdminProjectController extends Controller
         $limit = $request->get('limit', 20);
         $name = $request->get('name', '');
         $field = $request->get('field', '');
-        $status = $request->get('status', 0);
+        $status = (int) $request->get('status', 0);
         $type = $request->get('type', 0);
         $orderBy = $request->get('order', 'id');
         $condition = [];
         if($status > 0){
-            $condition['status'] = $status;
+            if ($status == 1) {
+                $condition['status'] = $status;
+                $condition[] = ['expired_time', '>=', time()] ;
+            } else {
+                $condition['status'] = [1, 2];
+                $condition[] = ['expired_time', '<', time()] ;
+            }
         }
 
         if($type > 0){
