@@ -107,14 +107,20 @@ class ProjectRepo
         $query = $this->repo;
         if(!empty($condition)){
             foreach ($condition as $key => $value) {
-                if (is_array($value)) {
-                    $query = $query->whereIn($key, $value);
-                } elseif ($key == 'name') {
-                    $query = $query->where($key, 'like', '%' . $value . '%');
-                } elseif ($key == 'field') {
-                    $query = $query->where($key, 'like', '%' . $value . '%');
+                if (is_string($key)) {
+                    if (is_array($value)) {
+                        $query = $query->whereIn($key, $value);
+                    } elseif ($key == 'name') {
+                        $query = $query->where($key, 'like', '%' . $value . '%');
+                    } elseif ($key == 'field') {
+                        $query = $query->where($key, 'like', '%' . $value . '%');
+                    } else {
+                        $query = $query->where($key, $value);
+                    }
                 } else {
-                    $query = $query->where($key, $value);
+                    if (!empty($value)) {
+                        $query = $query->where($value[0], $value[1], $value[1] == 'like' ? '%' . $value[2] . '%' : $value[2]);
+                    }
                 }
             }
         }
@@ -158,8 +164,10 @@ class ProjectRepo
         if (!empty($params['name'])) {
             $query = $query->where('name', 'like', '%' . $params['name'] . '%');
         }
-        if(isset($params['status']) && $params['status'] > 0){
+        if(isset($params['status']) && is_numeric($params['status']) && $params['status'] > 0){
             $query = $query->where('status',$params['status']);
+        } elseif (isset($params['status']) && is_array($params['status'])) {
+            $query = $query->whereIn('status',$params['status'])->where('expired_time', '<', time());
         }
         if (!empty($params['field'])) {
             $query = $query->where('field', 'like', '%' . $params['field'] . '%');
