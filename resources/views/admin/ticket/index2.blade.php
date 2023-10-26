@@ -235,15 +235,25 @@
                     @if ($user->hasRole(['super_admin', 'account', 'content']))
                     <div class="form-group row">
                         <div class="col-lg-12">
-                            <label>Order Thiết kế:</label>
+                            <label>Order Team khác:</label>
                             <div>
                                 <input class="is_order" data-switch="true" type="checkbox" name="is_order" data-on-text="Bật" data-off-text="Tắt" data-on-color="primary"/>
                             </div>
                         </div>
                         <div class="px-3 mt-3 row design_handle d-none">
 
-                            <div class="col-lg-6 mb-2">
-                                <label>Thiết kế xử lý:</label>
+                            <div class="col-lg-4 mb-2">
+                                <label>Nhóm công việc:</label>
+                                <select class="form-control" name="phase_group_id" style="width: 100%">
+                                    @if(!empty($phase[$pid]->group))
+                                    @foreach($phase[$pid]->group as $v)
+                                    <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-lg-4 mb-2">
+                                <label>Người xử lý:</label>
                                 <select class="form-control select2" name="design_handle[]" style="width: 100%">
                                     @if(!empty($admins))
                                     @foreach($admins as $v)
@@ -252,7 +262,7 @@
                                     @endif
                                 </select>
                             </div>
-                            <div class="col-lg-6 mb-2">
+                            <div class="col-lg-4 mb-2">
                                 <label>Trạng thái:</label>
                                 <div>
                                     <input data-switch="true" type="checkbox" name="child_status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
@@ -373,7 +383,7 @@
                     @if ($user->hasRole(['super_admin', 'account', 'content']))
                     <div class="form-group row check-content">
                         <div class="col-lg-12">
-                            <label>Order Thiết kế:</label>
+                            <label>Order team khác:</label>
                             <div>
                                 <input class="is_order" data-switch="true" type="checkbox" name="is_order" data-on-text="Bật" data-off-text="Tắt" data-on-color="primary"/>
                             </div>

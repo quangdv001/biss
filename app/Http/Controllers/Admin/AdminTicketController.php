@@ -242,8 +242,10 @@ class AdminTicketController extends Controller
             $isOrder = isset($req['is_order']) ? 1 : 0;
             if ($isOrder) {
                 $handle = $request->input('design_handle', []);
-                $role = $this->role->first(['slug' => 'Design']);
-                $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
+                $phaseGroupId = $request->input('phase_group_id', 0);
+                // $role = $this->role->first(['slug' => 'Design']);
+                // $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
+                $group = $this->groupRepo->first(['id' => $phaseGroupId]);
                 if ($group) {
                     $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
 
