@@ -220,7 +220,7 @@ type="text/css" /> --}}
                                     <span class="label label-lg font-weight-bold label-light-{{ $type[$v->type]['class'] }} label-inline">{{ $type[$v->type]['text'] }}</span>
                                 </td>
                                 <td nowrap>
-                                    <span class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? ($time > $v->expired_time ? 'danger' : ($time < $v->expired_time - 604800 ? 'success' : 'warning')) : 'success' }} label-inline">{{ $v->status == 1 ? 'Hoạt động' : 'Hoàn thành' }}</span>
+                                    <span class="label label-lg font-weight-bold label-light-{{ $v->status == 1 ? ($time > $v->expired_time ? 'danger' : ($time < $v->expired_time - 604800 ? 'success' : 'warning')) : 'success' }} label-inline">{{ $v->status == 1 ? ($time > $v->expired_time ? 'Hoàn thành' : 'Hoạt Động') : 'Hoàn thành' }}</span>
                                 </td>
                                 @if(!$isGuest)
                                     <td nowrap>
