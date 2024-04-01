@@ -53,7 +53,7 @@ class AdminProjectController extends Controller
         $user = auth('admin')->user();
         $isAdmin = $user->hasRole(['super_admin','account']);
         $isGuest = $user->hasRole(['guest']);
-        if($user->hasRole(['super_admin'])){
+        if($user->hasRole(['super_admin', 'account'])){
             $data = $this->projectRepo->paginate($condition, $limit, [$orderBy => 'DESC'], ['planer', 'executive', 'admin']);
         } else {
             $data = $this->projectRepo->search($condition, $limit, $user->id, $orderBy);
