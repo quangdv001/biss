@@ -218,8 +218,41 @@ class AdminTicketController extends Controller
                 return response()->json($res);
             }
         }
+
+        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : time();
+        $today = strtotime('tomorrow', time()) - 1;
+        $currentGroup = $this->groupRepo->first(['id' => $params['group_id']]);
         
-        $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
+        if ($currentGroup) {
+            $role = $this->role->first(['id' => $currentGroup->role_id]);
+            if (in_array($role->slug, ['Design', 'Design2'])) {
+                if ($params['deadline_time'] <= $today) {
+                    $res['mess'] = 'Deadline ít nhất phải ngày mai';
+                    return response()->json($res);
+                }
+            }
+        }
+
+        $req = $request->only('is_order');
+        
+        $isOrder = isset($req['is_order']) ? 1 : 0;
+        if ($isOrder) {
+            $phaseGroupId = $request->input('phase_group_id', 0);
+            $group = $this->groupRepo->first(['id' => $phaseGroupId]);
+            if ($group) {
+                $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
+                $deadline = !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : time();
+                $childRole = $this->role->first(['id' => $group->role_id]);
+                if (in_array($childRole->slug, ['Design', 'Design2'])) {
+                    if ($deadline <= $today) {
+                        $res['mess'] = 'Deadline thiết kế ít nhất phải ngày mai';
+                        return response()->json($res);
+                    }
+                }
+            }
+        }
+        
+        
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
         $params['priority'] = !empty($params['priority']) ? (int)$params['priority'] : 2;
@@ -238,16 +271,13 @@ class AdminTicketController extends Controller
         $res['mess'] = 'Có lỗi xảy ra!';
         if($resC){
             $resC->admin()->sync($admins);
-            $req = $request->only('is_order');
-            $isOrder = isset($req['is_order']) ? 1 : 0;
+            
             if ($isOrder) {
                 $handle = $request->input('design_handle', []);
-                $phaseGroupId = $request->input('phase_group_id', 0);
-                // $role = $this->role->first(['slug' => 'Design']);
-                // $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
-                $group = $this->groupRepo->first(['id' => $phaseGroupId]);
+                
                 if ($group) {
                     $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
+                    $deadline = !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : time();
 
                     $paramsC['name'] = $params['name'];
                     $paramsC['description'] = $params['description'];
@@ -259,7 +289,7 @@ class AdminTicketController extends Controller
                     $paramsC['status'] = isset($paramsChild['child_status']) ? 1 : 0;
                     $paramsC['qty'] = $paramsChild['child_qty'];
                     $paramsC['priority'] = $paramsChild['child_priority'];
-                    $paramsC['deadline_time'] =  !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : null;
+                    $paramsC['deadline_time'] = $deadline;
                     $paramsC['parent_id'] = $resC->id;
                     $paramsC['group_id'] = $group->id;
                     $paramsC['admin_id_c'] = $user->id;
