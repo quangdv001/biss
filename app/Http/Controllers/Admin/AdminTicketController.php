@@ -42,7 +42,7 @@ class AdminTicketController extends Controller
         $isAdmin = $user->hasRole(['super_admin', 'account']);
         $isSuperAdmin = $user->hasRole(['super_admin']);
         $group = $this->groupRepo->first(['id' => $gid]);
-        if(empty($group)){
+        if (empty($group)) {
             return back()->with('success_message', 'Không tìm thấy nhóm!');
         }
         $id = $group->project_id;
@@ -64,7 +64,9 @@ class AdminTicketController extends Controller
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
         $admins = $this->adminRepo->get();
-        // $admins = $user->hasRole(['super_admin']) ? $allAdmins : ($project->admin ?? []);
+        $design2Admins = $this->role->first(['slug' => 'Design2'], [], ['admin'])->admin->pluck('id')->toArray();
+        // $admins = $allAdmins->whereNotIn('id', $design2Admins);
+        // $admins = $user->hasRole(['super_admin']) ? $allAdmins : $admins;
         // $admins = $admins->where('id', $user->id)->first() ? $admins : $admins->push($user);
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
@@ -92,7 +94,7 @@ class AdminTicketController extends Controller
         $notes = $this->note->get(['group_id' => $gid, 'phase_id' => $pid], ['id' => 'DESC'], ['admin']);
         $role = $this->role->getRole();
         $id = $request->input('id', 0);
-        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes', 'role', 'id', 'isSuperAdmin', 'user'));
+        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes', 'role', 'id', 'isSuperAdmin', 'user', 'design2Admins'));
     }
 
     public function create(Request $request){
