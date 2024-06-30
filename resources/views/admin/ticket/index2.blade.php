@@ -226,7 +226,7 @@
                             <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
                                 @if(!empty($admins))
                                 @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                <option value="{{ $v->id }}" @if (!$isSuperAdmin && in_array($v->id, $design2Admins)) disabled @endif>{{ $v->username }}</option>
                                 @endforeach
                                 @endif
                             </select>
@@ -257,7 +257,7 @@
                                 <select class="form-control select2" name="design_handle[]" style="width: 100%">
                                     @if(!empty($admins))
                                     @foreach($admins as $v)
-                                    <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                    <option value="{{ $v->id }}" @if (!$isSuperAdmin && in_array($v->id, $design2Admins)) disabled @endif>{{ $v->username }}</option>
                                     @endforeach
                                     @endif
                                 </select>
@@ -367,7 +367,7 @@
                             <select class="form-control select2" name="admin[]" multiple="multiple" style="width: 100%">
                                 @if(!empty($admins))
                                 @foreach($admins as $v)
-                                <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                <option value="{{ $v->id }}" @if (!$isSuperAdmin && in_array($v->id, $design2Admins)) disabled @endif>{{ $v->username }}</option>
                                 @endforeach
                                 @endif
                             </select>
@@ -390,11 +390,11 @@
                         </div>
                         <div class="px-3 mt-3 row design_handle d-none">
                             <div class="col-lg-6 ">
-                                <label>Thiết kế xử lý:</label>
+                                <label>Người xử lý:</label>
                                 <select class="form-control select2" name="design_handle[]" style="width: 100%">
                                     @if(!empty($admins))
                                     @foreach($admins as $v)
-                                    <option value="{{ $v->id }}">{{ $v->username }}</option>
+                                    <option value="{{ $v->id }}" @if (!$isSuperAdmin && in_array($v->id, $design2Admins)) disabled @endif>{{ $v->username }}</option>
                                     @endforeach
                                     @endif
                                 </select>

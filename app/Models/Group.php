@@ -40,4 +40,9 @@ class Group extends Model
     {
         return $this->belongsToMany(Phase::class, 'phase_group');
     }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }
