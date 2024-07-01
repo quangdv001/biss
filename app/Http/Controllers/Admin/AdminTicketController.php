@@ -227,7 +227,7 @@ class AdminTicketController extends Controller
         
         if ($currentGroup) {
             $role = $this->role->first(['id' => $currentGroup->role_id]);
-            if (in_array($role->slug, ['Design', 'Design2'])) {
+            if ($role && in_array(@$role->slug, ['Design', 'Design2'])) {
                 if ($params['deadline_time'] <= $today) {
                     $res['mess'] = 'Deadline ít nhất phải ngày mai';
                     return response()->json($res);
