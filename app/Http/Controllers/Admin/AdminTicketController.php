@@ -245,7 +245,7 @@ class AdminTicketController extends Controller
                 $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
                 $deadline = !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : time();
                 $childRole = $this->role->first(['id' => $group->role_id]);
-                if (in_array($childRole->slug, ['Design', 'Design2'])) {
+                if ($childRole && in_array(@$childRole->slug, ['Design', 'Design2'])) {
                     if ($deadline <= $today) {
                         $res['mess'] = 'Deadline thiết kế ít nhất phải ngày mai';
                         return response()->json($res);
