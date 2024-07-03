@@ -389,7 +389,17 @@
                             </div>
                         </div>
                         <div class="px-3 mt-3 row design_handle d-none">
-                            <div class="col-lg-6 ">
+                            <div class="col-lg-4 mb-2">
+                                <label>Nhóm công việc:</label>
+                                <select class="form-control" name="phase_group_id" style="width: 100%">
+                                    @if(!empty($phase[$pid]->group))
+                                    @foreach($phase[$pid]->group as $v)
+                                    <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-lg-4 mb22">
                                 <label>Người xử lý:</label>
                                 <select class="form-control select2" name="design_handle[]" style="width: 100%">
                                     @if(!empty($admins))
@@ -399,7 +409,7 @@
                                     @endif
                                 </select>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-4 mb-2">
                                 <label>Trạng thái:</label>
                                 <div>
                                     <input data-switch="true" type="checkbox" name="child_status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary"/>
@@ -651,6 +661,8 @@ $(document).on('click', '.btn-edit', function(){
                     child_admin.push(v.id);
                 });
             }
+            console.log(ticket.child);
+            $('#modalEdit select[name="phase_group_id"]').val(ticket.child.group_id).trigger('change');
             $('#modalEdit select[name="design_handle[]"]').val(child_admin).trigger('change');
             $('#modalEdit input[name="child_status"]').prop('checked', ticket.child.status == 1 ? true : false).trigger('change');
             $('#modalEdit input[name="child_input"]').val(ticket.child.input);

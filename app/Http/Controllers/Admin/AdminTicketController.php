@@ -142,12 +142,13 @@ class AdminTicketController extends Controller
                         $childAdmin = $request->get('design_handle',[]);
                         
                         $child = $this->ticketRepo->first(['parent_id' => $res->id]);
-                        $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
+                        $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time', 'phase_group_id');
                         $paramsC['input'] = $paramsChild['child_input'];
                         $paramsC['output'] = $paramsChild['child_output'];
                         $paramsC['status'] = isset($paramsChild['child_status']) ? 1 : 0;
                         $paramsC['qty'] = $paramsChild['child_qty'];
                         $paramsC['priority'] = $paramsChild['child_priority'];
+                        $paramsC['group_id'] = $paramsChild['phase_group_id'];
                         $paramsC['deadline_time'] =  !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : null;
                         if ($child) {
                             $resP = $this->ticketRepo->update($child, $paramsC);
@@ -156,8 +157,10 @@ class AdminTicketController extends Controller
                             }
                         } else {
                             if ($isOrder) {
-                                $role = $this->role->first(['slug' => 'Design']);
-                                $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
+                                // $role = $this->role->first(['slug' => 'Design']);
+                                // $group = $this->groupRepo->first(['project_id' => $params['project_id'], 'role_id' => @$role->id], ['id' => 'DESC']);
+                                $phaseGroupId = $request->input('phase_group_id', 0);
+                                $group = $this->groupRepo->first(['id' => $phaseGroupId]);
                                 if ($group) {
                                     $paramsC['name'] = $params['name'];
                                     $paramsC['description'] = $params['description'];
