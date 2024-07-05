@@ -687,6 +687,11 @@ $(document).on('click', '.btn-edit', function(){
     $('#modalEdit').modal('show');
 });
 
+$('#formEdit').bind('submit', function () {
+    $('#modalEdit select[name="admin[]"] option').prop('disabled', false);
+    $('#modalEdit select[name="design_handle[]"] option').prop('disabled', false);
+});
+
 $(document).on('click', '.btn-note', function(){
     let id = $(this).data('id');
     let ticket = data[id];
