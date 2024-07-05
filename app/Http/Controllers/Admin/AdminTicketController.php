@@ -143,13 +143,13 @@ class AdminTicketController extends Controller
                         
                         $child = $this->ticketRepo->first(['parent_id' => $res->id]);
                         $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time', 'phase_group_id');
-                        $paramsC['input'] = $paramsChild['child_input'];
-                        $paramsC['output'] = $paramsChild['child_output'];
+                        $paramsC['input'] = @$paramsChild['child_input'];
+                        $paramsC['output'] = @$paramsChild['child_output'];
                         $paramsC['status'] = isset($paramsChild['child_status']) ? 1 : 0;
-                        $paramsC['qty'] = $paramsChild['child_qty'];
-                        $paramsC['priority'] = $paramsChild['child_priority'];
-                        $paramsC['group_id'] = $paramsChild['phase_group_id'];
-                        $paramsC['deadline_time'] =  !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : null;
+                        $paramsC['qty'] = @$paramsChild['child_qty'];
+                        $paramsC['priority'] = @$paramsChild['child_priority'];
+                        $paramsC['group_id'] = @$paramsChild['phase_group_id'];
+                        $paramsC['deadline_time'] = !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : null;
                         if ($child) {
                             $resP = $this->ticketRepo->update($child, $paramsC);
                             if ($resP) {
