@@ -35,7 +35,7 @@ class Project extends Model
 
     public function group()
     {
-        return $this->hasMany(Group::class,'project_id','id');
+        return $this->hasMany(Group::class,'project_id','id')->orderBy('id', 'DESC');
     }
 
     public function phase()
