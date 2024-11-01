@@ -217,15 +217,21 @@ class AdminRoleController extends Controller
         if($temp->count() > 0){
             foreach($temp as $k => $v){
                 if(in_array($k, $arrAdmin)){
-
                     $proj = [];
                     if($v->count() > 0){
                         foreach($v as $val){
+                            $lastPhase = $val->phase->first();
+                            $groups = $val->group->where('role_id', $id);
+                            $qty = 0;
+                            foreach ($groups as $group) {
+                                $qty += $group->phaseGroup->where('phase_id', $lastPhase->id)->sum('qty');
+                            }
                             $proj[] = [
                                 'name' => $val->name,
                                 'type' => $val->type,
-                                'qty' => $val->group->where('role_id', $id)->first() ? ceil((@$val->group->where('role_id', $id)->first()->phaseGroup->sortByDesc('phase_id')->first()->qty ?? 0)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)) : 0,
-                                'complete' => isset($val->group->where('role_id', $id)->first()->id) && isset($tickets[$k][$val->group->where('role_id', $id)->first()->id]) ? $tickets[$k][$val->group->where('role_id', $id)->first()->id]->count() : 0
+                                'qty' => ceil(($qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)),
+                                'complete' => isset($val->group->where('role_id', $id)->first()->id) && isset($tickets[$k][$val->group->where('role_id', $id)->first()->id]) ? $tickets[$k][$val->group->where('role_id', $id)->first()->id]->count() : 0,
+                                'test' => $qty . '-' . $val->payment_month
                             ];
                         }
                     }

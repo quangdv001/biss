@@ -40,7 +40,7 @@ class Project extends Model
 
     public function phase()
     {
-        return $this->hasMany(Phase::class, 'project_id', 'id');
+        return $this->hasMany(Phase::class, 'project_id', 'id')->orderBy('id', 'DESC');
     }
 
     public function ticket()

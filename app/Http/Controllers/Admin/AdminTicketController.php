@@ -99,8 +99,8 @@ class AdminTicketController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if($user->hasRole(['guest'])){
-            return back()->with('error_message', 'Bạn không có quyền!');
+        if($user->hasRole(['guest', 'Design', 'Design2'])){
+            return response()->json(['success' => 0, 'mess' => 'Bạn không có quyền!']);
         }
         $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
         $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : null;
@@ -113,11 +113,11 @@ class AdminTicketController extends Controller
         if(isset($params['id'])){
             $ticket = $this->ticketRepo->first(['id' => $params['id']]);
             if($ticket){
-                if ($user->hasRole(['Design'])) {
-                    $status = $params['status'];
-                    $params = [];
-                    $params['status'] = $status;
-                }
+                // if ($user->hasRole(['Design', 'Design2'])) {
+                //     $status = $params['status'];
+                //     $params = [];
+                //     $params['status'] = $status;
+                // }
                 $ticket->load('admin');
                 // $isAdmin = $user->hasRole(['super_admin', 'account']);
                 
@@ -209,7 +209,7 @@ class AdminTicketController extends Controller
 
     public function createAjax(Request $request){
         $user = auth('admin')->user();
-        if($user->hasRole(['guest', 'Design'])){
+        if($user->hasRole(['guest', 'Design', 'Design2'])){
             $res['success'] = 0;
             $res['mess'] = 'Bạn không có quyền!';
             return response()->json($res);

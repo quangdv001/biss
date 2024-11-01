@@ -212,7 +212,7 @@ class ProjectRepo
         if(isset($params['end_time']) && $params['end_time'] > 0){
             $query = $query->where('accept_time', '<=', $params['end_time'])->where('expired_time', '>=', $params['end_time']);
         }
-        $query = $query->with('admin','group.phaseGroup');
+        $query = $query->with('admin','group.phaseGroup', 'phase');
         
         return $query->get();
 
