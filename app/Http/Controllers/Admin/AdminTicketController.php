@@ -231,7 +231,14 @@ class AdminTicketController extends Controller
         if ($currentGroup) {
             $role = $this->role->first(['id' => $currentGroup->role_id]);
             if ($role && in_array(@$role->slug, ['Design', 'Design2'])) {
+                if(!$user->hasRole(['super_admin'])){
+                    $res['success'] = 0;
+                    $res['mess'] = 'Bạn không có quyền tạo ticket group Thiết kế!';
+                    return response()->json($res);
+                }
+
                 if ($params['deadline_time'] <= $today) {
+                    $res['success'] = 0;
                     $res['mess'] = 'Deadline ít nhất phải ngày mai';
                     return response()->json($res);
                 }
