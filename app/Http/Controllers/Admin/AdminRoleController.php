@@ -220,6 +220,12 @@ class AdminRoleController extends Controller
                     $proj = [];
                     if($v->count() > 0){
                         foreach($v as $val){
+                            $count = 0;
+                            foreach ($val->admin_id as $adminId) {
+                                if (in_array($adminId, $arrAdmin)) {
+                                    $count++;
+                                }
+                            }
                             $lastPhase = $val->phase->first();
                             $groups = $val->group->where('role_id', $id);
                             $qty = 0;
@@ -229,7 +235,7 @@ class AdminRoleController extends Controller
                             $proj[] = [
                                 'name' => $val->name,
                                 'type' => $val->type,
-                                'qty' => ceil(($qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)),
+                                'qty' => ceil(($qty)/($val->payment_month ? Str::replace(',', '.', $val->payment_month) : 1)/($count > 0 ? $count : 1)),
                                 'complete' => isset($val->group->where('role_id', $id)->first()->id) && isset($tickets[$k][$val->group->where('role_id', $id)->first()->id]) ? $tickets[$k][$val->group->where('role_id', $id)->first()->id]->count() : 0,
                                 'test' => $qty . '-' . $val->payment_month
                             ];
