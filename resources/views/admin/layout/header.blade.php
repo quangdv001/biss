@@ -231,6 +231,13 @@
                     </a>
                 </li>
                 @endif
+                @if(auth('admin')->user()->hasRole(['super_admin','account']))
+                <li class="menu-item menu-item-submenu menu-item-rel @if(Route::is('admin.ai.*')) menu-item-open menu-item-here @endif">
+                    <a href="{{ route('admin.ai.index') }}" class="menu-link">
+                        <span class="menu-text">AI</span>
+                    </a>
+                </li>
+                @endif
             </ul>
             <!--end::Header Nav-->
         </div>

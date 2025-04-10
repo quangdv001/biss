@@ -52,4 +52,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('customer/remove', 'AdminCustomerController@remove')->name('customer.remove');
     Route::get('customer/export', 'AdminCustomerController@export')->name('customer.export');
     Route::post('customer/import', 'AdminCustomerController@import')->name('customer.import');
+
+    Route::get('ai', 'AdminAiController@index')->name('ai.index');
+    Route::post('ai/send', 'AdminAiController@send')->name('ai.send');
 });
