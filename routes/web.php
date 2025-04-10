@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use OpenAI\Laravel\Facades\OpenAI;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +16,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('admin.home.index');
+});
+
+Route::get('/test', function () {
+    $result = OpenAI::chat()->create([
+        "model" => "gpt-4o-mini",
+        'messages' => [
+            ['role' => 'user', 'content' => 'Giới thiệu về BissBrand ở Việt Nam'],
+        ],
+    ]);
+
+    dd($result);
 });
 
 Route::namespace('Admin')->name('admin.')->prefix('admin')->group(function () {
