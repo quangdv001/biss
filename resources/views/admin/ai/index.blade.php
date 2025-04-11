@@ -67,7 +67,7 @@ type="text/css" /> --}}
                     <a class="nav-link" data-toggle="tab" href="#post_sample">Bài mẫu</a>
                 </li>
             </ul>
-              
+
             <!-- Tab panes -->
             <div class="tab-content">
                 <div class="tab-pane active container" id="timeline">
@@ -217,10 +217,17 @@ type="text/css" /> --}}
         let url = $form.attr('action');
         let method = $form.attr('method');
         let type = $form.data('type');
+        let button = $(this).find('button[type="submit"]');
         $.ajax({
             url: url,
             type: 'POST',
             data: $(this).serialize(),
+            beforeSend: function () {
+                button.addClass('spinner');
+                button.addClass('spinner-white');
+                button.addClass('spinner-right');
+                button.attr('disabled', true);
+            },
             success: function(res) {
                 if (res.success) {
                     $(`#ai_${type}`).val(res.data);
@@ -230,7 +237,13 @@ type="text/css" /> --}}
                 }
             },
             error: function(xhr) {
-                $('#responseMessage').text('Error: ' + xhr.responseText);
+                init.showNoty('Có lỗi xảy ra!', 'error');
+            },
+            complete: function() {
+                button.removeClass('spinner');
+                button.removeClass('spinner-white');
+                button.removeClass('spinner-right');
+                button.attr('disabled', false);
             }
         });
 
