@@ -156,6 +156,17 @@ class AdminTicketController extends Controller
                         $paramsC['group_id'] = @$paramsChild['phase_group_id'];
                         $paramsC['deadline_time'] = !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : null;
                         if ($child) {
+                            if ($paramsC['status'] == 1) {
+                                $childOutput = $paramsChild['child_output'] ?? $child->output;
+                                if (!$childOutput) {
+                                    $resA['mess'] = 'Bạn cần nhập sản phẩm để hoàn thành!';
+                                    return response()->json($resA);
+                                }
+                                $paramsC['complete_time'] = time();
+                            } else {
+                                $paramsC['complete_time'] = null;
+                            }
+
                             $resP = $this->ticketRepo->update($child, $paramsC);
                             if ($resP) {
                                 $resP->admin()->sync($childAdmin);
