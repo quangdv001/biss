@@ -120,11 +120,16 @@ class AdminTicketController extends Controller
                 // }
                 $ticket->load('admin');
                 // $isAdmin = $user->hasRole(['super_admin', 'account']);
-                
+
                 // if (!$isAdmin && !in_array($user->id, $ticket->admin->pluck('id')->all()) && $user->id != @$ticket->admin_id_c) {
                 //     return back()->with('error_message', 'Bạn không có quyền sửa ticket!');
                 // }
                 if ($params['status'] == 1) {
+                    $output = $params['output'] ?? $ticket->output;
+                    if (!$output) {
+                        $resA['mess'] = 'Bạn cần nhập sản phẩm!';
+                        return response()->json($resA);
+                    }
                     $params['complete_time'] = $ticket->complete_time ?? time();
                 } else {
                     $params['complete_time'] = null;
@@ -137,10 +142,10 @@ class AdminTicketController extends Controller
 
                     $req = $request->only('is_order');
                     $isOrder = isset($req['is_order']) ? 1 : 0;
-                    
+
                     if ($res->parent_id == 0) {
                         $childAdmin = $request->get('design_handle',[]);
-                        
+
                         $child = $this->ticketRepo->first(['parent_id' => $res->id]);
                         $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time', 'phase_group_id');
                         $paramsC['input'] = @$paramsChild['child_input'];
@@ -178,9 +183,9 @@ class AdminTicketController extends Controller
                             }
                         }
                     }
-                        
-                    
-                    
+
+
+
                     $resA['success'] = 1;
                     $resA['mess'] = 'Cập nhật ticket thành công!';
                     return response()->json($resA);
@@ -227,7 +232,7 @@ class AdminTicketController extends Controller
         $params['deadline_time'] = !empty($params['deadline_time']) ? strtotime('tomorrow', strtotime($params['deadline_time'])) - 1 : time();
         $today = strtotime('tomorrow', time()) - 1;
         $currentGroup = $this->groupRepo->first(['id' => $params['group_id']]);
-        
+
         if ($currentGroup) {
             $role = $this->role->first(['id' => $currentGroup->role_id]);
             if ($role && in_array(@$role->slug, ['Design', 'Design2'])) {
@@ -246,7 +251,7 @@ class AdminTicketController extends Controller
         }
 
         $req = $request->only('is_order');
-        
+
         $isOrder = isset($req['is_order']) ? 1 : 0;
         if ($isOrder) {
             $phaseGroupId = $request->input('phase_group_id', 0);
@@ -263,13 +268,13 @@ class AdminTicketController extends Controller
                 }
             }
         }
-        
-        
+
+
         $params['status'] = isset($params['status']) ? 1 : 0;
         $params['qty'] = !empty($params['qty']) ? (int)$params['qty'] : 1;
         $params['priority'] = !empty($params['priority']) ? (int)$params['priority'] : 2;
         $admins = $request->get('admin',[]);
-        
+
         if ($params['status'] == 1) {
             $params['complete_time'] = time();
         } else {
@@ -283,10 +288,10 @@ class AdminTicketController extends Controller
         $res['mess'] = 'Có lỗi xảy ra!';
         if($resC){
             $resC->admin()->sync($admins);
-            
+
             if ($isOrder) {
                 $handle = $request->input('design_handle', []);
-                
+
                 if ($group) {
                     $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
                     $deadline = !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : time();
@@ -305,7 +310,7 @@ class AdminTicketController extends Controller
                     $paramsC['parent_id'] = $resC->id;
                     $paramsC['group_id'] = $group->id;
                     $paramsC['admin_id_c'] = $user->id;
-                    
+
                     $resChild = $this->ticketRepo->create($paramsC);
                     if ($resChild) {
                         $resChild->admin()->sync($handle);
@@ -361,7 +366,7 @@ class AdminTicketController extends Controller
                         'status' => 1
                     ];
                 }
-    
+
                 if(!empty($params)){
                     $this->noty->createMult($params);
                 }
@@ -383,12 +388,12 @@ class AdminTicketController extends Controller
                         'status' => 1
                     ];
                 }
-    
+
                 if(!empty($params)){
                     $this->noty->createMult($params);
                 }
             }
-            
+
         }
     }
 
