@@ -125,11 +125,11 @@ class AdminTicketController extends Controller
                 //     return back()->with('error_message', 'Bạn không có quyền sửa ticket!');
                 // }
                 if ($params['status'] == 1) {
-                    $output = $params['output'] ?? $ticket->output;
-                    if (!$output) {
-                        $resA['mess'] = 'Bạn cần nhập sản phẩm!';
-                        return response()->json($resA);
-                    }
+                    // $input = $params['input'] ?? $ticket->input;
+                    // if (!$input) {
+                    //     $resA['mess'] = 'Bạn cần nhập khách duyệt!';
+                    //     return response()->json($resA);
+                    // }
                     $params['complete_time'] = $ticket->complete_time ?? time();
                 } else {
                     $params['complete_time'] = null;
