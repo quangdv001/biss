@@ -36,7 +36,7 @@ type="text/css" /> --}}
         text-align: center;
     }
 </style>
-    
+
 @endsection
 @section('content')
 <!--begin::Subheader-->
@@ -106,10 +106,10 @@ type="text/css" /> --}}
                 <form id="form-search" action="">
                 <div class="row align-items-center">
 
-                    
-                    <div class="col-lg-9 col-xl-10">
+
+                    <div class="col-lg-11 col-xl-11">
                         <div class="row align-items-center">
-                            <div class="col-md-2 my-2 my-md-0">
+                            <div class="col-md-1 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-2 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="limit" id="select-limit">
@@ -131,7 +131,7 @@ type="text/css" /> --}}
                                 </div>
                             </div>
 
-                            <div class="col-md-2 my-2 my-md-0">
+                            <div class="col-md-1 my-2 my-md-0">
                                 <div class="d-flex align-items-center">
                                     <label class="mr-3 mb-0 d-none d-md-block"></label>
                                     <select class="form-control" name="status">
@@ -164,9 +164,19 @@ type="text/css" /> --}}
                                     <span><i class="flaticon2-search-1 text-muted"></i></span>
                                 </div>
                             </div>
+                            <div class="col-md-2 my-2 my-md-0">
+                                <div class="d-flex align-items-center">
+                                    <label class="mr-3 mb-0 d-none d-md-block"></label>
+                                    <select class="form-control" name="has_late">
+                                        <option value="">Lọc Ticket trễ hạn</option>
+                                        <option value="0" @if(old('has_late') === "0") selected @endif>Không</option>
+                                        <option value="1" @if(old('has_late') == 1) selected @endif>Có</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-xl-2 mt-5 mt-lg-0">
+                    <div class="col-lg-1 col-xl-1 mt-5 mt-lg-0">
                         <button type="submit" class="btn btn-light-primary px-6 font-weight-bold">Tìm kiếm</button>
                     </div>
                 </div>
@@ -204,7 +214,7 @@ type="text/css" /> --}}
                             </tr>
                         </thead>
                         <tbody>
-                            @php 
+                            @php
                             $time = time();
                             @endphp
                             @foreach($data as $k => $v)
@@ -242,8 +252,8 @@ type="text/css" /> --}}
                                 <td>@if($v->website) <a href="{{ $v->website }}" target="_blank">Xem</a> @endif</td>
                                 <td>{{ $v->description }}</td>
                                 <td>{{ $v->note }}</td> --}}
-                                
-                                
+
+
                             </tr>
                             <tr>
                                 <td colspan="9" class="hiddenRow text-left">

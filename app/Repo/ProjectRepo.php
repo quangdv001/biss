@@ -177,7 +177,7 @@ class ProjectRepo
                 $query->where('admin_id', $userId);
             })->orwhere('planer_id', $userId);
         });
-        $query = $query->with(['planer', 'executive', 'admin']);
+        $query = $query->with(['planer', 'executive', 'admin', 'ticket']);
         if($orderBy){
             $query = $query->orderBy($orderBy, 'DESC');
         }
@@ -213,7 +213,7 @@ class ProjectRepo
             $query = $query->where('accept_time', '<=', $params['end_time'])->where('expired_time', '>=', $params['end_time']);
         }
         $query = $query->with('admin','group.phaseGroup', 'phase');
-        
+
         return $query->get();
 
     }
@@ -227,7 +227,7 @@ class ProjectRepo
         }
         $query = $query->where('status', 1);
         $query = $query->with('admin','group.phaseGroup');
-        
+
         return $query->get();
     }
 }

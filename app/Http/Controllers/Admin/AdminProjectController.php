@@ -29,6 +29,7 @@ class AdminProjectController extends Controller
         $field = $request->get('field', '');
         $status = (int) $request->get('status', 0);
         $type = $request->get('type', 0);
+        $has_late = $request->get('has_late', '');
         $orderBy = $request->get('order', 'id');
         $condition = [];
         if($status > 0){
@@ -54,11 +55,12 @@ class AdminProjectController extends Controller
         $isAdmin = $user->hasRole(['super_admin','account']);
         $isGuest = $user->hasRole(['guest']);
         if($user->hasRole(['super_admin', 'account'])){
-            $data = $this->projectRepo->paginate($condition, $limit, [$orderBy => 'DESC'], ['planer', 'executive', 'admin']);
+            $data = $this->projectRepo->paginate($condition, $limit, [$orderBy => 'DESC'], ['planer', 'executive', 'admin', 'ticket']);
         } else {
             $data = $this->projectRepo->search($condition, $limit, $user->id, $orderBy);
         }
-        $data->load('ticket')->map(function ($project){
+        // Xử lý has_late cho từng project
+        $data->getCollection()->transform(function ($project){
             $project->has_late = false;
             if(!empty($project->ticket)){
                 foreach ($project->ticket as $ticket){
@@ -69,6 +71,15 @@ class AdminProjectController extends Controller
             }
             return $project;
         });
+
+        // Lọc dự án có ticket trễ nếu có điều kiện (giữ nguyên phân trang)
+        if($has_late !== null){
+            $filtered = $data->getCollection()->filter(function ($project) use ($has_late){
+                return $project->has_late == (bool)$has_late;
+            });
+            $data->setCollection($filtered->values());
+        }
+
         $admins = $this->adminRepo->get();
         $type = [
             1 => [
