@@ -104,64 +104,57 @@ type="text/css" /> --}}
             <!--begin::Search Form-->
             <div class="mb-7">
                 <form id="form-search" action="">
-                    <div class="row align-items-center">
-                        <div class="col-md-2 my-2 my-md-0">
+                    <div class="d-flex flex-wrap align-items-center">
+                        <div class="mr-3 mb-3">
                             <select class="form-control" name="limit" id="select-limit">
-                                    <option value="20" @if(old('limit') == 20) selected @endif>20</option>
-                                    <option value="30" @if(old('limit') == 30) selected @endif>30</option>
-                                    <option value="50" @if(old('limit') == 50) selected @endif>50</option>
-                                    <option value="100" @if(old('limit') == 100) selected @endif>100</option>
-                                </select>
+                                <option value="20" @if(old('limit') == 20) selected @endif>20</option>
+                                <option value="30" @if(old('limit') == 30) selected @endif>30</option>
+                                <option value="50" @if(old('limit') == 50) selected @endif>50</option>
+                                <option value="100" @if(old('limit') == 100) selected @endif>100</option>
+                            </select>
                         </div>
-                        <div class="col-md-2 my-2 my-md-0">
+                        <div class="mr-3 mb-3">
                             <select class="form-control" name="order" id="select-limit">
-                                    <option value="id" @if(old('order') == 'id') selected @endif>Dự án mới</option>
-                                    <option value="expired_time" @if(old('order') == 'expired_time') selected @endif>Ngày hết hạn</option>
-                                    <option value="accept_time" @if(old('order') == 'accept_time') selected @endif>Ngày bắt đầu</option>
-                                </select>
+                                <option value="id" @if(old('order') == 'id') selected @endif>Dự án mới</option>
+                                <option value="expired_time" @if(old('order') == 'expired_time') selected @endif>Ngày hết hạn</option>
+                                <option value="accept_time" @if(old('order') == 'accept_time') selected @endif>Ngày bắt đầu</option>
+                            </select>
                         </div>
-
-                        <div class="col-md-2 my-2 my-md-0">
+                        <div class="mr-3 mb-3">
                             <select class="form-control" name="status">
-                                    <option value="0" @if(old('status') == 0) selected @endif>Tất cả</option>
-                                    <option value="1" @if(old('status') == 1) selected @endif>Hoạt động</option>
-                                    <option value="2" @if(old('status') == 2) selected @endif>Hoàn thành</option>
-                                </select>
+                                <option value="0" @if(old('status') == 0) selected @endif>Tất cả</option>
+                                <option value="1" @if(old('status') == 1) selected @endif>Hoạt động</option>
+                                <option value="2" @if(old('status') == 2) selected @endif>Hoàn thành</option>
+                            </select>
                         </div>
-                        <div class="col-md-2 my-2 my-md-0">
+                        <div class="mr-3 mb-3">
                             <select class="form-control" name="type">
-                                    <option value="0" @if(old('type') == 0) selected @endif>Loại dự án</option>
-                                    <option value="1" @if(old('type') == 1) selected @endif>Marketing</option>
-                                    <option value="2" @if(old('type') == 2) selected @endif>Branding</option>
-                                    <option value="3" @if(old('type') == 3) selected @endif>Video</option>
-                                </select>
+                                <option value="0" @if(old('type') == 0) selected @endif>Loại dự án</option>
+                                <option value="1" @if(old('type') == 1) selected @endif>Marketing</option>
+                                <option value="2" @if(old('type') == 2) selected @endif>Branding</option>
+                                <option value="3" @if(old('type') == 3) selected @endif>Video</option>
+                            </select>
+                        </div >
+                        <div class="input-icon mr-3 mb-3" >
+                            <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
+                            <span><i class="flaticon2-search-1 text-muted"></i></span>
                         </div>
-                        <div class="col-md-2 my-2 my-md-0">
-                            <div class="input-icon">
-                                <input type="text" class="form-control" name="name" placeholder="Tên dự án" value="{{ old('name') }}"/>
-                                <span><i class="flaticon2-search-1 text-muted"></i></span>
-                            </div>
+                        <div class="input-icon mr-3 mb-3">
+                            <input type="text" class="form-control" name="field" placeholder="Lĩnh vực" value="{{ old('field') }}"/>
+                            <span><i class="flaticon2-search-1 text-muted"></i></span>
                         </div>
-                        <div class="col-md-2 my-2 my-md-0">
-                            <div class="input-icon">
-                                <input type="text" class="form-control" name="field" placeholder="Lĩnh vực" value="{{ old('field') }}"/>
-                                <span><i class="flaticon2-search-1 text-muted"></i></span>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="row mt-3 align-items-center">
-                        <div class="col-md-2 my-2 my-md-0">
+                        <div class="mr-3 mb-3">
                             <select class="form-control" name="has_late">
-                                    <option value="">Lọc Ticket trễ hạn</option>
-                                    <option value="0" @if(old('has_late') === "0") selected @endif>Không</option>
-                                    <option value="1" @if(old('has_late') == 1) selected @endif>Có</option>
-                                </select>
+                                <option value="">Lọc Ticket trễ hạn</option>
+                                <option value="0" @if(old('has_late') === "0") selected @endif>Không</option>
+                                <option value="1" @if(old('has_late') == 1) selected @endif>Có</option>
+                            </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="mb-3">
                             <button type="submit" class="btn btn-light-primary px-6 font-weight-bold">Tìm kiếm</button>
                         </div>
                     </div>
+
                 </form>
             </div>
             <!--end::Search Form-->
