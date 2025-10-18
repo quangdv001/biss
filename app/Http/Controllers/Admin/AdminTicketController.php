@@ -246,6 +246,8 @@ class AdminTicketController extends Controller
 
         if ($currentGroup) {
             $role = $this->role->first(['id' => $currentGroup->role_id]);
+
+            // Kiểm tra quyền tạo ticket cho Design và Design2
             if ($role && in_array(@$role->slug, ['Design', 'Design2'])) {
                 if(!$user->hasRole(['super_admin'])){
                     $res['success'] = 0;
@@ -256,6 +258,19 @@ class AdminTicketController extends Controller
                 if ($params['deadline_time'] <= $today) {
                     $res['success'] = 0;
                     $res['mess'] = 'Deadline ít nhất phải ngày mai';
+                    return response()->json($res);
+                }
+            }
+
+            // Kiểm tra quyền tạo ticket cho Content_SEO
+            if ($role && in_array(@$role->slug, ['content_seo'])) {
+                // Chỉ admin hoặc user từ group SEO mới được tạo
+                $isSuperAdmin = $user->hasRole(['super_admin']);
+                $isSeoUser = $user->hasRole(['seo']);
+
+                if (!$isSuperAdmin && !$isSeoUser) {
+                    $res['success'] = 0;
+                    $res['mess'] = 'Bạn không có quyền tạo ticket group Content SEO!';
                     return response()->json($res);
                 }
             }
@@ -421,5 +436,104 @@ class AdminTicketController extends Controller
         }
 
         return response()->json($res);
+    }
+
+    public function importFromGoogleSheet(Request $request)
+    {
+        try {
+            $user = auth('admin')->user();
+
+            // Validate required parameters
+            $request->validate([
+                'google_sheet_url' => 'required|url',
+                'project_id' => 'required|exists:project,id',
+                'group_id' => 'required|exists:group,id',
+                'phase_id' => 'required|exists:phase,id',
+            ]);
+
+            $googleSheetUrl = $request->input('google_sheet_url');
+            $projectId = $request->input('project_id');
+            $groupId = $request->input('group_id');
+            $phaseId = $request->input('phase_id');
+
+            // Kiểm tra quyền import theo group
+            $currentGroup = $this->groupRepo->first(['id' => $groupId]);
+            if ($currentGroup) {
+                $role = $this->role->first(['id' => $currentGroup->role_id]);
+
+                // Kiểm tra quyền cho Design và Design2
+                if ($role && in_array(@$role->slug, ['Design', 'Design2'])) {
+                    if(!$user->hasRole(['super_admin'])){
+                        return response()->json([
+                            'success' => 0,
+                            'mess' => 'Bạn không có quyền import ticket cho group Thiết kế!'
+                        ]);
+                    }
+                }
+
+                // Kiểm tra quyền cho Content_SEO
+                if ($role && in_array(@$role->slug, ['content_seo'])) {
+                    $isSuperAdmin = $user->hasRole(['super_admin']);
+                    $isSeoUser = $user->hasRole(['seo']);
+
+                    if (!$isSuperAdmin && !$isSeoUser) {
+                        return response()->json([
+                            'success' => 0,
+                            'mess' => 'Bạn không có quyền import ticket cho group Content SEO!'
+                        ]);
+                    }
+                }
+            }
+
+            // Extract the spreadsheet ID and gid from the URL
+            preg_match('/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/', $googleSheetUrl, $matches);
+            if (!isset($matches[1])) {
+                return response()->json([
+                    'success' => 0,
+                    'mess' => 'URL Google Sheets không hợp lệ!'
+                ]);
+            }
+
+            $spreadsheetId = $matches[1];
+
+            // Extract gid (sheet ID)
+            preg_match('/gid=([0-9]+)/', $googleSheetUrl, $gidMatches);
+            $gid = isset($gidMatches[1]) ? $gidMatches[1] : '0';
+
+            // Convert Google Sheets URL to export URL
+            $exportUrl = "https://docs.google.com/spreadsheets/d/{$spreadsheetId}/export?format=xlsx&gid={$gid}";
+
+            // Download the file
+            $tempFile = tempnam(sys_get_temp_dir(), 'google_sheet_');
+            $tempFile .= '.xlsx';
+
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get($exportUrl, ['sink' => $tempFile]);
+            if ($response->getStatusCode() !== 200) {
+                return response()->json([
+                    'success' => 0,
+                    'mess' => 'Không thể tải file từ Google Sheets!'
+                ]);
+            }
+
+            // Import the data
+            $import = new \App\Imports\Ticket\TicketImport($projectId, $groupId, $phaseId, $user->id);
+            \Maatwebsite\Excel\Facades\Excel::import($import, $tempFile);
+
+            // Clean up temp file
+            unlink($tempFile);
+
+            return response()->json([
+                'success' => 1,
+                'mess' => 'Import dữ liệu thành công!',
+                'redirect' => route('admin.ticket.index', ['gid' => $groupId, 'pid' => $phaseId])
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => 0,
+                'mess' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ]);
+        }
     }
 }

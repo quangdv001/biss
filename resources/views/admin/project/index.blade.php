@@ -145,7 +145,7 @@ type="text/css" /> --}}
                         </div>
                         <div class="mr-3 mb-3">
                             <select class="form-control" name="has_late">
-                                <option value="">Lọc Ticket trễ hạn</option>
+                                <option value="">Lọc Ticket</option>
                                 <option value="0" @if(old('has_late') === "0") selected @endif>Không</option>
                                 <option value="1" @if(old('has_late') == 1) selected @endif>Có</option>
                             </select>

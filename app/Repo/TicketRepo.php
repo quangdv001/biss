@@ -26,6 +26,15 @@ class TicketRepo
         }
     }
 
+    public function insert($data)
+    {
+        try {
+            return Ticket::insert($data);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
     public function update($repo, $data)
     {
         try {
