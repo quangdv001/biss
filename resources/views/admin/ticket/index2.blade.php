@@ -61,6 +61,8 @@
                     <div class="card-toolbar">
                         <button type="button" class="btn btn-warning mr-2" data-toggle="modal"
                         data-target="#modalNote">Thêm ghi chú</button>
+                        <button type="button" class="btn btn-info mr-2" data-toggle="modal"
+                        data-target="#modalImportGoogleSheet">Import Google Sheet</button>
                         <button type="button" class="btn btn-success mr-2" data-toggle="modal"
                         data-target="#modalCreate">Thêm công việc</button>
                     </div>
@@ -69,7 +71,7 @@
 
                 <!--begin::Body-->
                 <div class="card-body">
-                    
+
                     <!--begin: Datatable-->
                     @php
                     $time = time()
@@ -97,7 +99,7 @@
                         </thead>
 
                         <tbody>
-                            
+
                             @foreach($data as $k => $v)
                             <tr class="@if($v->id == $id) bg-secondary @endif">
                                 <td>{{ $k + 1 }}</td>
@@ -107,7 +109,7 @@
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
                                 <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
                                 <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
-                                
+
                                 <td nowrap>
                                     @if($v->priority == 1)
                                         <span  class="label label-lg font-weight-bold label-light-success label-inline">Thấp</span>
@@ -143,7 +145,7 @@
                                     @endif
                                 </td>
                                 @endforeach
-                                
+
                             </tr>
                         </tbody>
 
@@ -378,7 +380,7 @@
                                 <input data-switch="true" type="checkbox" name="status" data-on-text="Hoàn thành" data-off-text="Mới" data-on-color="primary" @if(auth('admin')->user()->hasRole(['guest'])) readonly @endif/>
                             </div>
                         </div>
-                        
+
                     </div>
                     @if ($user->hasRole(['super_admin', 'account', 'content']))
                     <div class="form-group row check-content">
@@ -578,6 +580,63 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalImportGoogleSheet" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import từ Google Sheets</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="card-body p-0 pb-4">
+                <div class="tab-content pt-5">
+                    <div class="tab-pane active" role="tabpanel">
+                        <div class="container">
+                            <form id="formImportGoogleSheet" class="form" method="post">
+                                @csrf
+                                <input type="hidden" name="project_id" value="{{ $project->id }}">
+                                <input type="hidden" name="group_id" value="{{ $gid }}">
+                                <input type="hidden" name="phase_id" value="{{ $pid }}">
+
+                                <div class="form-group">
+                                    <label for="google_sheet_url">URL Google Sheets <span class="text-danger">*</span></label>
+                                    <input type="url" class="form-control form-control-lg form-control-solid"
+                                        id="google_sheet_url" name="google_sheet_url"
+                                        placeholder="https://docs.google.com/spreadsheets/d/..."
+                                        required>
+                                    <span class="form-text text-muted">
+                                        Nhập link Google Sheets có chứa dữ liệu với các cột: Chủ đề, Mô Tả, Khách duyệt, Sản phẩm, Deadline, Ghi chú
+                                    </span>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <strong>Lưu ý:</strong>
+                                    <ul class="mb-0">
+                                        <li>Google Sheets phải được chia sẻ công khai (Anyone with the link can view)</li>
+                                        <li>Dòng đầu tiên phải là tiêu đề cột với tên: chu_de, mo_ta, khach_duyet, san_pham, deadline, ghi_chu</li>
+                                        <li>Cột Deadline có thể để trống hoặc nhập theo định dạng ngày/tháng/năm</li>
+                                    </ul>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-file-import"></i> Import dữ liệu
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 @section('custom_js')
 <script>
@@ -734,7 +793,7 @@ $(document).on('click', '.btn-remove', function(){
                     }
                 })
             }
-            
+
         }
     });
 });
@@ -853,6 +912,68 @@ $('.is_order').on('switchChange.bootstrapSwitch', function (e, data) {
     } else {
         inp.addClass('d-none');
     }
+});
+
+// Handle Google Sheets Import
+$("#formImportGoogleSheet").submit(function(e) {
+    e.preventDefault();
+
+    var formData = $(this).serialize();
+
+    if(!init.conf.ajax_sending){
+        $.ajax({
+            url: '{{ route("admin.ticket.importGoogleSheet") }}',
+            type: 'post',
+            data: formData,
+            beforeSend: function(){
+                init.conf.ajax_sending = true;
+                // Show loading indicator
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng đợi trong khi import dữ liệu từ Google Sheets',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
+            },
+            success: function(res) {
+                Swal.close();
+                if(res.success){
+                    init.showNoty(res.mess, 'success');
+                    $('#modalImportGoogleSheet').modal('hide');
+                    setTimeout(() => {
+                        if (res.redirect) {
+                            window.location.href = res.redirect;
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 1000);
+                } else {
+                    init.showNoty(res.mess, 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.close();
+                let errorMsg = 'Có lỗi xảy ra khi import dữ liệu!';
+                if (xhr.responseJSON && xhr.responseJSON.mess) {
+                    errorMsg = xhr.responseJSON.mess;
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                init.showNoty(errorMsg, 'error');
+            },
+            complete: function(){
+                init.conf.ajax_sending = false;
+            }
+        });
+    }
+});
+
+// Reset form when modal is hidden
+$('#modalImportGoogleSheet').on('hidden.bs.modal', function () {
+    $('#formImportGoogleSheet')[0].reset();
 });
 </script>
 @endsection
