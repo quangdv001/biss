@@ -163,9 +163,11 @@
             class="header-menu header-menu-left header-menu-mobile  header-menu-layout-default header-menu-root-arrow ">
             <!--begin::Header Nav-->
             <ul class="menu-nav ">
+                @if(auth('admin')->user()->hasRole(['super_admin','account']))
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is('admin.home.dashboard') || Route::is('admin.home.index')) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.home.dashboard') }}" class="menu-link"><span class="menu-text">Dashboard</span></a>
                 </li>
+                @endif
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is('admin.home.intro')) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.home.intro') }}" class="menu-link"><span class="menu-text">Giới thiệu</span></a>
                 </li>

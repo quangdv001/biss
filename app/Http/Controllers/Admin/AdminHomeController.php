@@ -22,12 +22,29 @@ class AdminHomeController extends Controller
         $this->role = $role;
     }
 
+    public function index(){
+        $user = auth('admin')->user();
+
+        // Nếu là admin thì vào dashboard, không thì vào intro
+        if ($user->hasRole(['super_admin', 'account'])) {
+            return redirect()->route('admin.home.dashboard');
+        }
+
+        return redirect()->route('admin.home.intro');
+    }
+
     public function intro(){
         return view('admin.home.intro');
     }
 
     public function dashboard(Request $request){
         $user = auth('admin')->user();
+
+        // Chỉ cho phép super_admin và account truy cập dashboard
+        if (!$user->hasRole(['super_admin', 'account'])) {
+            return redirect()->route('admin.home.intro')->with('error_message', 'Bạn không có quyền truy cập Dashboard');
+        }
+
         $isAdmin = $user->hasRole(['super_admin', 'account']);
 
         // Lấy danh sách roles và projects
