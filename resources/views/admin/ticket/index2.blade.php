@@ -602,12 +602,30 @@
 
                                 <div class="form-group">
                                     <label for="google_sheet_url">URL Google Sheets <span class="text-danger">*</span></label>
-                                    <input type="url" class="form-control form-control-lg form-control-solid"
-                                        id="google_sheet_url" name="google_sheet_url"
-                                        placeholder="https://docs.google.com/spreadsheets/d/..."
-                                        required>
+                                    <div class="input-group">
+                                        <input type="url" class="form-control form-control-lg form-control-solid"
+                                            id="google_sheet_url" name="google_sheet_url"
+                                            placeholder="https://docs.google.com/spreadsheets/d/..."
+                                            required>
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-info" id="btnLoadSheets">
+                                                <i class="fas fa-list"></i> Tải danh sách sheets
+                                            </button>
+                                        </div>
+                                    </div>
                                     <span class="form-text text-muted">
                                         Nhập link Google Sheets có chứa dữ liệu với các cột: Chủ đề, Mô Tả, Khách duyệt, Sản phẩm, Deadline, Ghi chú
+                                    </span>
+                                </div>
+
+                                <div class="form-group" id="sheetSelectGroup" style="display: none;">
+                                    <label for="sheet_gid">Chọn Sheet <span class="text-danger">*</span></label>
+                                    <select class="form-control form-control-lg form-control-solid"
+                                        id="sheet_gid" name="sheet_gid">
+                                        <option value="">-- Chọn sheet để import --</option>
+                                    </select>
+                                    <span class="form-text text-muted">
+                                        Chọn sheet cụ thể để import dữ liệu
                                     </span>
                                 </div>
 
@@ -914,6 +932,57 @@ $('.is_order').on('switchChange.bootstrapSwitch', function (e, data) {
     }
 });
 
+// Handle Load Sheets Button
+$("#btnLoadSheets").click(function() {
+    var googleSheetUrl = $('#google_sheet_url').val();
+
+    if (!googleSheetUrl) {
+        init.showNoty('Vui lòng nhập URL Google Sheets trước!', 'error');
+        return;
+    }
+
+    $.ajax({
+        url: '{{ route("admin.ticket.getGoogleSheets") }}',
+        type: 'post',
+        data: {
+            _token: '{{ csrf_token() }}',
+            google_sheet_url: googleSheetUrl
+        },
+        beforeSend: function() {
+            $('#btnLoadSheets').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang tải...');
+        },
+        success: function(res) {
+            if (res.success) {
+                var $select = $('#sheet_gid');
+                $select.empty();
+                $select.append('<option value="">-- Chọn sheet để import --</option>');
+
+                if (res.sheets && res.sheets.length > 0) {
+                    $.each(res.sheets, function(index, sheet) {
+                        $select.append('<option value="' + sheet.gid + '">' + sheet.title + '</option>');
+                    });
+                    $('#sheetSelectGroup').show();
+                    init.showNoty('Tải danh sách sheets thành công!', 'success');
+                } else {
+                    init.showNoty('Không tìm thấy sheet nào!', 'warning');
+                }
+            } else {
+                init.showNoty(res.mess, 'error');
+            }
+        },
+        error: function(xhr) {
+            let errorMsg = 'Có lỗi xảy ra khi tải danh sách sheets!';
+            if (xhr.responseJSON && xhr.responseJSON.mess) {
+                errorMsg = xhr.responseJSON.mess;
+            }
+            init.showNoty(errorMsg, 'error');
+        },
+        complete: function() {
+            $('#btnLoadSheets').prop('disabled', false).html('<i class="fas fa-list"></i> Tải danh sách sheets');
+        }
+    });
+});
+
 // Handle Google Sheets Import
 $("#formImportGoogleSheet").submit(function(e) {
     e.preventDefault();
@@ -974,6 +1043,8 @@ $("#formImportGoogleSheet").submit(function(e) {
 // Reset form when modal is hidden
 $('#modalImportGoogleSheet').on('hidden.bs.modal', function () {
     $('#formImportGoogleSheet')[0].reset();
+    $('#sheetSelectGroup').hide();
+    $('#sheet_gid').empty();
 });
 </script>
 @endsection
