@@ -49,6 +49,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('ticket/remove', 'AdminTicketController@remove')->name('ticket.remove');
     Route::post('ticket/createNote', 'AdminTicketController@createNote')->name('ticket.createNote');
     Route::post('ticket/editNote', 'AdminTicketController@editNote')->name('ticket.editNote');
+    Route::post('ticket/get-google-sheets', 'AdminTicketController@getGoogleSheets')->name('ticket.getGoogleSheets');
     Route::post('ticket/import-google-sheet', 'AdminTicketController@importFromGoogleSheet')->name('ticket.importGoogleSheet');
 
     Route::get('customer', 'AdminCustomerController@index')->name('customer.index');

@@ -10,21 +10,24 @@ use App\Repo\PhaseRepo;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
-class TicketImport implements ToCollection, WithHeadingRow
+class TicketImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 {
     protected $projectId;
     protected $groupId;
     protected $phaseId;
     protected $adminIdC;
+    protected $sheetIndex;
 
-    public function __construct($projectId, $groupId, $phaseId, $adminIdC)
+    public function __construct($projectId, $groupId, $phaseId, $adminIdC, $sheetIndex = null)
     {
         $this->projectId = $projectId;
         $this->groupId = $groupId;
         $this->phaseId = $phaseId;
         $this->adminIdC = $adminIdC;
+        $this->sheetIndex = $sheetIndex;
     }
 
     /**
@@ -33,6 +36,24 @@ class TicketImport implements ToCollection, WithHeadingRow
     public function headingRow(): int
     {
         return 2; // Use row 2 as the heading row
+    }
+
+    /**
+     * Specify which sheets to import
+     */
+    public function sheets(): array
+    {
+        // If a specific sheet is selected, only import that sheet
+        if ($this->sheetIndex !== null) {
+            return [
+                $this->sheetIndex => $this
+            ];
+        }
+
+        // Otherwise import the first sheet (index 0)
+        return [
+            0 => $this
+        ];
     }
 
     /**

@@ -438,6 +438,74 @@ class AdminTicketController extends Controller
         return response()->json($res);
     }
 
+    public function getGoogleSheets(Request $request)
+    {
+        try {
+            $request->validate([
+                'google_sheet_url' => 'required|url',
+            ]);
+
+            $googleSheetUrl = $request->input('google_sheet_url');
+
+            // Extract the spreadsheet ID from the URL
+            preg_match('/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/', $googleSheetUrl, $matches);
+            if (!isset($matches[1])) {
+                return response()->json([
+                    'success' => 0,
+                    'mess' => 'URL Google Sheets không hợp lệ!'
+                ]);
+            }
+
+            $spreadsheetId = $matches[1];
+
+            // Fetch spreadsheet metadata to get all sheets
+            $metadataUrl = "https://docs.google.com/spreadsheets/d/{$spreadsheetId}/edit#gid=0";
+
+            // Use a different approach: Download the Excel file and parse it to get sheet names
+            $exportUrl = "https://docs.google.com/spreadsheets/d/{$spreadsheetId}/export?format=xlsx";
+
+            $tempFile = tempnam(sys_get_temp_dir(), 'google_sheet_meta_');
+            $tempFile .= '.xlsx';
+
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get($exportUrl, ['sink' => $tempFile]);
+
+            if ($response->getStatusCode() !== 200) {
+                return response()->json([
+                    'success' => 0,
+                    'mess' => 'Không thể tải file từ Google Sheets! Vui lòng kiểm tra link và quyền truy cập.'
+                ]);
+            }
+
+            // Load the Excel file to get sheet names
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tempFile);
+            $sheets = [];
+
+            foreach ($spreadsheet->getAllSheets() as $index => $sheet) {
+                $sheets[] = [
+                    'title' => $sheet->getTitle(),
+                    'gid' => $index, // Excel doesn't use gid, we'll use index
+                    'index' => $index
+                ];
+            }
+
+            // Clean up temp file
+            unlink($tempFile);
+
+            return response()->json([
+                'success' => 1,
+                'sheets' => $sheets,
+                'spreadsheet_id' => $spreadsheetId
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => 0,
+                'mess' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     public function importFromGoogleSheet(Request $request)
     {
         try {
@@ -455,6 +523,7 @@ class AdminTicketController extends Controller
             $projectId = $request->input('project_id');
             $groupId = $request->input('group_id');
             $phaseId = $request->input('phase_id');
+            $sheetGid = $request->input('sheet_gid'); // Get selected sheet
 
             // Kiểm tra quyền import theo group
             $currentGroup = $this->groupRepo->first(['id' => $groupId]);
@@ -485,7 +554,7 @@ class AdminTicketController extends Controller
                 }
             }
 
-            // Extract the spreadsheet ID and gid from the URL
+            // Extract the spreadsheet ID from the URL
             preg_match('/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/', $googleSheetUrl, $matches);
             if (!isset($matches[1])) {
                 return response()->json([
@@ -496,14 +565,9 @@ class AdminTicketController extends Controller
 
             $spreadsheetId = $matches[1];
 
-            // Extract gid (sheet ID)
-            preg_match('/gid=([0-9]+)/', $googleSheetUrl, $gidMatches);
-            $gid = isset($gidMatches[1]) ? $gidMatches[1] : '0';
+            // Download the entire workbook
+            $exportUrl = "https://docs.google.com/spreadsheets/d/{$spreadsheetId}/export?format=xlsx";
 
-            // Convert Google Sheets URL to export URL
-            $exportUrl = "https://docs.google.com/spreadsheets/d/{$spreadsheetId}/export?format=xlsx&gid={$gid}";
-
-            // Download the file
             $tempFile = tempnam(sys_get_temp_dir(), 'google_sheet_');
             $tempFile .= '.xlsx';
 
@@ -516,8 +580,9 @@ class AdminTicketController extends Controller
                 ]);
             }
 
-            // Import the data
-            $import = new \App\Imports\Ticket\TicketImport($projectId, $groupId, $phaseId, $user->id);
+            // Import the data with selected sheet index
+            $sheetIndex = ($sheetGid !== null && $sheetGid !== '') ? intval($sheetGid) : null;
+            $import = new \App\Imports\Ticket\TicketImport($projectId, $groupId, $phaseId, $user->id, $sheetIndex);
             \Maatwebsite\Excel\Facades\Excel::import($import, $tempFile);
 
             // Clean up temp file
