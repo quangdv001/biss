@@ -28,6 +28,14 @@ class TicketImport implements ToCollection, WithHeadingRow
     }
 
     /**
+     * Specify which row contains the headings
+     */
+    public function headingRow(): int
+    {
+        return 2; // Use row 2 as the heading row
+    }
+
+    /**
     * @param Collection $collection
     */
     public function collection(Collection $collection)

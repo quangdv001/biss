@@ -7,7 +7,7 @@ Route::post('login', 'AdminAuthController@postLogin')->name('auth.postLogin');
 Route::get('logout', 'AdminAuthController@logout')->name('auth.logout');
 
 Route::middleware(['auth:admin'])->group(function () {
-    Route::get('/', 'AdminHomeController@dashboard')->name('home.index');
+    Route::get('/', 'AdminHomeController@index')->name('home.index');
     Route::get('dashboard', 'AdminHomeController@dashboard')->name('home.dashboard');
     Route::get('intro', 'AdminHomeController@intro')->name('home.intro');
     Route::post('home/getNoty', 'AdminHomeController@getNoty')->name('home.getNoty');

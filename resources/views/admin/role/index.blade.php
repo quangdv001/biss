@@ -356,7 +356,9 @@ Biss
     });
 
     var data = @json($data->keyBy('id'));
-    $('.btn-edit').click(function(){
+
+    // Use event delegation for dynamically loaded content
+    $(document).on('click', '.btn-edit', function(){
         let id = $(this).data('id');
         let role = data[id];
         $('#modalEdit input[name="name"]').val(role.name);
@@ -365,7 +367,7 @@ Biss
         $('#modalEdit').modal('show');
     });
 
-    $('.btn-remove').click(function(){
+    $(document).on('click', '.btn-remove', function(){
         let id = $(this).data('id');
         Swal.fire({
             title: "Bạn chắc chắn muốn xóa?",
@@ -399,12 +401,12 @@ Biss
                         }
                     })
                 }
-                
+
             }
         });
     });
 
-    $('.btn-report').click(function(){
+    $(document).on('click', '.btn-report', function(){
         let id = $(this).data('id');
         let role = data[id];
         $('#modalReport .username').html(role.name);
@@ -413,7 +415,7 @@ Biss
         $('#modalReport').modal('show');
     });
 
-    $('.btn-report2').click(function(){
+    $(document).on('click', '.btn-report2', function(){
         let id = $(this).data('id');
         let role = data[id];
         $('#modalReport2 .username').html(role.name);
@@ -423,7 +425,7 @@ Biss
         $('#modalReport2').modal('show');
     });
 
-    $('.btn-report3').click(function(){
+    $(document).on('click', '.btn-report3', function(){
         let id = $(this).data('id');
         let role = data[id];
         $('#modalReport3 .username').html(role.name);
@@ -472,7 +474,7 @@ Biss
                                             if($kp == 1){
                                                 html += `<tr>
                                                         <td colspan="11" class="hiddenRow">
-                                                            <div class="accordian-body collapse" id="demo${$ka}"> 
+                                                            <div class="accordian-body collapse" id="demo${$ka}">
                                                                 <table class="table">
                                                                     <thead>
                                                                         <tr class="info">
@@ -486,7 +488,7 @@ Biss
                                                                             <th scope="col">Tỉ lệ đúng hạn</th>
                                                                             <th scope="col">Tỉ lệ trễ</th>
                                                                         </tr>
-                                                                    </thead>	
+                                                                    </thead>
                                                                     <tbody>`;
                                             }
                                             html += `<tr>
@@ -504,7 +506,7 @@ Biss
                                             if($kp === admin.projects.length - 1){
                                                 html += `</tbody>
                                                                 </table>
-                                                            </div> 
+                                                            </div>
                                                         </td>
                                                     </tr>`;
                                             }
@@ -600,7 +602,7 @@ Biss
                                                 </tr>
                                                 <tr>
                                                         <td colspan="7" class="hiddenRow">
-                                                            <div class="accordian-body collapse" id="dome${$ka}"> 
+                                                            <div class="accordian-body collapse" id="dome${$ka}">
                                                                 <table class="table">
                                                                     <thead>
                                                                         <tr class="info">
@@ -608,7 +610,7 @@ Biss
                                                                             <th scope="col">SLHĐ</th>
                                                                             <th scope="col">Hoàn thành</th>
                                                                         </tr>
-                                                                    </thead>	
+                                                                    </thead>
                                                                     <tbody>`;
                                 if(v.projects.length> 0){
                                     v.projects.forEach(function (project , $kp) {
@@ -639,7 +641,7 @@ Biss
                                 }
                                 html += `</tbody>
                                                                 </table>
-                                                            </div> 
+                                                            </div>
                                                         </td>
                                                     </tr>`;
                             });
@@ -697,14 +699,14 @@ Biss
                                                 </tr>
                                                 <tr>
                                                         <td colspan="3" class="hiddenRow">
-                                                            <div class="accordian-body collapse" id="domex${$ka}"> 
+                                                            <div class="accordian-body collapse" id="domex${$ka}">
                                                                 <table class="table">
                                                                     <thead>
                                                                         <tr class="info">
                                                                             <th scope="col">Dự án</th>
                                                                             <th scope="col">Ngày hết hạn</th>
                                                                         </tr>
-                                                                    </thead>	
+                                                                    </thead>
                                                                     <tbody>`;
                                 if(v.projects.length> 0){
                                     v.projects.forEach(function (project , $kp) {
@@ -729,7 +731,7 @@ Biss
                                 }
                                 html += `</tbody>
                                                                 </table>
-                                                            </div> 
+                                                            </div>
                                                         </td>
                                                     </tr>`;
                             });
