@@ -51,6 +51,15 @@
 
         <!--begin::Topbar-->
         <div class="topbar  topbar-minimize ">
+            <!--begin::Calendar Button-->
+            <div class="topbar-item mr-3">
+                <a href="{{ route('admin.home.calendar') }}" class="btn btn-light-primary btn-sm">
+                    <i class="flaticon2-calendar-8"></i>
+                    <span class="d-none d-md-inline ml-1">Lịch công việc</span>
+                </a>
+            </div>
+            <!--end::Calendar Button-->
+
             <!--begin::Notifications-->
             @include('admin.layout.noty')
             <!--end::Notifications-->

@@ -10,10 +10,13 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/', 'AdminHomeController@index')->name('home.index');
     Route::get('dashboard', 'AdminHomeController@dashboard')->name('home.dashboard');
     Route::get('intro', 'AdminHomeController@intro')->name('home.intro');
+    Route::get('calendar', 'AdminHomeController@calendar')->name('home.calendar');
     Route::post('home/getNoty', 'AdminHomeController@getNoty')->name('home.getNoty');
     Route::post('home/detailNoty', 'AdminHomeController@detailNoty')->name('home.detailNoty');
     Route::post('home/viewNoty', 'AdminHomeController@viewNoty')->name('home.viewNoty');
     Route::post('home/getPersonalReport', 'AdminHomeController@getPersonalReport')->name('home.getPersonalReport');
+    Route::post('home/getProjectReport', 'AdminHomeController@getProjectReport')->name('home.getProjectReport');
+    Route::get('home/getCalendarData', 'AdminHomeController@getCalendarData')->name('home.getCalendarData');
 
     Route::get('profile', 'AdminProfileController@index')->name('profile.index');
     Route::post('profile', 'AdminProfileController@postIndex')->name('profile.postIndex');

@@ -22,6 +22,16 @@ Dashboard - Báo cáo
         border-radius: 8px;
         margin-bottom: 20px;
     }
+    /* Accordion arrow rotation */
+    .card-header[data-toggle="collapse"] .ki-arrow-down {
+        transition: transform 0.3s ease;
+    }
+    .card-header[data-toggle="collapse"]:not(.collapsed) .ki-arrow-down {
+        transform: rotate(180deg);
+    }
+    .card-header[data-toggle="collapse"]:hover {
+        background-color: #F3F6F9;
+    }
 </style>
 @endsection
 @section('lib_js')
@@ -57,6 +67,12 @@ Dashboard - Báo cáo
                         <span class="nav-text">Báo cáo phòng ban</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#tab_project" role="tab">
+                        <span class="nav-icon"><i class="flaticon2-pie-chart-3"></i></span>
+                        <span class="nav-text">Báo cáo dự án</span>
+                    </a>
+                </li>
                 @endif
             </ul>
         </div>
@@ -72,6 +88,11 @@ Dashboard - Báo cáo
                 @if($isAdmin || $userRoles->count() > 0)
                 <div class="tab-pane fade" id="tab_department" role="tabpanel">
                     @include('admin.home.partials.department_report')
+                </div>
+
+                <!-- Tab Dự án -->
+                <div class="tab-pane fade" id="tab_project" role="tabpanel">
+                    @include('admin.home.partials.project_report')
                 </div>
                 @endif
             </div>
@@ -91,6 +112,14 @@ $(document).ready(function() {
         if (!window.departmentReportLoaded) {
             loadDepartmentReport();
             window.departmentReportLoaded = true;
+        }
+    });
+
+    // Load project report when tab is clicked
+    $('a[href="#tab_project"]').on('shown.bs.tab', function() {
+        if (!window.projectReportLoaded) {
+            loadProjectReport();
+            window.projectReportLoaded = true;
         }
     });
 });
@@ -120,6 +149,9 @@ function loadPersonalReport() {
                 $('#completed_tasks').text(response.stats.completed);
                 $('#pending_tasks').text(response.stats.pending);
                 $('#expired_tasks').text(response.stats.expired);
+                $('#on_time_rate').text(response.stats.on_time_rate);
+                $('#completed_on_time').text(response.stats.completed_on_time);
+                $('#total_completed').text(response.stats.completed);
             } else {
                 init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
             }
@@ -169,14 +201,13 @@ function loadDepartmentReport() {
 function renderPersonalReport(data) {
     let html = '<div class="table-responsive"><table class="table table-bordered table-hover" id="personal_table"><thead><tr>';
     html += '<th>STT</th><th>Dự án</th><th>Tên task</th><th>Mô tả</th><th>Deadline</th>';
-    html += '<th>Hoàn thành</th><th>Trạng thái</th><th>Độ ưu tiên</th></tr></thead><tbody>';
+    html += '<th>Hoàn thành</th><th>Trạng thái</th><th>Tài khoản phụ trách</th></tr></thead><tbody>';
 
     data.forEach((item, index) => {
         const deadlineDate = new Date(item.deadline_time * 1000);
         const completeDate = item.complete_time ? new Date(item.complete_time * 1000) : null;
         const statusClass = item.status == 1 ? 'success' : (item.deadline_time < Date.now()/1000 ? 'danger' : 'warning');
         const statusText = item.status == 1 ? 'Hoàn thành' : (item.deadline_time < Date.now()/1000 ? 'Trễ hạn' : 'Chưa làm');
-        const priorityText = item.priority == 1 ? 'Cao' : (item.priority == 2 ? 'Trung bình' : 'Thấp');
 
         html += `<tr>
             <td>${index + 1}</td>
@@ -186,7 +217,7 @@ function renderPersonalReport(data) {
             <td>${deadlineDate.toLocaleDateString('vi-VN')}</td>
             <td>${completeDate ? completeDate.toLocaleDateString('vi-VN') : '-'}</td>
             <td><span class="label label-${statusClass} label-inline">${statusText}</span></td>
-            <td>${priorityText}</td>
+            <td>${item.assignees || 'Chưa phân công'}</td>
         </tr>`;
     });
 
@@ -247,6 +278,149 @@ function renderDepartmentReport(data) {
 
     html += '</div>';
     $('#department_report_table').html(html);
+}
+
+function loadProjectReport() {
+    $.ajax({
+        url: '{{ route("admin.home.getProjectReport") }}',
+        method: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}'
+        },
+        beforeSend: function() {
+            $('#active_projects_content, #late_projects_content, #pending_projects_content, #expiring_projects_content').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
+        },
+        success: function(response) {
+            if (response.success) {
+                renderProjectReport(response.data);
+            } else {
+                init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
+            }
+        },
+        error: function() {
+            init.showNoty('Không thể tải dữ liệu báo cáo dự án!', 'error');
+        }
+    });
+}
+
+function renderProjectReport(data) {
+    // 1. Dự án đang hoạt động
+    renderProjectList(data.active, 'active_projects', 'Không có dự án nào đang hoạt động');
+    $('#active_projects_count').text(data.active.length);
+    $('#active_projects_badge').text(data.active.length);
+
+    // 2. Dự án trễ (đã hoàn thành nhưng còn task)
+    renderLateProjects(data.late);
+    $('#late_projects_count').text(data.late.length);
+    $('#late_projects_badge').text(data.late.length);
+
+    // 3. Dự án có task chưa hoàn thành
+    renderProjectList(data.pending, 'pending_projects', 'Không có dự án nào có task chưa hoàn thành');
+    $('#pending_projects_count').text(data.pending.length);
+    $('#pending_projects_badge').text(data.pending.length);
+
+    // 4. Dự án sắp hết hạn
+    renderExpiringProjects(data.expiring);
+    $('#expiring_projects_count').text(data.expiring.length);
+    $('#expiring_projects_badge').text(data.expiring.length);
+}
+
+function renderProjectList(projects, containerId, emptyMessage) {
+    let html = '';
+
+    if (projects.length === 0) {
+        html = `<div class="text-center p-5"><p class="text-muted">${emptyMessage}</p></div>`;
+    } else {
+        html = '<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr>';
+        html += '<th>STT</th><th>Tên dự án</th><th>Tổng task</th><th>Hoàn thành</th><th>Chưa làm</th><th>Người phụ trách</th>';
+        html += '</tr></thead><tbody>';
+
+        projects.forEach((project, index) => {
+            html += `<tr>
+                <td>${index + 1}</td>
+                <td><strong>${project.name}</strong></td>
+                <td>${project.total_tasks}</td>
+                <td><span class="label label-success">${project.completed_tasks}</span></td>
+                <td><span class="label label-warning">${project.pending_tasks}</span></td>
+                <td>${project.admins}</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+    }
+
+    $(`#${containerId}_content`).html(html);
+}
+
+function renderLateProjects(projects) {
+    let html = '';
+
+    if (projects.length === 0) {
+        html = '<div class="text-center p-5"><p class="text-muted">Không có dự án nào bị trễ</p></div>';
+    } else {
+        html = '<div class="accordion accordion-toggle-arrow" id="lateProjectsAccordion">';
+
+        projects.forEach((project, index) => {
+            html += `<div class="card">
+                <div class="card-header">
+                    <div class="card-title collapsed" data-toggle="collapse" data-target="#late_${index}">
+                        <i class="flaticon2-exclamation text-warning"></i>
+                        <strong>${project.name}</strong>
+                        <span class="badge badge-warning ml-2">${project.pending_tasks} task chưa làm</span>
+                        <span class="text-muted ml-2">| Người phụ trách: ${project.admins}</span>
+                    </div>
+                </div>
+                <div id="late_${index}" class="collapse" data-parent="#lateProjectsAccordion">
+                    <div class="card-body">
+                        <h6>Nhóm có task chưa hoàn thành:</h6>
+                        <ul class="list-group">`;
+
+            if (project.pending_groups && project.pending_groups.length > 0) {
+                project.pending_groups.forEach(group => {
+                    html += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                        ${group.group_name}
+                        <span class="badge badge-danger badge-pill">${group.pending_count} task</span>
+                    </li>`;
+                });
+            }
+
+            html += `</ul></div></div></div>`;
+        });
+
+        html += '</div>';
+    }
+
+    $('#late_projects_content').html(html);
+}
+
+function renderExpiringProjects(projects) {
+    let html = '';
+
+    if (projects.length === 0) {
+        html = '<div class="text-center p-5"><p class="text-muted">Không có dự án nào sắp hết hạn</p></div>';
+    } else {
+        html = '<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr>';
+        html += '<th>STT</th><th>Tên dự án</th><th>Ngày hết hạn</th><th>Còn lại</th><th>Tổng task</th><th>Hoàn thành</th><th>Chưa làm</th><th>Người phụ trách</th>';
+        html += '</tr></thead><tbody>';
+
+        projects.forEach((project, index) => {
+            const expiredDate = new Date(project.expired_time * 1000);
+            html += `<tr>
+                <td>${index + 1}</td>
+                <td><strong>${project.name}</strong></td>
+                <td>${expiredDate.toLocaleDateString('vi-VN')}</td>
+                <td><span class="badge badge-danger">${project.days_left} ngày</span></td>
+                <td>${project.total_tasks}</td>
+                <td><span class="label label-success">${project.completed_tasks}</span></td>
+                <td><span class="label label-warning">${project.pending_tasks}</span></td>
+                <td>${project.admins}</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+    }
+
+    $('#expiring_projects_content').html(html);
 }
 </script>
 @endsection

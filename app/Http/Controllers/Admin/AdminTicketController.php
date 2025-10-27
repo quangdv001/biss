@@ -99,7 +99,7 @@ class AdminTicketController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if($user->hasRole(['guest', 'Design', 'Design2'])){
+        if($user->hasRole(['guest', 'Design', 'Design2', 'content_seo'])){
             return response()->json(['success' => 0, 'mess' => 'Bạn không có quyền!']);
         }
         $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
@@ -165,6 +165,11 @@ class AdminTicketController extends Controller
                                 $paramsC['complete_time'] = time();
                             } else {
                                 $paramsC['complete_time'] = null;
+                            }
+
+                            if ($user->hasRole(['SEO'])) {
+                                unset($paramsC['status']);
+                                unset($paramsC['deadline_time']);
                             }
 
                             $resP = $this->ticketRepo->update($child, $paramsC);
