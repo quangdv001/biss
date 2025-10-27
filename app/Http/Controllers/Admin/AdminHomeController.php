@@ -37,6 +37,15 @@ class AdminHomeController extends Controller
         return view('admin.home.intro');
     }
 
+    public function calendar(){
+        $user = auth('admin')->user();
+
+        // Lấy danh sách projects cho filter
+        $projects = $this->project->get([], [], ['admin']);
+
+        return view('admin.home.calendar', compact('user', 'projects'));
+    }
+
     public function dashboard(Request $request){
         $user = auth('admin')->user();
 
@@ -79,6 +88,10 @@ class AdminHomeController extends Controller
 
         // Map dữ liệu
         $data = $tickets->map(function($ticket) {
+            // Lấy danh sách người phụ trách
+            $assignees = $ticket->admin->pluck('username')->toArray();
+            $assigneesText = !empty($assignees) ? implode(', ', $assignees) : 'Chưa phân công';
+
             return [
                 'id' => $ticket->id,
                 'name' => $ticket->name,
@@ -88,17 +101,27 @@ class AdminHomeController extends Controller
                 'deadline_time' => $ticket->deadline_time,
                 'complete_time' => $ticket->complete_time,
                 'status' => $ticket->status,
-                'priority' => $ticket->priority,
+                'assignees' => $assigneesText,
                 'qty' => $ticket->qty
             ];
         })->values();
 
         // Thống kê
+        $completedTickets = $tickets->where('status', 1);
+        $completedOnTime = $completedTickets->filter(function($ticket) {
+            return $ticket->complete_time && $ticket->complete_time <= $ticket->deadline_time;
+        })->count();
+
+        $totalCompleted = $completedTickets->count();
+        $onTimeRate = $totalCompleted > 0 ? round(($completedOnTime / $totalCompleted) * 100, 1) : 0;
+
         $stats = [
             'total' => $tickets->count(),
-            'completed' => $tickets->where('status', 1)->count(),
+            'completed' => $totalCompleted,
             'pending' => $tickets->where('status', 0)->where('deadline_time', '>=', time())->count(),
             'expired' => $tickets->where('status', 0)->where('deadline_time', '<', time())->count(),
+            'completed_on_time' => $completedOnTime,
+            'on_time_rate' => $onTimeRate,
         ];
 
         return response()->json([
@@ -147,5 +170,163 @@ class AdminHomeController extends Controller
         }
 
         return response()->json($res);
+    }
+
+    public function getProjectReport(Request $request){
+        $user = auth('admin')->user();
+
+        // Chỉ cho phép super_admin và account truy cập
+        if (!$user->hasRole(['super_admin', 'account'])) {
+            return response()->json([
+                'success' => 0,
+                'message' => 'Bạn không có quyền truy cập'
+            ]);
+        }
+
+        $currentTime = time();
+        $oneWeekLater = strtotime('+7 days');
+
+        // Lấy tất cả dự án với quan hệ
+        $projects = $this->project->get([], [], ['admin', 'ticket', 'group']);
+
+        $activeProjects = [];
+        $lateProjects = [];
+        $pendingProjects = [];
+        $expiringProjects = [];
+
+        foreach ($projects as $project) {
+            // Lấy thông tin người phụ trách
+            $admins = $project->admin->pluck('username')->toArray();
+            $adminsText = !empty($admins) ? implode(', ', $admins) : 'Chưa phân công';
+
+            $projectData = [
+                'id' => $project->id,
+                'name' => $project->name,
+                'status' => $project->status,
+                'expired_time' => $project->expired_time,
+                'admins' => $adminsText,
+            ];
+
+            // Đếm task
+            $totalTasks = $project->ticket->count();
+            $pendingTasks = $project->ticket->where('status', 0)->count();
+            $completedTasks = $project->ticket->where('status', 1)->count();
+
+            $projectData['total_tasks'] = $totalTasks;
+            $projectData['pending_tasks'] = $pendingTasks;
+            $projectData['completed_tasks'] = $completedTasks;
+
+            // 1. Dự án đang hoạt động (status = 1)
+            if ($project->status == 1) {
+                $activeProjects[] = $projectData;
+            }
+
+            // 2. Dự án đã hoàn thành (status = 0) nhưng còn task chưa làm
+            if ($project->status == 0 && $pendingTasks > 0) {
+                // Lấy danh sách group có task chưa làm
+                $pendingGroups = $project->ticket()
+                    ->where('status', 0)
+                    ->with('group')
+                    ->get()
+                    ->groupBy('group_id')
+                    ->map(function($tickets, $groupId) {
+                        $group = $tickets->first()->group;
+                        return [
+                            'group_name' => $group ? $group->name : 'N/A',
+                            'pending_count' => $tickets->count()
+                        ];
+                    })
+                    ->values();
+
+                $projectData['pending_groups'] = $pendingGroups;
+                $lateProjects[] = $projectData;
+            }
+
+            // 3. Dự án đang có task chưa hoàn thành
+            if ($pendingTasks > 0) {
+                $pendingProjects[] = $projectData;
+            }
+
+            // 4. Dự án sắp hết hạn (còn 7 ngày)
+            if ($project->expired_time &&
+                $project->expired_time > $currentTime &&
+                $project->expired_time <= $oneWeekLater) {
+                $daysLeft = ceil(($project->expired_time - $currentTime) / 86400);
+                $projectData['days_left'] = $daysLeft;
+                $expiringProjects[] = $projectData;
+            }
+        }
+
+        return response()->json([
+            'success' => 1,
+            'data' => [
+                'active' => $activeProjects,
+                'late' => $lateProjects,
+                'pending' => $pendingProjects,
+                'expiring' => $expiringProjects,
+            ]
+        ]);
+    }
+
+    public function getCalendarData(Request $request){
+        $user = auth('admin')->user();
+
+        $projectId = $request->input('project_id');
+        $startDate = $request->input('start');
+        $endDate = $request->input('end');
+
+        // Convert dates to timestamps
+        $startTime = $startDate ? strtotime($startDate) : strtotime('-30 days');
+        $endTime = $endDate ? strtotime($endDate) : strtotime('+60 days');
+
+        // Lấy tickets của user
+        $ticketsQuery = $this->ticket->getTicketByAdmin([$user->id], '', $startTime, $endTime);
+
+        // Lọc theo project nếu có
+        if ($projectId) {
+            $ticketsQuery = $ticketsQuery->where('project_id', $projectId);
+        }
+
+        // Map dữ liệu cho calendar
+        $events = $ticketsQuery->map(function($ticket) {
+            // Xác định màu sắc dựa trên trạng thái
+            if ($ticket->status == 1) {
+                $color = '#1BC5BD'; // Success - green
+                $textColor = '#ffffff';
+            } elseif ($ticket->deadline_time < time()) {
+                $color = '#F64E60'; // Danger - red (trễ hạn)
+                $textColor = '#ffffff';
+            } else {
+                $color = '#FFA800'; // Warning - yellow (chưa làm)
+                $textColor = '#ffffff';
+            }
+
+            // Lấy thông tin người phụ trách
+            $assignees = $ticket->admin->pluck('username')->toArray();
+            $assigneesText = !empty($assignees) ? implode(', ', $assignees) : 'Chưa phân công';
+
+            return [
+                'id' => $ticket->id,
+                'title' => $ticket->name,
+                'start' => date('Y-m-d', $ticket->deadline_time),
+                'end' => date('Y-m-d', $ticket->deadline_time),
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'textColor' => $textColor,
+                'allDay' => true,
+                'extendedProps' => [
+                    'description' => $ticket->description,
+                    'project_name' => $ticket->project->name ?? '',
+                    'group_name' => $ticket->group->name ?? '',
+                    'deadline_time' => $ticket->deadline_time,
+                    'complete_time' => $ticket->complete_time,
+                    'status' => $ticket->status,
+                    'assignees' => $assigneesText,
+                    'note' => $ticket->note,
+                ]
+            ];
+        })->values();
+
+        return response()->json($events);
     }
 }

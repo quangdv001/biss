@@ -38,69 +38,89 @@
 
 <!-- Thống kê tổng quan -->
 <div class="row mb-5">
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card card-stats bg-light-primary">
             <div class="card-body">
                 <div class="d-flex align-items-center">
-                    <div class="symbol symbol-50 symbol-light-primary mr-4">
+                    <div class="symbol symbol-40 symbol-light-primary mr-3">
                         <span class="symbol-label">
-                            <i class="flaticon2-layers-1 text-primary icon-2x"></i>
+                            <i class="flaticon2-layers-1 text-primary icon-xl"></i>
                         </span>
                     </div>
                     <div>
-                        <h6 class="text-muted mb-1">Tổng task</h6>
-                        <h2 class="stat-number text-primary" id="total_tasks">0</h2>
+                        <h6 class="text-muted mb-1 font-size-sm">Tổng task</h6>
+                        <h3 class="stat-number text-primary mb-0" id="total_tasks">0</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card card-stats bg-light-success">
             <div class="card-body">
                 <div class="d-flex align-items-center">
-                    <div class="symbol symbol-50 symbol-light-success mr-4">
+                    <div class="symbol symbol-40 symbol-light-success mr-3">
                         <span class="symbol-label">
-                            <i class="flaticon2-check-mark text-success icon-2x"></i>
+                            <i class="flaticon2-check-mark text-success icon-xl"></i>
                         </span>
                     </div>
                     <div>
-                        <h6 class="text-muted mb-1">Hoàn thành</h6>
-                        <h2 class="stat-number text-success" id="completed_tasks">0</h2>
+                        <h6 class="text-muted mb-1 font-size-sm">Hoàn thành</h6>
+                        <h3 class="stat-number text-success mb-0" id="completed_tasks">0</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card card-stats bg-light-warning">
             <div class="card-body">
                 <div class="d-flex align-items-center">
-                    <div class="symbol symbol-50 symbol-light-warning mr-4">
+                    <div class="symbol symbol-40 symbol-light-warning mr-3">
                         <span class="symbol-label">
-                            <i class="flaticon2-time text-warning icon-2x"></i>
+                            <i class="flaticon2-time text-warning icon-xl"></i>
                         </span>
                     </div>
                     <div>
-                        <h6 class="text-muted mb-1">Chưa làm</h6>
-                        <h2 class="stat-number text-warning" id="pending_tasks">0</h2>
+                        <h6 class="text-muted mb-1 font-size-sm">Chưa làm</h6>
+                        <h3 class="stat-number text-warning mb-0" id="pending_tasks">0</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card card-stats bg-light-danger">
             <div class="card-body">
                 <div class="d-flex align-items-center">
-                    <div class="symbol symbol-50 symbol-light-danger mr-4">
+                    <div class="symbol symbol-40 symbol-light-danger mr-3">
                         <span class="symbol-label">
-                            <i class="flaticon2-exclamation text-danger icon-2x"></i>
+                            <i class="flaticon2-exclamation text-danger icon-xl"></i>
                         </span>
                     </div>
                     <div>
-                        <h6 class="text-muted mb-1">Trễ hạn</h6>
-                        <h2 class="stat-number text-danger" id="expired_tasks">0</h2>
+                        <h6 class="text-muted mb-1 font-size-sm">Trễ hạn</h6>
+                        <h3 class="stat-number text-danger mb-0" id="expired_tasks">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-stats bg-light-info">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="symbol symbol-40 symbol-light-info mr-3">
+                        <span class="symbol-label">
+                            <i class="flaticon2-chart2 text-info icon-xl"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1 font-size-sm">Tỉ lệ hoàn thành đúng hạn</h6>
+                        <h3 class="stat-number text-info mb-0">
+                            <span id="on_time_rate">0</span>%
+                            <span class="font-size-sm font-weight-normal">(<span id="completed_on_time">0</span>/<span id="total_completed">0</span>)</span>
+                        </h3>
                     </div>
                 </div>
             </div>
