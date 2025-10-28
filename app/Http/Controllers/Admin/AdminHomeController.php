@@ -77,26 +77,15 @@ class AdminHomeController extends Controller
         $startTime = $request->input('start_time') ? strtotime($request->input('start_time')) : strtotime('-30 days');
         $endTime = $request->input('end_time') ? strtotime('tomorrow', strtotime($request->input('end_time'))) - 1 : time();
         $status = $request->input('status');
-        $planerId = $request->input('planer_id'); // Lọc theo planer
+        $adminId = $request->input('planer_id'); // Lọc theo nhân sự phụ trách
 
-        // Nếu không chọn planer_id thì lấy của chính mình
-        if (!$planerId) {
-            $planerId = $user->id;
+        // Nếu không chọn admin_id thì lấy của chính mình
+        if (!$adminId) {
+            $adminId = $user->id;
         }
 
-        // Lấy tất cả tickets của các dự án có planer_id được chọn
-        $tickets = $this->ticket->get([], [], ['project', 'project.planer', 'admin', 'group'])
-            ->filter(function($ticket) use ($planerId, $startTime, $endTime) {
-                // Lọc theo planer_id của dự án
-                if (!$ticket->project || $ticket->project->planer_id != $planerId) {
-                    return false;
-                }
-                // Lọc theo thời gian deadline
-                if ($ticket->deadline_time < $startTime || $ticket->deadline_time > $endTime) {
-                    return false;
-                }
-                return true;
-            });
+        // Lấy tất cả tickets của nhân sự được chọn
+        $tickets = $this->ticket->getTicketByAdmin([$adminId], '', $startTime, $endTime);
 
         // Lọc theo trạng thái nếu có
         if ($status !== '' && $status !== null) {

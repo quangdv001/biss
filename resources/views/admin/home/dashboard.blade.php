@@ -104,9 +104,9 @@ Dashboard - Báo cáo
 @section('custom_js')
 <script>
 $(document).ready(function() {
-    // Initialize Select2 for planer filter
+    // Initialize Select2 for personal admin filter
     $('#personal_admin_id').select2({
-        placeholder: 'Chọn account planer',
+        placeholder: 'Chọn nhân sự phụ trách',
         allowClear: true,
         width: '100%'
     });
@@ -131,7 +131,6 @@ $(document).ready(function() {
     // Load department report when tab is clicked
     $('a[href="#tab_department"]').on('shown.bs.tab', function() {
         if (!window.departmentReportLoaded) {
-            loadDepartmentReport();
             window.departmentReportLoaded = true;
         }
     });
@@ -141,6 +140,44 @@ $(document).ready(function() {
         if (!window.projectReportLoaded) {
             loadProjectReport();
             window.projectReportLoaded = true;
+        }
+    });
+
+    // Load admin list when role changes in department report
+    $('#department_role').on('change', function() {
+        const roleId = $(this).val();
+        if (roleId) {
+            $.ajax({
+                url: '{{ route("admin.role.report") }}',
+                method: 'GET',
+                data: { id: roleId },
+                success: function(response) {
+                    if (response.success && response.admin) {
+                        let options = '<option value="">Tất cả</option>';
+                        response.admin.forEach(admin => {
+                            options += `<option value="${admin.id}">${admin.username}</option>`;
+                        });
+                        $('#department_admin').html(options);
+                    }
+                }
+            });
+        } else {
+            $('#department_admin').html('<option value="">Tất cả</option>');
+        }
+    });
+
+    // Load project report and expired report when switching tabs in department section
+    $('a[href="#dept_project_report"]').on('shown.bs.tab', function() {
+        const roleId = $('#department_role').val();
+        if (roleId && window.departmentReportLoaded) {
+            loadDepartmentProjectReport();
+        }
+    });
+
+    $('a[href="#dept_expired_report"]').on('shown.bs.tab', function() {
+        const roleId = $('#department_role').val();
+        if (roleId && window.departmentReportLoaded) {
+            loadDepartmentExpiredReport();
         }
     });
 });
@@ -196,6 +233,19 @@ function loadDepartmentReport() {
         return;
     }
 
+    // Load tất cả 3 loại báo cáo cùng lúc
+    loadDepartmentTaskReport();
+    loadDepartmentProjectReport();
+    loadDepartmentExpiredReport();
+}
+
+// Báo cáo theo Task (report)
+function loadDepartmentTaskReport() {
+    const roleId = $('#department_role').val();
+    const startTime = $('#department_start_time').val();
+    const endTime = $('#department_end_time').val();
+    const adminId = $('#department_admin').val();
+
     $.ajax({
         url: '{{ route("admin.role.report") }}',
         method: 'GET',
@@ -217,6 +267,72 @@ function loadDepartmentReport() {
         },
         error: function() {
             init.showNoty('Không thể tải dữ liệu báo cáo!', 'error');
+        }
+    });
+}
+
+// Báo cáo theo Dự án (report2)
+function loadDepartmentProjectReport() {
+    const roleId = $('#department_role').val();
+    const startTime = $('#department_start_time').val();
+    const endTime = $('#department_end_time').val();
+    const adminId = $('#department_admin').val();
+
+    if (!roleId) return;
+
+    $.ajax({
+        url: '{{ route("admin.role.report2") }}',
+        method: 'GET',
+        data: {
+            id: roleId,
+            start_time: startTime,
+            end_time: endTime,
+            admin_id: adminId
+        },
+        beforeSend: function() {
+            $('#department_project_table').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
+        },
+        success: function(response) {
+            if (response.success) {
+                renderDepartmentProjectReport(response.data);
+            } else {
+                init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
+            }
+        },
+        error: function() {
+            init.showNoty('Không thể tải dữ liệu báo cáo dự án!', 'error');
+        }
+    });
+}
+
+// Dự án sắp hết hạn (report3)
+function loadDepartmentExpiredReport() {
+    const roleId = $('#department_role').val();
+    const startTime = $('#department_start_time').val();
+    const adminId = $('#department_admin').val();
+
+    if (!roleId) return;
+
+    $.ajax({
+        url: '{{ route("admin.role.report3") }}',
+        method: 'GET',
+        data: {
+            id: roleId,
+            start_time: startTime,
+            admin_id: adminId
+        },
+        beforeSend: function() {
+            $('#department_expired_table').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
+        },
+        success: function(response) {
+            if (response.success) {
+                renderDepartmentExpiredReport(response.data);
+            } else {
+                init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
+            }
+        },
+        error: function() {
+            init.showNoty('Không thể tải dữ liệu báo cáo dự án sắp hết hạn!', 'error');
         }
     });
 }
@@ -447,6 +563,145 @@ function renderExpiringProjects(projects) {
     }
 
     $('#expiring_projects_content').html(html);
+}
+
+// Render báo cáo dự án theo KL (report2)
+function renderDepartmentProjectReport(data) {
+    if (!data || data.length === 0) {
+        $('#department_project_table').html('<div class="text-center p-5"><p class="text-muted">Không có dữ liệu báo cáo</p></div>');
+        return;
+    }
+
+    let html = '<div class="accordion accordion-toggle-arrow" id="projectAccordion">';
+
+    data.forEach((member, index) => {
+        html += `<div class="card">
+            <div class="card-header">
+                <div class="card-title collapsed" data-toggle="collapse" data-target="#project_collapse_${index}">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <span><i class="flaticon2-user"></i> <strong>${member.admin}</strong></span>
+                        <span class="mr-5">
+                            <span class="label label-primary label-inline mr-2">Tổng: ${member.total}</span>
+                            <span class="label label-success label-inline mr-2">Hoàn thành: ${member.total_complete}</span>
+                            <span class="label label-info label-inline mr-2">Branding: ${member.total_branding}</span>
+                            <span class="label label-warning label-inline mr-2">Marketing: ${member.total_mkt}</span>
+                            <span class="label label-danger label-inline">Video: ${member.total_video}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div id="project_collapse_${index}" class="collapse" data-parent="#projectAccordion">
+                <div class="card-body">`;
+        
+        if (member.projects && member.projects.length > 0) {
+            html += `<div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Dự án</th>
+                                    <th>Loại</th>
+                                    <th>KL cần làm</th>
+                                    <th>Đã hoàn thành</th>
+                                    <th>Còn lại</th>
+                                    <th>Tiến độ</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            member.projects.forEach((project, pIndex) => {
+                const typeLabel = project.type == 1 ? 'Marketing' : (project.type == 2 ? 'Branding' : (project.type == 3 ? 'Video' : 'Khác'));
+                const typeClass = project.type == 1 ? 'warning' : (project.type == 2 ? 'info' : (project.type == 3 ? 'danger' : 'secondary'));
+                const remaining = project.qty - project.complete;
+                const progress = project.qty > 0 ? Math.round((project.complete / project.qty) * 100) : 0;
+                const progressClass = progress >= 80 ? 'success' : (progress >= 50 ? 'warning' : 'danger');
+
+                html += `<tr>
+                    <td>${pIndex + 1}</td>
+                    <td><strong>${project.name}</strong></td>
+                    <td><span class="label label-${typeClass} label-inline">${typeLabel}</span></td>
+                    <td><span class="label label-primary label-inline">${project.qty}</span></td>
+                    <td><span class="label label-success label-inline">${project.complete}</span></td>
+                    <td><span class="label label-${remaining > 0 ? 'warning' : 'success'} label-inline">${remaining}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress" style="width: 100px; height: 20px;">
+                                <div class="progress-bar bg-${progressClass}" role="progressbar" style="width: ${progress}%" 
+                                     aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100">
+                                    ${progress}%
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+        } else {
+            html += '<p class="text-muted">Không có dự án nào</p>';
+        }
+
+        html += `</div></div></div>`;
+    });
+
+    html += '</div>';
+    $('#department_project_table').html(html);
+}
+
+// Render dự án sắp hết hạn (report3)
+function renderDepartmentExpiredReport(data) {
+    if (!data || data.length === 0) {
+        $('#department_expired_table').html('<div class="text-center p-5"><p class="text-muted">Không có dữ liệu báo cáo</p></div>');
+        return;
+    }
+
+    let html = '<div class="accordion accordion-toggle-arrow" id="expiredAccordion">';
+
+    data.forEach((member, index) => {
+        html += `<div class="card">
+            <div class="card-header">
+                <div class="card-title collapsed" data-toggle="collapse" data-target="#expired_collapse_${index}">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <span><i class="flaticon2-user"></i> <strong>${member.admin}</strong></span>
+                        <span class="label label-danger label-inline mr-5">
+                            <i class="flaticon2-exclamation"></i> ${member.total} dự án sắp hết hạn
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div id="expired_collapse_${index}" class="collapse" data-parent="#expiredAccordion">
+                <div class="card-body">`;
+
+        if (member.projects && member.projects.length > 0) {
+            html += `<div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên dự án</th>
+                                    <th>Ngày hết hạn</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            member.projects.forEach((project, pIndex) => {
+                html += `<tr>
+                    <td>${pIndex + 1}</td>
+                    <td><strong>${project.name}</strong></td>
+                    <td><span class="label label-danger label-inline"><i class="flaticon2-calendar-9"></i> ${project.expired_time}</span></td>
+                </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+        } else {
+            html += '<div class="alert alert-success"><i class="flaticon2-check-mark"></i> Không có dự án sắp hết hạn</div>';
+        }
+
+        html += `</div></div></div>`;
+    });
+
+    html += '</div>';
+    $('#department_expired_table').html(html);
 }
 </script>
 @endsection
