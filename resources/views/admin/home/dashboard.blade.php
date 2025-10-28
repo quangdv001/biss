@@ -592,7 +592,7 @@ function renderDepartmentProjectReport(data) {
             </div>
             <div id="project_collapse_${index}" class="collapse" data-parent="#projectAccordion">
                 <div class="card-body">`;
-        
+
         if (member.projects && member.projects.length > 0) {
             html += `<div class="table-responsive">
                         <table class="table table-bordered table-hover">
@@ -626,7 +626,7 @@ function renderDepartmentProjectReport(data) {
                     <td>
                         <div class="d-flex align-items-center">
                             <div class="progress" style="width: 100px; height: 20px;">
-                                <div class="progress-bar bg-${progressClass}" role="progressbar" style="width: ${progress}%" 
+                                <div class="progress-bar bg-${progressClass}" role="progressbar" style="width: ${progress}%"
                                      aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100">
                                     ${progress}%
                                 </div>
