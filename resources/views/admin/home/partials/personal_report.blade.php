@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-md-2">
             <div class="form-group">
-                <label>Account Planer:</label>
+                <label>Nhân sự phụ trách:</label>
                 <select class="form-control select2" id="personal_admin_id">
                     <option value="">Của tôi</option>
                     @if($isAdmin)
