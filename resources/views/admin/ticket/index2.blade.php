@@ -695,6 +695,14 @@ let user_id = @json(auth('admin')->user()->id);
 let is_admin = @json(auth('admin')->user()->hasRole(['super_admin', 'account']));
 let is_guest = @json(auth('admin')->user()->hasRole(['guest']));
 let is_content = @json($user->hasRole(['super_admin', 'account', 'content']));
+let project_expired_time = @json($project->expired_time ?? null);
+let project_max_date = null;
+
+// Tính ngày tối đa cho deadline dựa trên expired_time của project
+if (project_expired_time) {
+    let tzoffset = (new Date()).getTimezoneOffset() * 60000;
+    project_max_date = new Date(project_expired_time * 1000 - tzoffset).toISOString().split('T')[0];
+}
 $(document).on('click', '.btn-edit', function(){
     let id = $(this).data('id');
     let ticket = data[id];
@@ -852,6 +860,22 @@ $("#formCreate").submit(function(e) {
     //prevent Default functionality
     e.preventDefault();
 
+    // Validation deadline với ngày kết thúc dự án
+    if (project_max_date) {
+        let deadline = $('#modalCreate input[name="deadline_time"]').val();
+        let childDeadline = $('#modalCreate input[name="child_deadline_time"]').val();
+
+        if (deadline && deadline > project_max_date) {
+            init.showNoty('Deadline không được vượt quá ngày kết thúc dự án (' + formatDate(project_max_date) + ')!', 'error');
+            return false;
+        }
+
+        if (childDeadline && childDeadline > project_max_date) {
+            init.showNoty('Deadline của task con không được vượt quá ngày kết thúc dự án (' + formatDate(project_max_date) + ')!', 'error');
+            return false;
+        }
+    }
+
     //get the action-url of the form
     var actionurl = e.currentTarget.action;
     //do your own request an handle the results
@@ -885,6 +909,22 @@ $("#formCreate").submit(function(e) {
 $("#formEdit").submit(function(e) {
     //prevent Default functionality
     e.preventDefault();
+
+    // Validation deadline với ngày kết thúc dự án
+    if (project_max_date) {
+        let deadline = $('#modalEdit input[name="deadline_time"]').val();
+        let childDeadline = $('#modalEdit input[name="child_deadline_time"]').val();
+
+        if (deadline && deadline > project_max_date) {
+            init.showNoty('Deadline không được vượt quá ngày kết thúc dự án (' + formatDate(project_max_date) + ')!', 'error');
+            return false;
+        }
+
+        if (childDeadline && childDeadline > project_max_date) {
+            init.showNoty('Deadline của task con không được vượt quá ngày kết thúc dự án (' + formatDate(project_max_date) + ')!', 'error');
+            return false;
+        }
+    }
 
     //get the action-url of the form
     var actionurl = e.currentTarget.action;
@@ -1046,5 +1086,28 @@ $('#modalImportGoogleSheet').on('hidden.bs.modal', function () {
     $('#sheetSelectGroup').hide();
     $('#sheet_gid').empty();
 });
+
+// Set max date cho deadline khi mở modal Create
+$('#modalCreate').on('shown.bs.modal', function () {
+    if (project_max_date) {
+        $('#modalCreate input[name="deadline_time"]').attr('max', project_max_date);
+        $('#modalCreate input[name="child_deadline_time"]').attr('max', project_max_date);
+    }
+});
+
+// Set max date cho deadline khi mở modal Edit
+$('#modalEdit').on('shown.bs.modal', function () {
+    if (project_max_date) {
+        $('#modalEdit input[name="deadline_time"]').attr('max', project_max_date);
+        $('#modalEdit input[name="child_deadline_time"]').attr('max', project_max_date);
+    }
+});
+
+// Hàm format date để hiển thị
+function formatDate(dateString) {
+    if (!dateString) return '';
+    let parts = dateString.split('-');
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+}
 </script>
 @endsection
