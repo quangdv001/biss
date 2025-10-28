@@ -5,6 +5,19 @@
     </div>
 </div>
 
+<!-- Bộ lọc -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <label for="project_admin_id">Lọc theo Account Planer</label>
+        <select id="project_admin_id" class="form-control select2" name="admin_id">
+            <option value="">-- Tất cả planer --</option>
+            @foreach($admins as $admin)
+                <option value="{{ $admin->id }}">{{ $admin->username }} - {{ $admin->fullname }}</option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
 <!-- Thống kê tổng quan -->
 <div class="row mb-5">
     <div class="col-md-3">

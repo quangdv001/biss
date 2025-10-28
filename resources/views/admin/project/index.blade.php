@@ -143,13 +143,13 @@ type="text/css" /> --}}
                             <input type="text" class="form-control" name="field" placeholder="Lĩnh vực" value="{{ old('field') }}"/>
                             <span><i class="flaticon2-search-1 text-muted"></i></span>
                         </div>
-                        <div class="mr-3 mb-3">
+                        {{-- <div class="mr-3 mb-3">
                             <select class="form-control" name="has_late">
                                 <option value="">Lọc Ticket</option>
                                 <option value="0" @if(old('has_late') === "0") selected @endif>Không</option>
                                 <option value="1" @if(old('has_late') == 1) selected @endif>Có</option>
                             </select>
-                        </div>
+                        </div> --}}
                         <div class="mb-3">
                             <button type="submit" class="btn btn-light-primary px-6 font-weight-bold">Tìm kiếm</button>
                         </div>

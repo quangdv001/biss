@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Repo\AdminRepo;
 use App\Repo\GroupRepo;
 use App\Repo\NotyRepo;
 use App\Repo\ProjectRepo;
@@ -12,14 +13,15 @@ use Illuminate\Http\Request;
 
 class AdminHomeController extends Controller
 {
-    private $noty, $ticket, $group, $project, $role;
-    public function __construct(NotyRepo $noty, TicketRepo $ticket, GroupRepo $group, ProjectRepo $project, RoleRepo $role)
+    private $noty, $ticket, $group, $project, $role, $admin;
+    public function __construct(NotyRepo $noty, TicketRepo $ticket, GroupRepo $group, ProjectRepo $project, RoleRepo $role, AdminRepo $admin)
     {
         $this->noty = $noty;
         $this->ticket = $ticket;
         $this->group = $group;
         $this->project = $project;
         $this->role = $role;
+        $this->admin = $admin;
     }
 
     public function index(){
@@ -60,10 +62,13 @@ class AdminHomeController extends Controller
         $roles = $this->role->get();
         $projects = $this->project->get([], [], ['admin']);
 
+        // Lấy danh sách admins để filter
+        $admins = $this->admin->get();
+
         // Lấy thông tin user hiện tại
         $userRoles = $user->roles;
 
-        return view('admin.home.dashboard', compact('user', 'isAdmin', 'roles', 'projects', 'userRoles'));
+        return view('admin.home.dashboard', compact('user', 'isAdmin', 'roles', 'projects', 'userRoles', 'admins'));
     }
 
     public function getPersonalReport(Request $request){
@@ -72,9 +77,26 @@ class AdminHomeController extends Controller
         $startTime = $request->input('start_time') ? strtotime($request->input('start_time')) : strtotime('-30 days');
         $endTime = $request->input('end_time') ? strtotime('tomorrow', strtotime($request->input('end_time'))) - 1 : time();
         $status = $request->input('status');
+        $planerId = $request->input('planer_id'); // Lọc theo planer
 
-        // Lấy tất cả tickets của user
-        $tickets = $this->ticket->getTicketByAdmin([$user->id], '', $startTime, $endTime);
+        // Nếu không chọn planer_id thì lấy của chính mình
+        if (!$planerId) {
+            $planerId = $user->id;
+        }
+
+        // Lấy tất cả tickets của các dự án có planer_id được chọn
+        $tickets = $this->ticket->get([], [], ['project', 'project.planer', 'admin', 'group'])
+            ->filter(function($ticket) use ($planerId, $startTime, $endTime) {
+                // Lọc theo planer_id của dự án
+                if (!$ticket->project || $ticket->project->planer_id != $planerId) {
+                    return false;
+                }
+                // Lọc theo thời gian deadline
+                if ($ticket->deadline_time < $startTime || $ticket->deadline_time > $endTime) {
+                    return false;
+                }
+                return true;
+            });
 
         // Lọc theo trạng thái nếu có
         if ($status !== '' && $status !== null) {
@@ -88,9 +110,11 @@ class AdminHomeController extends Controller
 
         // Map dữ liệu
         $data = $tickets->map(function($ticket) {
-            // Lấy danh sách người phụ trách
-            $assignees = $ticket->admin->pluck('username')->toArray();
-            $assigneesText = !empty($assignees) ? implode(', ', $assignees) : 'Chưa phân công';
+            // Lấy thông tin planer của dự án
+            $planerName = 'Chưa có planer';
+            if ($ticket->project && $ticket->project->planer) {
+                $planerName = $ticket->project->planer->username;
+            }
 
             return [
                 'id' => $ticket->id,
@@ -101,7 +125,7 @@ class AdminHomeController extends Controller
                 'deadline_time' => $ticket->deadline_time,
                 'complete_time' => $ticket->complete_time,
                 'status' => $ticket->status,
-                'assignees' => $assigneesText,
+                'planer' => $planerName,
                 'qty' => $ticket->qty
             ];
         })->values();
@@ -175,19 +199,23 @@ class AdminHomeController extends Controller
     public function getProjectReport(Request $request){
         $user = auth('admin')->user();
 
-        // Chỉ cho phép super_admin và account truy cập
+        // Chỉ cho phép super_admin và account xem báo cáo dự án
         if (!$user->hasRole(['super_admin', 'account'])) {
-            return response()->json([
-                'success' => 0,
-                'message' => 'Bạn không có quyền truy cập'
-            ]);
+            return response()->json(['status' => 'error', 'message' => 'Bạn không có quyền xem báo cáo này'], 403);
         }
+
+        $planerId = $request->input('admin_id'); // Lọc theo planer
 
         $currentTime = time();
         $oneWeekLater = strtotime('+7 days');
 
         // Lấy tất cả dự án với quan hệ
-        $projects = $this->project->get([], [], ['admin', 'ticket', 'group']);
+        $projects = $this->project->get([], [], ['planer', 'ticket', 'group']);
+
+        // Lọc theo planer nếu có
+        if ($planerId) {
+            $projects = $projects->where('planer_id', $planerId);
+        }
 
         $activeProjects = [];
         $lateProjects = [];
@@ -195,16 +223,15 @@ class AdminHomeController extends Controller
         $expiringProjects = [];
 
         foreach ($projects as $project) {
-            // Lấy thông tin người phụ trách
-            $admins = $project->admin->pluck('username')->toArray();
-            $adminsText = !empty($admins) ? implode(', ', $admins) : 'Chưa phân công';
+            // Lấy thông tin planer
+            $planerName = $project->planer ? $project->planer->username : 'Chưa có planer';
 
             $projectData = [
                 'id' => $project->id,
                 'name' => $project->name,
                 'status' => $project->status,
                 'expired_time' => $project->expired_time,
-                'admins' => $adminsText,
+                'admins' => $planerName,
             ];
 
             // Đếm task

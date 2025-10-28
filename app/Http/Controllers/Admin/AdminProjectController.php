@@ -59,26 +59,26 @@ class AdminProjectController extends Controller
         } else {
             $data = $this->projectRepo->search($condition, $limit, $user->id, $orderBy);
         }
-        // Xử lý has_late cho từng project
-        $data->getCollection()->transform(function ($project){
-            $project->has_late = false;
-            if(!empty($project->ticket)){
-                foreach ($project->ticket as $ticket){
-                    if($ticket->status == 0 && $ticket->deadline_time < time()){
-                        $project->has_late = true;
-                    }
-                }
-            }
-            return $project;
-        });
+        // // Xử lý has_late cho từng project
+        // $data->getCollection()->transform(function ($project){
+        //     $project->has_late = false;
+        //     if(!empty($project->ticket)){
+        //         foreach ($project->ticket as $ticket){
+        //             if($ticket->status == 0 && $ticket->deadline_time < time()){
+        //                 $project->has_late = true;
+        //             }
+        //         }
+        //     }
+        //     return $project;
+        // });
 
-        // Lọc dự án có ticket trễ nếu có điều kiện (giữ nguyên phân trang)
-        if($has_late !== null){
-            $filtered = $data->getCollection()->filter(function ($project) use ($has_late){
-                return $project->has_late == (bool)$has_late;
-            });
-            $data->setCollection($filtered->values());
-        }
+        // // Lọc dự án có ticket trễ nếu có điều kiện (giữ nguyên phân trang)
+        // if($has_late !== null){
+        //     $filtered = $data->getCollection()->filter(function ($project) use ($has_late){
+        //         return $project->has_late == (bool)$has_late;
+        //     });
+        //     $data->setCollection($filtered->values());
+        // }
 
         $admins = $this->adminRepo->get();
         $type = [

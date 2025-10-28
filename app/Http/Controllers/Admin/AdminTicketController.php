@@ -167,11 +167,6 @@ class AdminTicketController extends Controller
                                 $paramsC['complete_time'] = null;
                             }
 
-                            if ($user->hasRole(['SEO'])) {
-                                unset($paramsC['status']);
-                                unset($paramsC['deadline_time']);
-                            }
-
                             $resP = $this->ticketRepo->update($child, $paramsC);
                             if ($resP) {
                                 $resP->admin()->sync($childAdmin);
@@ -271,7 +266,7 @@ class AdminTicketController extends Controller
             if ($role && in_array(@$role->slug, ['content_seo'])) {
                 // Chỉ admin hoặc user từ group SEO mới được tạo
                 $isSuperAdmin = $user->hasRole(['super_admin']);
-                $isSeoUser = $user->hasRole(['seo']);
+                $isSeoUser = $user->hasRole(['SEO']);
 
                 if (!$isSuperAdmin && !$isSeoUser) {
                     $res['success'] = 0;
@@ -548,7 +543,7 @@ class AdminTicketController extends Controller
                 // Kiểm tra quyền cho Content_SEO
                 if ($role && in_array(@$role->slug, ['content_seo'])) {
                     $isSuperAdmin = $user->hasRole(['super_admin']);
-                    $isSeoUser = $user->hasRole(['seo']);
+                    $isSeoUser = $user->hasRole(['SEO']);
 
                     if (!$isSuperAdmin && !$isSeoUser) {
                         return response()->json([
