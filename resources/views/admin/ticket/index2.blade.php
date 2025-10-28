@@ -234,7 +234,7 @@
                             </select>
                         </div>
                     </div>
-                    @if ($user->hasRole(['super_admin', 'account', 'content']))
+                    @if ($user->hasRole(['super_admin', 'account', 'content', 'SEO']))
                     <div class="form-group row">
                         <div class="col-lg-12">
                             <label>Order Team khác:</label>
@@ -382,7 +382,7 @@
                         </div>
 
                     </div>
-                    @if ($user->hasRole(['super_admin', 'account', 'content']))
+                    @if ($user->hasRole(['super_admin', 'account', 'content', 'SEO']))
                     <div class="form-group row check-content">
                         <div class="col-lg-12">
                             <label>Order team khác:</label>

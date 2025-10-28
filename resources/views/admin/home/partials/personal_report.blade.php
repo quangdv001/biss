@@ -2,19 +2,32 @@
 <div class="filter-card">
     <h5 class="mb-4"><i class="flaticon2-filter"></i> Bộ lọc</h5>
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Account Planer:</label>
+                <select class="form-control select2" id="personal_admin_id">
+                    <option value="">Của tôi</option>
+                    @if($isAdmin)
+                        @foreach($admins as $admin)
+                        <option value="{{ $admin->id }}">{{ $admin->username }}</option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
             <div class="form-group">
                 <label>Từ ngày:</label>
                 <input type="date" class="form-control" id="personal_start_time" value="{{ date('Y-m-d', strtotime('-30 days')) }}">
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="form-group">
                 <label>Đến ngày:</label>
                 <input type="date" class="form-control" id="personal_end_time" value="{{ date('Y-m-d') }}">
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="form-group">
                 <label>Trạng thái:</label>
                 <select class="form-control" id="personal_status">
@@ -25,7 +38,7 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="form-group">
                 <label>&nbsp;</label>
                 <button type="button" class="btn btn-primary btn-block" onclick="loadPersonalReport()">

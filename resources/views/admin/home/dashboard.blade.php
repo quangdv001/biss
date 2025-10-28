@@ -104,6 +104,27 @@ Dashboard - Báo cáo
 @section('custom_js')
 <script>
 $(document).ready(function() {
+    // Initialize Select2 for planer filter
+    $('#personal_admin_id').select2({
+        placeholder: 'Chọn account planer',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Initialize Select2 for project planer filter
+    $('#project_admin_id').select2({
+        placeholder: 'Chọn account planer',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Reload project report when admin filter changes
+    $('#project_admin_id').on('change', function() {
+        if (window.projectReportLoaded) {
+            loadProjectReport();
+        }
+    });
+
     // Load personal report on page load
     loadPersonalReport();
 
@@ -128,6 +149,7 @@ function loadPersonalReport() {
     const startTime = $('#personal_start_time').val();
     const endTime = $('#personal_end_time').val();
     const status = $('#personal_status').val();
+    const planerId = $('#personal_admin_id').val();
 
     $.ajax({
         url: '{{ route("admin.home.getPersonalReport") }}',
@@ -136,7 +158,8 @@ function loadPersonalReport() {
             _token: '{{ csrf_token() }}',
             start_time: startTime,
             end_time: endTime,
-            status: status
+            status: status,
+            planer_id: planerId
         },
         beforeSend: function() {
             $('#personal_report_table').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
@@ -201,7 +224,7 @@ function loadDepartmentReport() {
 function renderPersonalReport(data) {
     let html = '<div class="table-responsive"><table class="table table-bordered table-hover" id="personal_table"><thead><tr>';
     html += '<th>STT</th><th>Dự án</th><th>Tên task</th><th>Mô tả</th><th>Deadline</th>';
-    html += '<th>Hoàn thành</th><th>Trạng thái</th><th>Tài khoản phụ trách</th></tr></thead><tbody>';
+    html += '<th>Hoàn thành</th><th>Trạng thái</th><th>Account Planer</th></tr></thead><tbody>';
 
     data.forEach((item, index) => {
         const deadlineDate = new Date(item.deadline_time * 1000);
@@ -217,7 +240,7 @@ function renderPersonalReport(data) {
             <td>${deadlineDate.toLocaleDateString('vi-VN')}</td>
             <td>${completeDate ? completeDate.toLocaleDateString('vi-VN') : '-'}</td>
             <td><span class="label label-${statusClass} label-inline">${statusText}</span></td>
-            <td>${item.assignees || 'Chưa phân công'}</td>
+            <td>${item.planer || 'Chưa có planer'}</td>
         </tr>`;
     });
 
@@ -281,11 +304,14 @@ function renderDepartmentReport(data) {
 }
 
 function loadProjectReport() {
+    const adminId = $('#project_admin_id').val();
+
     $.ajax({
         url: '{{ route("admin.home.getProjectReport") }}',
         method: 'POST',
         data: {
-            _token: '{{ csrf_token() }}'
+            _token: '{{ csrf_token() }}',
+            admin_id: adminId
         },
         beforeSend: function() {
             $('#active_projects_content, #late_projects_content, #pending_projects_content, #expiring_projects_content').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
@@ -332,7 +358,7 @@ function renderProjectList(projects, containerId, emptyMessage) {
         html = `<div class="text-center p-5"><p class="text-muted">${emptyMessage}</p></div>`;
     } else {
         html = '<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr>';
-        html += '<th>STT</th><th>Tên dự án</th><th>Tổng task</th><th>Hoàn thành</th><th>Chưa làm</th><th>Người phụ trách</th>';
+        html += '<th>STT</th><th>Tên dự án</th><th>Tổng task</th><th>Hoàn thành</th><th>Chưa làm</th><th>Account Planer</th>';
         html += '</tr></thead><tbody>';
 
         projects.forEach((project, index) => {
@@ -367,7 +393,7 @@ function renderLateProjects(projects) {
                         <i class="flaticon2-exclamation text-warning"></i>
                         <strong>${project.name}</strong>
                         <span class="badge badge-warning ml-2">${project.pending_tasks} task chưa làm</span>
-                        <span class="text-muted ml-2">| Người phụ trách: ${project.admins}</span>
+                        <span class="text-muted ml-2">| Account Planer: ${project.admins}</span>
                     </div>
                 </div>
                 <div id="late_${index}" class="collapse" data-parent="#lateProjectsAccordion">
@@ -400,7 +426,7 @@ function renderExpiringProjects(projects) {
         html = '<div class="text-center p-5"><p class="text-muted">Không có dự án nào sắp hết hạn</p></div>';
     } else {
         html = '<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr>';
-        html += '<th>STT</th><th>Tên dự án</th><th>Ngày hết hạn</th><th>Còn lại</th><th>Tổng task</th><th>Hoàn thành</th><th>Chưa làm</th><th>Người phụ trách</th>';
+        html += '<th>STT</th><th>Tên dự án</th><th>Ngày hết hạn</th><th>Còn lại</th><th>Tổng task</th><th>Hoàn thành</th><th>Chưa làm</th><th>Account Planer</th>';
         html += '</tr></thead><tbody>';
 
         projects.forEach((project, index) => {
