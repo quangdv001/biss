@@ -138,8 +138,50 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn_view_ticket_detail">
+                    <i class="flaticon2-analytics-1"></i> Xem chi tiết
+                </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+let calendar_currentTicketId = null;
+let calendar_currentTicketGroupId = null;
+let calendar_currentTicketPhaseId = null;
+
+$(document).ready(function() {
+    // Event handler cho nút "Xem chi tiết"
+    $('#btn_view_ticket_detail').on('click', function() {
+        if (calendar_currentTicketId && calendar_currentTicketGroupId && calendar_currentTicketPhaseId) {
+            // Mở trang ticket trong tab mới
+            const url = '{{ route("admin.ticket.index", ["gid" => ":gid", "pid" => ":pid"]) }}'
+                .replace(':gid', calendar_currentTicketGroupId)
+                .replace(':pid', calendar_currentTicketPhaseId);
+
+            window.open(url, '_blank');
+
+            // Đóng modal hiện tại
+            $('#modalTicketDetail').modal('hide');
+        }
+    });
+});
+
+// Cập nhật hàm showTicketDetail nếu có
+if (typeof window.showTicketDetail_original === 'undefined' && typeof window.showTicketDetail !== 'undefined') {
+    window.showTicketDetail_original = window.showTicketDetail;
+    window.showTicketDetail = function(event) {
+        const props = event.extendedProps;
+
+        // Lưu thông tin ticket
+        calendar_currentTicketId = props.ticket_id;
+        calendar_currentTicketGroupId = props.group_id;
+        calendar_currentTicketPhaseId = props.phase_id;
+
+        // Gọi hàm gốc
+        window.showTicketDetail_original(event);
+    };
+}
+</script>

@@ -183,6 +183,9 @@ Lịch công việc
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn_view_ticket_detail">
+                    <i class="flaticon2-analytics-1"></i> Xem chi tiết
+                </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
             </div>
         </div>
@@ -193,9 +196,27 @@ Lịch công việc
 @section('custom_js')
 <script>
 let calendar;
+let currentTicketId = null;
+let currentTicketGroupId = null;
+let currentTicketPhaseId = null;
 
 $(document).ready(function() {
     initCalendar();
+
+    // Event handler cho nút "Xem chi tiết"
+    $('#btn_view_ticket_detail').on('click', function() {
+        if (currentTicketId && currentTicketGroupId && currentTicketPhaseId) {
+            // Mở trang ticket trong tab mới
+            const url = '{{ route("admin.ticket.index", ["gid" => ":gid", "pid" => ":pid"]) }}'
+                .replace(':gid', currentTicketGroupId)
+                .replace(':pid', currentTicketPhaseId);
+
+            window.open(url, '_blank');
+
+            // Đóng modal hiện tại
+            $('#modalTicketDetail').modal('hide');
+        }
+    });
 });
 
 function initCalendar() {
@@ -277,6 +298,11 @@ function loadCalendarEvents(start, end, successCallback, failureCallback) {
 
 function showTicketDetail(event) {
     const props = event.extendedProps;
+
+    // Lưu thông tin ticket để sử dụng khi bấm nút "Xem chi tiết"
+    currentTicketId = props.ticket_id;
+    currentTicketGroupId = props.group_id;
+    currentTicketPhaseId = props.phase_id;
 
     // Set ticket info
     $('#ticket_title').text(event.title);
