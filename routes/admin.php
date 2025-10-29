@@ -54,6 +54,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('ticket/editNote', 'AdminTicketController@editNote')->name('ticket.editNote');
     Route::post('ticket/get-google-sheets', 'AdminTicketController@getGoogleSheets')->name('ticket.getGoogleSheets');
     Route::post('ticket/import-google-sheet', 'AdminTicketController@importFromGoogleSheet')->name('ticket.importGoogleSheet');
+    Route::post('ticket/generate-auto-post-token', 'AdminTicketController@generateAutoPostToken')->name('ticket.generateAutoPostToken');
 
     Route::get('customer', 'AdminCustomerController@index')->name('customer.index');
     Route::post('customer/create', 'AdminCustomerController@create')->name('customer.create');

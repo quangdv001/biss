@@ -13,6 +13,7 @@ use App\Repo\ProjectRepo;
 use App\Repo\RoleRepo;
 use App\Repo\TicketRepo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminTicketController extends Controller
 {
@@ -599,6 +600,48 @@ class AdminTicketController extends Controller
                 'success' => 0,
                 'mess' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ]);
+        }
+    }
+
+    public function generateAutoPostToken(Request $request)
+    {
+        $user = Auth::guard('admin')->user();
+
+        // Kiểm tra quyền: chỉ super_admin, account, content
+        if (!$user->hasRole(['super_admin', 'account', 'content'])) {
+            return response()->json([
+                'success' => 0,
+                'mess' => 'Bạn không có quyền thực hiện tác vụ này!'
+            ], 403);
+        }
+
+        $ticketId = $request->input('ticket_id');
+        if (!$ticketId) {
+            return response()->json([
+                'success' => 0,
+                'mess' => 'Thiếu thông tin ticket!'
+            ], 400);
+        }
+
+        try {
+            // Xóa tất cả token cũ của user
+            $user->tokens()->delete();
+
+            // Tạo token mới
+            $token = $user->createToken('auto-post')->plainTextToken;
+
+            // Tạo URL với token và ticket_id
+            $url = env('AUTO_POST_DOMAIN', 'http://localhost') . '?token=' . $token . '&ticket_id=' . $ticketId;
+
+            return response()->json([
+                'success' => 1,
+                'url' => $url
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => 0,
+                'mess' => 'Không thể tạo token: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
