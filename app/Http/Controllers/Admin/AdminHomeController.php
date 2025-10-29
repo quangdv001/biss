@@ -331,6 +331,10 @@ class AdminHomeController extends Controller
                 'textColor' => $textColor,
                 'allDay' => true,
                 'extendedProps' => [
+                    'ticket_id' => $ticket->id,
+                    'group_id' => $ticket->group_id,
+                    'phase_id' => $ticket->phase_id,
+                    'project_id' => $ticket->project_id,
                     'description' => $ticket->description,
                     'project_name' => $ticket->project->name ?? '',
                     'group_name' => $ticket->group->name ?? '',
