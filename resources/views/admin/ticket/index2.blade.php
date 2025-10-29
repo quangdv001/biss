@@ -701,6 +701,7 @@ let user_id = @json(auth('admin')->user()->id);
 let is_admin = @json(auth('admin')->user()->hasRole(['super_admin', 'account']));
 let is_guest = @json(auth('admin')->user()->hasRole(['guest']));
 let is_content = @json($user->hasRole(['super_admin', 'account', 'content']));
+let is_super_admin = @json($isSuperAdmin ?? false);
 let project_expired_time = @json($project->expired_time ?? null);
 let project_max_date = null;
 
@@ -866,8 +867,8 @@ $("#formCreate").submit(function(e) {
     //prevent Default functionality
     e.preventDefault();
 
-    // Validation deadline với ngày kết thúc dự án
-    if (project_max_date) {
+    // Validation deadline với ngày kết thúc dự án (chỉ áp dụng khi KHÔNG phải super_admin)
+    if (project_max_date && !is_super_admin) {
         let deadline = $('#modalCreate input[name="deadline_time"]').val();
         let childDeadline = $('#modalCreate input[name="child_deadline_time"]').val();
 
@@ -916,8 +917,8 @@ $("#formEdit").submit(function(e) {
     //prevent Default functionality
     e.preventDefault();
 
-    // Validation deadline với ngày kết thúc dự án
-    if (project_max_date) {
+    // Validation deadline với ngày kết thúc dự án (chỉ áp dụng khi KHÔNG phải super_admin)
+    if (project_max_date && !is_super_admin) {
         let deadline = $('#modalEdit input[name="deadline_time"]').val();
         let childDeadline = $('#modalEdit input[name="child_deadline_time"]').val();
 
@@ -1093,19 +1094,27 @@ $('#modalImportGoogleSheet').on('hidden.bs.modal', function () {
     $('#sheet_gid').empty();
 });
 
-// Set max date cho deadline khi mở modal Create
+// Set max date cho deadline khi mở modal Create (chỉ áp dụng khi KHÔNG phải super_admin)
 $('#modalCreate').on('shown.bs.modal', function () {
-    if (project_max_date) {
+    if (project_max_date && !is_super_admin) {
         $('#modalCreate input[name="deadline_time"]').attr('max', project_max_date);
         $('#modalCreate input[name="child_deadline_time"]').attr('max', project_max_date);
+    } else {
+        // Xóa giới hạn max nếu là super_admin
+        $('#modalCreate input[name="deadline_time"]').removeAttr('max');
+        $('#modalCreate input[name="child_deadline_time"]').removeAttr('max');
     }
 });
 
-// Set max date cho deadline khi mở modal Edit
+// Set max date cho deadline khi mở modal Edit (chỉ áp dụng khi KHÔNG phải super_admin)
 $('#modalEdit').on('shown.bs.modal', function () {
-    if (project_max_date) {
+    if (project_max_date && !is_super_admin) {
         $('#modalEdit input[name="deadline_time"]').attr('max', project_max_date);
         $('#modalEdit input[name="child_deadline_time"]').attr('max', project_max_date);
+    } else {
+        // Xóa giới hạn max nếu là super_admin
+        $('#modalEdit input[name="deadline_time"]').removeAttr('max');
+        $('#modalEdit input[name="child_deadline_time"]').removeAttr('max');
     }
 });
 
