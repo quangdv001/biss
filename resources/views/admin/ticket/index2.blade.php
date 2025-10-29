@@ -137,6 +137,12 @@
                                         title="Chỉnh sửa" data-id="{{ $v->id }}">
                                         <i class="la la-edit"></i>
                                     </a>
+                                    @if ($user->hasRole(['super_admin', 'account', 'content']))
+                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-auto-post"
+                                        title="Tự động đăng bài" data-id="{{ $v->id }}">
+                                        <i class="la la-paper-plane"></i>
+                                    </a>
+                                    @endif
                                     @if ($isSuperAdmin)
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove"
                                         title="Xóa thành viên" data-id="{{ $v->id }}">
@@ -1109,5 +1115,41 @@ function formatDate(dateString) {
     let parts = dateString.split('-');
     return parts[2] + '/' + parts[1] + '/' + parts[0];
 }
+
+// Handle Auto Post button click
+$(document).on('click', '.btn-auto-post', function() {
+    let ticketId = $(this).data('id');
+
+    if (confirm('Bạn có chắc muốn mở trang tự động đăng bài cho ticket này?')) {
+        // Call API to generate new token
+        $.ajax({
+            url: '{{ route("admin.ticket.generateAutoPostToken") }}',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                ticket_id: ticketId
+            },
+            beforeSend: function() {
+                init.showNoty('Đang tạo token...', 'info');
+            },
+            success: function(res) {
+                if (res.success) {
+                    // Open new window with the URL
+                    let autoPostUrl = res.url;
+                    window.open(autoPostUrl, '_blank');
+                } else {
+                    init.showNoty(res.message || 'Có lỗi xảy ra!', 'error');
+                }
+            },
+            error: function(xhr) {
+                let errorMsg = 'Không thể tạo token!';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                init.showNoty(errorMsg, 'error');
+            }
+        });
+    }
+});
 </script>
 @endsection
