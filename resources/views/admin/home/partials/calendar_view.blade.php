@@ -159,7 +159,7 @@ $(document).ready(function() {
             // Mở trang ticket trong tab mới
             const url = '{{ route("admin.ticket.index", ["gid" => ":gid", "pid" => ":pid"]) }}'
                 .replace(':gid', calendar_currentTicketGroupId)
-                .replace(':pid', calendar_currentTicketPhaseId);
+                .replace(':pid', calendar_currentTicketPhaseId) + '?id=' + calendar_currentTicketId;
 
             window.open(url, '_blank');
 

@@ -209,7 +209,7 @@ $(document).ready(function() {
             // Mở trang ticket trong tab mới
             const url = '{{ route("admin.ticket.index", ["gid" => ":gid", "pid" => ":pid"]) }}'
                 .replace(':gid', currentTicketGroupId)
-                .replace(':pid', currentTicketPhaseId);
+                .replace(':pid', currentTicketPhaseId) + '?id=' + currentTicketId;;
 
             window.open(url, '_blank');
 
