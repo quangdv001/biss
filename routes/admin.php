@@ -50,6 +50,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('ticket/create', 'AdminTicketController@create')->name('ticket.create');
     Route::post('ticket/createAjax', 'AdminTicketController@createAjax')->name('ticket.createAjax');
     Route::post('ticket/remove', 'AdminTicketController@remove')->name('ticket.remove');
+    Route::post('ticket/bulk-remove', 'AdminTicketController@bulkRemove')->name('ticket.bulkRemove');
     Route::post('ticket/createNote', 'AdminTicketController@createNote')->name('ticket.createNote');
     Route::post('ticket/editNote', 'AdminTicketController@editNote')->name('ticket.editNote');
     Route::post('ticket/get-google-sheets', 'AdminTicketController@getGoogleSheets')->name('ticket.getGoogleSheets');

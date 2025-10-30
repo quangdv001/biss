@@ -59,6 +59,11 @@
                         <span class="text-muted font-weight-bold font-size-sm mt-1">Danh sách công việc</span>
                     </div>
                     <div class="card-toolbar">
+                        @if ($isSuperAdmin)
+                        <button type="button" class="btn btn-danger mr-2" id="btnBulkDelete" style="display: none;">
+                            <i class="la la-trash"></i> Xóa đã chọn (<span id="selectedCount">0</span>)
+                        </button>
+                        @endif
                         <button type="button" class="btn btn-warning mr-2" data-toggle="modal"
                         data-target="#modalNote">Thêm ghi chú</button>
                         <button type="button" class="btn btn-info mr-2" data-toggle="modal"
@@ -81,6 +86,14 @@
                         <thead>
                             <tr>
                                 <th data-priority="1">#</th>
+                                @if ($isSuperAdmin)
+                                <th data-priority="1" style="width: 30px;">
+                                    <label class="checkbox checkbox-single">
+                                        <input type="checkbox" id="checkAll"/>
+                                        <span></span>
+                                    </label>
+                                </th>
+                                @endif
                                 <th data-priority="1" style="min-width: 100px">Tên</th>
                                 <th data-priority="1">Ghi chú</th>
                                 <th data-priority="1">Deadline</th>
@@ -103,6 +116,14 @@
                             @foreach($data as $k => $v)
                             <tr class="@if($v->id == $id) bg-secondary @endif">
                                 <td>{{ $k + 1 }}</td>
+                                @if ($isSuperAdmin)
+                                <td>
+                                    <label class="checkbox checkbox-single">
+                                        <input type="checkbox" class="ticket-checkbox" value="{{ $v->id }}"/>
+                                        <span></span>
+                                    </label>
+                                </td>
+                                @endif
                                 <td >{{ $v->name }}</td>
                                 <td>{{ $v->note }}</td>
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
@@ -664,6 +685,8 @@
 @endsection
 @section('custom_js')
 <script>
+let is_super_admin = @json($isSuperAdmin ?? false);
+
 let table = $('#kt_datatable').DataTable({
     scrollY: '50vh',
     scrollX: true,
@@ -671,7 +694,24 @@ let table = $('#kt_datatable').DataTable({
     responsive: true,
     pageLength: 25,
     paging: true,
-    columns:[
+    columns: is_super_admin ? [
+        {},
+        {"orderable": false, "className": "control"},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {"className": "none"},
+        {"className": "none"},
+        {"className": "none"},
+        {"className": "none"},
+        {"className": "none"},
+        {"className": "none"},
+    ] : [
         {},
         {},
         {},
@@ -701,7 +741,6 @@ let user_id = @json(auth('admin')->user()->id);
 let is_admin = @json(auth('admin')->user()->hasRole(['super_admin', 'account']));
 let is_guest = @json(auth('admin')->user()->hasRole(['guest']));
 let is_content = @json($user->hasRole(['super_admin', 'account', 'content']));
-let is_super_admin = @json($isSuperAdmin ?? false);
 let project_expired_time = @json($project->expired_time ?? null);
 let project_max_date = null;
 
@@ -1159,6 +1198,106 @@ $(document).on('click', '.btn-auto-post', function() {
             }
         });
     }
+});
+
+// ===== Bulk Delete Feature =====
+// Check All / Uncheck All
+$(document).on('change', '#checkAll', function() {
+    let isChecked = $(this).is(':checked');
+    $('.ticket-checkbox').prop('checked', isChecked);
+    updateBulkDeleteButton();
+});
+
+// Individual checkbox change
+$(document).on('change', '.ticket-checkbox', function() {
+    updateBulkDeleteButton();
+
+    // Update "Check All" state
+    let totalCheckboxes = $('.ticket-checkbox').length;
+    let checkedCheckboxes = $('.ticket-checkbox:checked').length;
+    $('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes);
+});
+
+// Update bulk delete button visibility and count
+function updateBulkDeleteButton() {
+    let checkedCount = $('.ticket-checkbox:checked').length;
+    $('#selectedCount').text(checkedCount);
+
+    if (checkedCount > 0) {
+        $('#btnBulkDelete').show();
+    } else {
+        $('#btnBulkDelete').hide();
+    }
+}
+
+// Bulk Delete Action
+$(document).on('click', '#btnBulkDelete', function() {
+    let selectedIds = [];
+    $('.ticket-checkbox:checked').each(function() {
+        selectedIds.push($(this).val());
+    });
+
+    if (selectedIds.length === 0) {
+        init.showNoty('Vui lòng chọn ít nhất một ticket để xóa!', 'warning');
+        return;
+    }
+
+    Swal.fire({
+        title: "Bạn chắc chắn muốn xóa?",
+        text: "Bạn sắp xóa " + selectedIds.length + " ticket. Sau khi xóa sẽ không thể khôi phục!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Xóa",
+        cancelButtonText: "Hủy",
+        confirmButtonColor: '#d33',
+    }).then(function(result) {
+        if (result.value) {
+            if(!init.conf.ajax_sending){
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('admin.ticket.bulkRemove') }}",
+                    data: {
+                        ids: selectedIds,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    beforeSend: function(){
+                        init.conf.ajax_sending = true;
+                        Swal.fire({
+                            title: 'Đang xử lý...',
+                            text: 'Vui lòng đợi trong khi xóa tickets',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading()
+                            }
+                        });
+                    },
+                    success: function(res){
+                        Swal.close();
+                        if(res.success){
+                            init.showNoty('Đã xóa ' + res.deleted_count + ' ticket thành công!', 'success');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 500);
+                        } else {
+                            init.showNoty(res.mess, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.close();
+                        let errorMsg = 'Có lỗi xảy ra khi xóa tickets!';
+                        if (xhr.responseJSON && xhr.responseJSON.mess) {
+                            errorMsg = xhr.responseJSON.mess;
+                        }
+                        init.showNoty(errorMsg, 'error');
+                    },
+                    complete: function(){
+                        init.conf.ajax_sending = false;
+                    }
+                })
+            }
+        }
+    });
 });
 </script>
 @endsection

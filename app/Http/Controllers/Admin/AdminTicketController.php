@@ -376,6 +376,59 @@ class AdminTicketController extends Controller
         return response()->json($res);
     }
 
+    public function bulkRemove(Request $request){
+        $user = auth('admin')->user();
+
+        // Chỉ cho phép super_admin xóa hàng loạt
+        if(!$user->hasRole(['super_admin'])){
+            $res['success'] = 0;
+            $res['mess'] = 'Bạn không có quyền xóa hàng loạt ticket!';
+            return response()->json($res);
+        }
+
+        $ids = $request->input('ids', []);
+
+        if(empty($ids) || !is_array($ids)){
+            return response()->json([
+                'success' => 0,
+                'mess' => 'Không có ticket nào được chọn!'
+            ]);
+        }
+
+        try {
+            $deletedCount = 0;
+
+            foreach($ids as $id){
+                $ticket = $this->ticketRepo->first(['id' => $id]);
+                if($ticket){
+                    // Xóa ticket con nếu có
+                    $childTicket = $this->ticketRepo->first(['parent_id' => $id]);
+                    if($childTicket){
+                        $this->ticketRepo->remove($childTicket->id);
+                    }
+
+                    // Xóa ticket chính
+                    $resR = $this->ticketRepo->remove($id);
+                    if($resR){
+                        $deletedCount++;
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => 1,
+                'mess' => 'Đã xóa ' . $deletedCount . ' ticket thành công!',
+                'deleted_count' => $deletedCount
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => 0,
+                'mess' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     private function createNoty($data, $type = 1){
         if($type == 1){
             $data = $data->load('group.project.admin');
