@@ -641,7 +641,7 @@
                                         </div>
                                     </div>
                                     <span class="form-text text-muted">
-                                        Nhập link Google Sheets có chứa dữ liệu với các cột: Chủ đề, Mô Tả, Khách duyệt, Sản phẩm, Deadline, Ghi chú
+                                        Nhập link Google Sheets có chứa dữ liệu với các cột: Chủ đề, Mô Tả, Khách duyệt, Sản phẩm, Deadline, Ghi chú, Người xử lý
                                     </span>
                                 </div>
 
@@ -660,7 +660,9 @@
                                     <strong>Lưu ý:</strong>
                                     <ul class="mb-0">
                                         <li>Google Sheets phải được chia sẻ công khai (Anyone with the link can view)</li>
-                                        <li>Dòng đầu tiên phải là tiêu đề cột với tên: chu_de, mo_ta, khach_duyet, san_pham, deadline, ghi_chu</li>
+                                        <li>Dòng đầu tiên phải là tiêu đề cột với tên: <strong>chu_de</strong>, <strong>mo_ta</strong>, <strong>khach_duyet</strong>, <strong>san_pham</strong>, <strong>deadline</strong>, <strong>ghi_chu</strong>, <strong>nguoi_xu_ly</strong></li>
+                                        <li>Cột <strong>chu_de</strong> là bắt buộc, không được để trống</li>
+                                        <li>Cột <strong>nguoi_xu_ly</strong>: nhập username (có thể nhiều người cách nhau bởi dấu phẩy hoặc chấm phẩy)</li>
                                         <li>Cột Deadline có thể để trống hoặc nhập theo định dạng ngày/tháng/năm</li>
                                     </ul>
                                 </div>

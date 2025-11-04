@@ -65,11 +65,17 @@ class TicketImport implements ToCollection, WithHeadingRow, WithMultipleSheets
             $ticketRepo = app(TicketRepo::class);
             $adminRepo = app(AdminRepo::class);
 
-            // Get all admins for reference
-            $admins = $adminRepo->getAdmin()->keyBy('username');
+            // Get all admins for reference - key by username (lowercase for case-insensitive matching)
+            $adminsCollection = $adminRepo->get([]);
+            $admins = [];
+            foreach ($adminsCollection as $admin) {
+                $admins[strtolower(trim($admin->username))] = $admin->id;
+            }
 
             $data = [];
-            foreach ($collection as $row) {
+            $ticketAdminRelations = []; // Store ticket-admin relationships
+
+            foreach ($collection as $index => $row) {
                 // Skip empty rows
                 if (empty($row['chu_de'])) {
                     continue;
@@ -95,7 +101,24 @@ class TicketImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                     }
                 }
 
-                $data[] = [
+                // Parse người xử lý (handler/assigned admin)
+                $assignedAdminIds = [];
+                if (!empty($row['nguoi_xu_ly'])) {
+                    // Split by comma or semicolon to support multiple admins
+                    $adminNames = preg_split('/[,;]+/', $row['nguoi_xu_ly']);
+
+                    foreach ($adminNames as $adminName) {
+                        $adminName = strtolower(trim($adminName));
+                        if (!empty($adminName) && isset($admins[$adminName])) {
+                            $assignedAdminIds[] = $admins[$adminName];
+                        }
+                    }
+
+                    // Remove duplicates
+                    $assignedAdminIds = array_unique($assignedAdminIds);
+                }
+
+                $ticketData = [
                     'name' => $row['chu_de'] ?? '',
                     'description' => $row['mo_ta'] ?? '',
                     'input' => $row['khach_duyet'] ?? '',
@@ -115,11 +138,34 @@ class TicketImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
+
+                $data[] = $ticketData;
+
+                // Store admin relationships for this ticket (using index as temporary key)
+                if (!empty($assignedAdminIds)) {
+                    $ticketAdminRelations[$index] = $assignedAdminIds;
+                }
             }
 
             if (!empty($data)) {
-                foreach (array_chunk($data, 1000) as $chunk) {
-                    $ticketRepo->insert($chunk);
+                // Insert tickets in chunks and sync admin relationships
+                $insertedTickets = [];
+
+                foreach (array_chunk($data, 100) as $chunkIndex => $chunk) {
+                    // Calculate the starting index for this chunk
+                    $chunkStartIndex = $chunkIndex * 100;
+
+                    foreach ($chunk as $localIndex => $ticketData) {
+                        $originalIndex = $chunkStartIndex + $localIndex;
+
+                        // Create ticket
+                        $ticket = $ticketRepo->create($ticketData);
+
+                        // Sync admins if any were assigned
+                        if (isset($ticketAdminRelations[$originalIndex]) && !empty($ticketAdminRelations[$originalIndex])) {
+                            $ticket->admin()->sync($ticketAdminRelations[$originalIndex]);
+                        }
+                    }
                 }
             }
         }

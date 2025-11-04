@@ -678,7 +678,7 @@ class AdminTicketController extends Controller
 
         try {
             // Xóa tất cả token cũ của user
-            $user->tokens()->delete();
+            // $user->tokens()->delete();
 
             // Tạo token mới
             $token = $user->createToken('auto-post')->plainTextToken;
