@@ -7,12 +7,13 @@
 1. **Tạo hoặc mở Google Sheets** với link: https://docs.google.com/spreadsheets/d/1-2LO-6XKqAiwysFnsp-Y_B_qqfr8rZkSExn5wdBA3DY/edit?gid=965454359#gid=965454359
 
 2. **Đảm bảo cột đầu tiên có các tiêu đề sau** (chính xác tên này):
-   - `chu_de` - Chủ đề/Tên công việc
+   - `chu_de` - Chủ đề/Tên công việc (BẮT BUỘC)
    - `mo_ta` - Mô tả chi tiết
    - `khach_duyet` - Thông tin khách duyệt
    - `san_pham` - Sản phẩm
    - `deadline` - Ngày hết hạn (có thể để trống)
    - `ghi_chu` - Ghi chú thêm
+   - `nguoi_xu_ly` - Người xử lý/phụ trách (username, có thể nhiều người cách nhau bởi dấu phẩy hoặc chấm phẩy)
 
 3. **Chia sẻ Google Sheets công khai**:
    - Click nút "Share" (Chia sẻ)
@@ -31,6 +32,14 @@
 #### Các cột văn bản
 - Nhập tự do, không giới hạn độ dài
 - Có thể để trống (trừ cột `chu_de`)
+
+#### Cột Người xử lý (nguoi_xu_ly)
+- Nhập username của người xử lý trong hệ thống
+- Có thể để trống (ticket sẽ không có người xử lý)
+- Hỗ trợ nhiều người xử lý, cách nhau bởi dấu phẩy (,) hoặc chấm phẩy (;)
+- Ví dụ: `admin1, admin2` hoặc `admin1; admin2`
+- Username không phân biệt chữ hoa/chữ thường
+- Nếu username không tồn tại trong hệ thống, sẽ bị bỏ qua
 
 ### Sử dụng tính năng Import
 
@@ -63,11 +72,12 @@ Nếu gặp lỗi:
 
 ### Ví dụ cấu trúc Google Sheets
 
-| chu_de | mo_ta | khach_duyet | san_pham | deadline | ghi_chu |
-|--------|-------|-------------|----------|----------|---------|
-| Thiết kế banner | Banner quảng cáo sản phẩm mới | Anh Nam | File PSD, PNG | 25/12/2024 | Ưu tiên cao |
-| Viết content | Bài viết giới thiệu | Chị Hoa | File Word | 30/12/2024 | |
-| Chỉnh sửa video | Video review sản phẩm | Anh Tuấn | File MP4 | | Cần phê duyệt trước |
+| chu_de | mo_ta | khach_duyet | san_pham | deadline | ghi_chu | nguoi_xu_ly |
+|--------|-------|-------------|----------|----------|---------|-------------|
+| Thiết kế banner | Banner quảng cáo sản phẩm mới | Anh Nam | File PSD, PNG | 25/12/2024 | Ưu tiên cao | admin1, admin2 |
+| Viết content | Bài viết giới thiệu | Chị Hoa | File Word | 30/12/2024 | | admin3 |
+| Chỉnh sửa video | Video review sản phẩm | Anh Tuấn | File MP4 | | Cần phê duyệt trước | admin1; admin3 |
+| Làm mockup | Mockup website | | | 28/12/2024 | | |
 
 ## Thông tin kỹ thuật
 
