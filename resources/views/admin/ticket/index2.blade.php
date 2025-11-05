@@ -95,19 +95,19 @@
                                 </th>
                                 @endif
                                 <th data-priority="1" style="min-width: 100px">Tên</th>
-                                <th data-priority="1">Ghi chú</th>
+                                <th data-priority="1">Mô tả</th>
                                 <th data-priority="1">Deadline</th>
                                 <th data-priority="1">Hoàn thành</th>
                                 <th data-priority="1">Khách duyệt</th>
                                 <th data-priority="1">Sản phẩm</th>
-                                <th data-priority="1">Độ ưu tiên</th>
                                 <th data-priority="1">Trạng thái</th>
+                                <th data-priority="1">Hành động</th>
                                 <th data-priority="2">Khối lượng</th>
                                 <th data-priority="2">Người xử lý</th>
                                 <th data-priority="2">Người tạo</th>
-                                <th data-priority="2">Mô tả</th>
+                                <th data-priority="2">Ghi chú</th>
+                                <th data-priority="2">Độ ưu tiên</th>
                                 <th data-priority="2">Thời gian tạo</th>
-                                <th data-priority="2">Hành động</th>
                             </tr>
                         </thead>
 
@@ -125,30 +125,15 @@
                                 </td>
                                 @endif
                                 <td >{{ $v->name }}</td>
-                                <td>{{ $v->note }}</td>
+                                <td>{{ $v->description }}</td>
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
                                 <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
                                 <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
-
-                                <td nowrap>
-                                    @if($v->priority == 1)
-                                        <span  class="label label-lg font-weight-bold label-light-success label-inline">Thấp</span>
-                                    @elseif($v->priority == 2)
-                                        <span  class="label label-lg font-weight-bold label-light-warning label-inline">Trung bình</span>
-                                    @else
-                                        <span class="label label-lg font-weight-bold label-light-danger label-inline">Cao</span>
-                                    @endif
-                                </td>
                                 <td nowrap>
                                     <span
                                         class="label label-lg font-weight-bold label-light-{{ $v->status_cl }} label-inline">{{ $v->status_lb }}</span>
                                 </td>
-                                <td>{{ $v->qty }}</td>
-                                <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
-                                <td>{{ @$v->creator->username }}</td>
-                                <td>{{ $v->description }}</td>
-                                <th>{{ $v->created_at->format('d/m/y') }}</th>
                                 <td nowrap>
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-note"
                                         title="Ghi chú" data-id="{{ $v->id }}">
@@ -171,6 +156,20 @@
                                     </a>
                                     @endif
                                 </td>
+                                <td>{{ $v->qty }}</td>
+                                <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
+                                <td>{{ @$v->creator->username }}</td>
+                                <td>{{ $v->note }}</td>
+                                <td nowrap>
+                                    @if($v->priority == 1)
+                                        <span  class="label label-lg font-weight-bold label-light-success label-inline">Thấp</span>
+                                    @elseif($v->priority == 2)
+                                        <span  class="label label-lg font-weight-bold label-light-warning label-inline">Trung bình</span>
+                                    @else
+                                        <span class="label label-lg font-weight-bold label-light-danger label-inline">Cao</span>
+                                    @endif
+                                </td>
+                                <th>{{ $v->created_at->format('d/m/y') }}</th>
                                 @endforeach
 
                             </tr>
