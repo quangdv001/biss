@@ -101,13 +101,16 @@
                                 <th data-priority="1">Khách duyệt</th>
                                 <th data-priority="1">Sản phẩm</th>
                                 <th data-priority="1">Trạng thái</th>
-                                <th data-priority="1">Hành động</th>
+                                @if ($user->hasRole(['super_admin', 'account', 'content']))
+                                <th data-priority="1">Auto Post</th>
+                                @endif
                                 <th data-priority="2">Khối lượng</th>
                                 <th data-priority="2">Người xử lý</th>
                                 <th data-priority="2">Người tạo</th>
                                 <th data-priority="2">Ghi chú</th>
                                 <th data-priority="2">Độ ưu tiên</th>
                                 <th data-priority="2">Thời gian tạo</th>
+                                <th data-priority="2">Hành động</th>
                             </tr>
                         </thead>
 
@@ -134,28 +137,14 @@
                                     <span
                                         class="label label-lg font-weight-bold label-light-{{ $v->status_cl }} label-inline">{{ $v->status_lb }}</span>
                                 </td>
+                                @if ($user->hasRole(['super_admin', 'account', 'content']))
                                 <td nowrap>
-                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-note"
-                                        title="Ghi chú" data-id="{{ $v->id }}">
-                                        <i class="la la-sticky-note"></i>
-                                    </a>
-                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit"
-                                        title="Chỉnh sửa" data-id="{{ $v->id }}">
-                                        <i class="la la-edit"></i>
-                                    </a>
-                                    @if ($user->hasRole(['super_admin', 'account', 'content']))
                                     <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-auto-post"
                                         title="Tự động đăng bài" data-id="{{ $v->id }}">
                                         <i class="la la-paper-plane"></i>
                                     </a>
-                                    @endif
-                                    @if ($isSuperAdmin)
-                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove"
-                                        title="Xóa thành viên" data-id="{{ $v->id }}">
-                                        <i class="la la-trash"></i>
-                                    </a>
-                                    @endif
                                 </td>
+                                @endif
                                 <td>{{ $v->qty }}</td>
                                 <td>{{ !empty($v->admin) ? implode(', ', $v->admin->pluck('username')->toArray()) : '' }}</td>
                                 <td>{{ @$v->creator->username }}</td>
@@ -170,6 +159,22 @@
                                     @endif
                                 </td>
                                 <th>{{ $v->created_at->format('d/m/y') }}</th>
+                                <td nowrap>
+                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-note"
+                                        title="Ghi chú" data-id="{{ $v->id }}">
+                                        <i class="la la-sticky-note"></i>
+                                    </a>
+                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-edit"
+                                        title="Chỉnh sửa" data-id="{{ $v->id }}">
+                                        <i class="la la-edit"></i>
+                                    </a>
+                                    @if ($isSuperAdmin)
+                                    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-remove"
+                                        title="Xóa thành viên" data-id="{{ $v->id }}">
+                                        <i class="la la-trash"></i>
+                                    </a>
+                                    @endif
+                                </td>
                                 @endforeach
 
                             </tr>
@@ -687,6 +692,41 @@
 @section('custom_js')
 <script>
 let is_super_admin = @json($isSuperAdmin ?? false);
+let is_content = @json($user->hasRole(['super_admin', 'account', 'content']));
+
+// Xác định cấu trúc columns dựa trên quyền user
+let tableColumns = [];
+
+// Cột # (STT)
+tableColumns.push({});
+
+// Cột checkbox (chỉ super_admin)
+if (is_super_admin) {
+    tableColumns.push({"orderable": false, "className": "control"});
+}
+
+// Các cột chính (data-priority="1")
+tableColumns.push({}); // Tên
+tableColumns.push({}); // Mô tả
+tableColumns.push({}); // Deadline
+tableColumns.push({}); // Hoàn thành
+tableColumns.push({}); // Khách duyệt
+tableColumns.push({}); // Sản phẩm
+tableColumns.push({}); // Trạng thái
+
+// Cột Auto Post (chỉ super_admin, account, content)
+if (is_content) {
+    tableColumns.push({}); // Auto Post
+}
+
+// Các cột ẩn (data-priority="2")
+tableColumns.push({"className": "none"}); // Khối lượng
+tableColumns.push({"className": "none"}); // Người xử lý
+tableColumns.push({"className": "none"}); // Người tạo
+tableColumns.push({"className": "none"}); // Ghi chú
+tableColumns.push({"className": "none"}); // Độ ưu tiên
+tableColumns.push({"className": "none"}); // Thời gian tạo
+tableColumns.push({"className": "none"}); // Hành động
 
 let table = $('#kt_datatable').DataTable({
     scrollY: '50vh',
@@ -695,40 +735,7 @@ let table = $('#kt_datatable').DataTable({
     responsive: true,
     pageLength: 25,
     paging: true,
-    columns: is_super_admin ? [
-        {},
-        {"orderable": false, "className": "control"},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-    ] : [
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-        {"className": "none"},
-    ],
+    columns: tableColumns,
     bStateSave: true,
     fnStateSave: function (oSettings, oData) {
         localStorage.setItem('offersDataTables', JSON.stringify(oData));
@@ -741,7 +748,6 @@ var data = @json($data->keyBy('id'));
 let user_id = @json(auth('admin')->user()->id);
 let is_admin = @json(auth('admin')->user()->hasRole(['super_admin', 'account']));
 let is_guest = @json(auth('admin')->user()->hasRole(['guest']));
-let is_content = @json($user->hasRole(['super_admin', 'account', 'content']));
 let project_expired_time = @json($project->expired_time ?? null);
 let project_max_date = null;
 
