@@ -17,6 +17,8 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('home/getPersonalReport', 'AdminHomeController@getPersonalReport')->name('home.getPersonalReport');
     Route::post('home/getProjectReport', 'AdminHomeController@getProjectReport')->name('home.getProjectReport');
     Route::get('home/getCalendarData', 'AdminHomeController@getCalendarData')->name('home.getCalendarData');
+    Route::get('home/personal-calendar/{adminId?}', 'AdminHomeController@personalCalendar')->name('home.personalCalendar');
+    Route::get('home/getPersonalCalendarData', 'AdminHomeController@getPersonalCalendarData')->name('home.getPersonalCalendarData');
 
     Route::get('profile', 'AdminProfileController@index')->name('profile.index');
     Route::post('profile', 'AdminProfileController@postIndex')->name('profile.postIndex');

@@ -703,5 +703,18 @@ function renderDepartmentExpiredReport(data) {
     html += '</div>';
     $('#department_expired_table').html(html);
 }
+
+// Function để xem lịch công việc cá nhân
+function viewPersonalCalendar() {
+    const adminId = $('#personal_admin_id').val();
+    let url = '{{ route("admin.home.personalCalendar") }}';
+
+    if (adminId) {
+        url = '{{ route("admin.home.personalCalendar", ":adminId") }}'.replace(':adminId', adminId);
+    }
+
+    // Mở trong tab mới
+    window.open(url, '_blank');
+}
 </script>
 @endsection

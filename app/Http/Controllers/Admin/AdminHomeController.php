@@ -349,4 +349,103 @@ class AdminHomeController extends Controller
 
         return response()->json($events);
     }
+
+    public function personalCalendar($adminId = null)
+    {
+        $user = auth('admin')->user();
+
+        // Nếu không truyền adminId hoặc không phải admin thì xem lịch của chính mình
+        if (!$adminId || !$user->hasRole(['super_admin', 'account'])) {
+            $adminId = $user->id;
+        }
+
+        // Lấy thông tin admin được chọn
+        $selectedAdmin = $this->admin->first(['id' => $adminId]);
+        if (!$selectedAdmin) {
+            return redirect()->route('admin.home.dashboard')->with('error_message', 'Không tìm thấy nhân sự');
+        }
+
+        // Lấy danh sách projects cho filter
+        $projects = $this->project->get([], [], ['admin']);
+
+        return view('admin.home.personal_calendar', compact('user', 'projects', 'selectedAdmin'));
+    }
+
+    public function getPersonalCalendarData(Request $request)
+    {
+        $user = auth('admin')->user();
+
+        $adminId = $request->input('admin_id');
+        $projectId = $request->input('project_id');
+        $startDate = $request->input('start');
+        $endDate = $request->input('end');
+
+        // Kiểm tra quyền xem lịch của người khác
+        if ($adminId && $adminId != $user->id && !$user->hasRole(['super_admin', 'account'])) {
+            return response()->json(['error' => 'Không có quyền xem lịch của người khác'], 403);
+        }
+
+        // Nếu không truyền adminId thì xem lịch của chính mình
+        if (!$adminId) {
+            $adminId = $user->id;
+        }
+
+        // Convert dates to timestamps
+        $startTime = $startDate ? strtotime($startDate) : strtotime('-30 days');
+        $endTime = $endDate ? strtotime($endDate) : strtotime('+60 days');
+
+        // Lấy tickets của admin được chọn
+        $ticketsQuery = $this->ticket->getTicketByAdmin([$adminId], '', $startTime, $endTime);
+
+        // Lọc theo project nếu có
+        if ($projectId) {
+            $ticketsQuery = $ticketsQuery->where('project_id', $projectId);
+        }
+
+        // Map dữ liệu cho calendar
+        $events = $ticketsQuery->map(function($ticket) {
+            // Xác định màu sắc dựa trên trạng thái
+            if ($ticket->status == 1) {
+                $color = '#1BC5BD'; // Success - green
+                $textColor = '#ffffff';
+            } elseif ($ticket->deadline_time < time()) {
+                $color = '#F64E60'; // Danger - red (trễ hạn)
+                $textColor = '#ffffff';
+            } else {
+                $color = '#FFA800'; // Warning - yellow (chưa làm)
+                $textColor = '#ffffff';
+            }
+
+            // Lấy thông tin người phụ trách
+            $assignees = $ticket->admin->pluck('username')->toArray();
+            $assigneesText = !empty($assignees) ? implode(', ', $assignees) : 'Chưa phân công';
+
+            return [
+                'id' => $ticket->id,
+                'title' => $ticket->name,
+                'start' => date('Y-m-d', $ticket->deadline_time),
+                'end' => date('Y-m-d', $ticket->deadline_time),
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'textColor' => $textColor,
+                'allDay' => true,
+                'extendedProps' => [
+                    'ticket_id' => $ticket->id,
+                    'group_id' => $ticket->group_id,
+                    'phase_id' => $ticket->phase_id,
+                    'project_id' => $ticket->project_id,
+                    'description' => $ticket->description,
+                    'project_name' => $ticket->project->name ?? '',
+                    'group_name' => $ticket->group->name ?? '',
+                    'deadline_time' => $ticket->deadline_time,
+                    'complete_time' => $ticket->complete_time,
+                    'status' => $ticket->status,
+                    'assignees' => $assigneesText,
+                    'note' => $ticket->note,
+                ]
+            ];
+        })->values();
+
+        return response()->json($events);
+    }
 }

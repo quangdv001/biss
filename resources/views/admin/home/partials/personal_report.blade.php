@@ -46,6 +46,14 @@
                 </button>
             </div>
         </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="button" class="btn btn-info btn-block" onclick="viewPersonalCalendar()">
+                    <i class="flaticon2-calendar-1"></i> Xem lịch công việc
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
