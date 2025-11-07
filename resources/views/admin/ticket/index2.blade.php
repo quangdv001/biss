@@ -132,7 +132,23 @@
                                 <td>{{ $v->deadline_time ? date('d/m', $v->deadline_time) : '' }}</td>
                                 <td>{{ $v->complete_time ? date('d/m', $v->complete_time) : '' }}</td>
                                 <td><a href="{{ $v->input }}" target="_blank" class="{{empty($v->input)?'d-none':''}}">Xem</a></td>
-                                <td><a href="{{ $v->output }}" target="_blank" class="{{empty($v->output)?'d-none':''}}">Xem</a></td>
+                                <td>
+                                    @if(!empty($v->output))
+                                        @php
+                                            // Tách các link bằng dấu phẩy và loại bỏ khoảng trắng
+                                            $outputLinks = array_filter(array_map('trim', explode(',', $v->output)));
+                                        @endphp
+                                        @if(count($outputLinks) > 1)
+                                            @foreach($outputLinks as $index => $link)
+                                                <a href="{{ $link }}" target="_blank" class="btn btn-sm btn-light-primary mr-1 mb-1">
+                                                    Xem {{ $index + 1 }}
+                                                </a>
+                                            @endforeach
+                                        @else
+                                            <a href="{{ $v->output }}" target="_blank" class="btn btn-sm btn-light-primary">Xem</a>
+                                        @endif
+                                    @endif
+                                </td>
                                 <td nowrap>
                                     <span
                                         class="label label-lg font-weight-bold label-light-{{ $v->status_cl }} label-inline">{{ $v->status_lb }}</span>
