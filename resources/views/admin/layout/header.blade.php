@@ -238,7 +238,7 @@
                 <li class="menu-item  menu-item-submenu menu-item-rel @if(Route::is(['admin.project.*', 'admin.group.*', 'admin.ticket.*'])) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.project.index') }}" class="menu-link"><span class="menu-text">Dự án</span></a>
                 </li>
-                @if(auth('admin')->user()->hasRole(['super_admin','account']))
+                @if(auth('admin')->user()->hasRole(['super_admin','account']) && auth('admin')->user()->username != 'admin')
                 <li class="menu-item menu-item-submenu menu-item-rel @if(Route::is('admin.customer.*')) menu-item-open menu-item-here @endif">
                     <a href="{{ route('admin.customer.index') }}" class="menu-link">
                         <span class="menu-text">Khách hàng</span>
