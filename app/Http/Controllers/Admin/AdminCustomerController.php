@@ -20,6 +20,10 @@ class AdminCustomerController extends Controller
 
     public function index(Request $request)
     {
+        $user = auth('admin')->user();
+        if ($user->username == 'admin') {
+            return redirect()->route('admin.home.index')->with('error_message', 'Bạn không có quyền truy cập mục này!');
+        }
         $request->flash();
         $params = $request->only('name', 'phone', 'admin_id', 'start_time', 'end_time', 'status');
         $limit = $request->input('limit', 50);
@@ -34,10 +38,10 @@ class AdminCustomerController extends Controller
                         unset($params[$k]);
                         $params[] = $search;
                     }
-    
+
                     if ($k == 'start_time') {
                         $start = strtotime($v);
-                        $params[] = ['created_time', '>=', $start]; 
+                        $params[] = ['created_time', '>=', $start];
                         unset($params[$k]);
                     }
                     if ($k == 'end_time') {
@@ -49,7 +53,7 @@ class AdminCustomerController extends Controller
 
             }
         }
-        $user = auth('admin')->user();
+
         $isSuperAdmin = $user->hasRole(['super_admin']);
         if(!$user->hasRole(['super_admin'])) {
             $params['admin_id'] = $user->id;
@@ -77,6 +81,9 @@ class AdminCustomerController extends Controller
     public function create(Request $request)
     {
         $user = auth('admin')->user();
+        if ($user->username == 'admin') {
+            return redirect()->route('admin.home.index')->with('error_message', 'Bạn không có quyền truy cập mục này!');
+        }
         if (!$user->hasRole(['super_admin', 'account'])) {
             return back()->with('error_message', 'Bạn không có quyền quản lý dự án!');
         }
@@ -117,6 +124,10 @@ class AdminCustomerController extends Controller
 
     public function export(Request $request)
     {
+         $user = auth('admin')->user();
+        if ($user->username == 'admin') {
+            return redirect()->route('admin.home.index')->with('error_message', 'Bạn không có quyền truy cập mục này!');
+        }
         $params = $request->only('id', 'name', 'phone', 'admin_id', 'start_time', 'end_time', 'status');
         if (!empty($params)) {
             foreach ($params as $k => $v) {
@@ -132,7 +143,7 @@ class AdminCustomerController extends Controller
 
                 if ($k == 'start_time' && $v) {
                     $start = strtotime($v);
-                    $params[] = ['created_time', '>=', $start]; 
+                    $params[] = ['created_time', '>=', $start];
                     unset($params[$k]);
                 }
                 if ($k == 'end_time' && $v) {
@@ -151,5 +162,5 @@ class AdminCustomerController extends Controller
         $res['success'] = 1;
         return response()->json($res);
     }
-    
+
 }
