@@ -587,7 +587,7 @@ type="text/css" /> --}}
         $('#modalEdit select[name="planer_id"]').val(project.planer_id).trigger('change');
         $('#modalEdit select[name="executive_id"]').val(project.executive_id).trigger('change');
         $('#modalEdit select[name="type"]').val(project.type);
-        // $('#modalEdit input[name="status"]').prop('checked', admin.status == 1 ? true : false).change();
+        $('#modalEdit input[name="status"]').prop('checked', project.status == 1 ? true : false).change();
         $('#modalEdit').modal('show');
     });
 
