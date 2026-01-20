@@ -7,6 +7,7 @@ use App\Repo\AdminRepo;
 use App\Repo\ProjectRepo;
 use App\Repo\GroupRepo;
 use App\Repo\PhaseRepo;
+use App\Models\PhaseGroup;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -64,6 +65,29 @@ class TicketImport implements ToCollection, WithHeadingRow, WithMultipleSheets
         if ($collection->count()) {
             $ticketRepo = app(TicketRepo::class);
             $adminRepo = app(AdminRepo::class);
+
+            // Kiểm tra số lượng hợp đồng trước khi import
+            $phaseGroup = PhaseGroup::where('phase_id', $this->phaseId)
+                                    ->where('group_id', $this->groupId)
+                                    ->first();
+
+            if ($phaseGroup) {
+                $currentCount = $ticketRepo->get([
+                    'phase_id' => $this->phaseId,
+                    'group_id' => $this->groupId
+                ])->count();
+
+                $importCount = 0;
+                foreach ($collection as $row) {
+                    if (!empty($row['chu_de'])) {
+                        $importCount++;
+                    }
+                }
+
+                if (($currentCount + $importCount) > $phaseGroup->qty) {
+                    throw new \Exception("Không thể import: Vượt quá số lượng hợp đồng. Hiện tại: {$currentCount}, Import: {$importCount}, Giới hạn: {$phaseGroup->qty}");
+                }
+            }
 
             // Get all admins for reference - key by username (lowercase for case-insensitive matching)
             $adminsCollection = $adminRepo->get([]);

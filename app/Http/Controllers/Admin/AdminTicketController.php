@@ -64,11 +64,23 @@ class AdminTicketController extends Controller
         // }
         $phase = $this->phase->get(['project_id' => $id], ['id' => 'DESC'])->keyBy('id');
         $pid = $pid > 0 ? $pid : $phase->first()->id;
-        $admins = $this->adminRepo->get();
+
+        // Lọc admins theo group và project
+        if ($isSuperAdmin) {
+            // Super admin thì show tất cả
+            $admins = $this->adminRepo->get();
+        } else {
+            // Lấy admins trong group hiện tại
+            $groupAdmins = $group->admin->pluck('id')->toArray();
+            // Lấy admins trong project
+            $projectAdmins = $project->admin->pluck('id')->toArray();
+            // Merge và loại bỏ duplicate
+            $allowedAdminIds = array_unique(array_merge($groupAdmins, $projectAdmins));
+            // Lấy danh sách admins được phép
+            $admins = $this->adminRepo->get()->whereIn('id', $allowedAdminIds)->values();
+        }
+
         $design2Admins = $this->role->first(['slug' => 'Design2'], [], ['admin'])->admin->pluck('id')->toArray();
-        // $admins = $allAdmins->whereNotIn('id', $design2Admins);
-        // $admins = $user->hasRole(['super_admin']) ? $allAdmins : $admins;
-        // $admins = $admins->where('id', $user->id)->first() ? $admins : $admins->push($user);
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
@@ -320,6 +332,16 @@ class AdminTicketController extends Controller
                 $handle = $request->input('design_handle', []);
 
                 if ($group) {
+                    // Kiểm tra số lượng hợp đồng cho group con
+                    $phaseGroup = PhaseGroup::where('phase_id', $params['phase_id'])->where('group_id', $group->id)->first();
+                    if ($phaseGroup) {
+                        $count = $this->ticketRepo->get(['phase_id' => $params['phase_id'], 'group_id' => $group->id])->count();
+                        if ($count >= $phaseGroup->qty) {
+                            $res['mess'] = 'Quá số lượng hợp đồng cho group thiết kế';
+                            return response()->json($res);
+                        }
+                    }
+
                     $paramsChild = $request->only('child_input', 'child_output', 'child_status', 'child_qty', 'child_priority', 'child_deadline_time');
                     $deadline = !empty($paramsChild['child_deadline_time']) ? strtotime('tomorrow', strtotime($paramsChild['child_deadline_time'])) - 1 : time();
 
