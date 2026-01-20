@@ -42,7 +42,7 @@ class AdminTicketController extends Controller
         $user = auth('admin')->user();
         $isAdmin = $user->hasRole(['super_admin', 'account']);
         $isSuperAdmin = $user->hasRole(['super_admin']);
-        $group = $this->groupRepo->first(['id' => $gid]);
+        $group = $this->groupRepo->first(['id' => $gid], [], ['role.admin']);
         if (empty($group)) {
             return back()->with('success_message', 'Không tìm thấy nhóm!');
         }
@@ -70,17 +70,48 @@ class AdminTicketController extends Controller
             // Super admin thì show tất cả
             $admins = $this->adminRepo->get();
         } else {
-            // Lấy admins trong group hiện tại
-            $groupAdmins = $group->admin->pluck('id')->toArray();
-            // Lấy admins trong project
-            $projectAdmins = $project->admin->pluck('id')->toArray();
-            // Merge và loại bỏ duplicate
-            $allowedAdminIds = array_unique(array_merge($groupAdmins, $projectAdmins));
-            // Lấy danh sách admins được phép
-            $admins = $this->adminRepo->get()->whereIn('id', $allowedAdminIds)->values();
+            // User thường: Chỉ lấy admins vừa trong group vừa trong project
+            $groupAdminsIds = [];
+            if ($group->role && $group->role->admin) {
+                $groupAdminsIds = $group->role->admin->pluck('id')->toArray();
+            }
+            $projectAdminsIds = $project->admin->pluck('id')->toArray();
+
+            // Nếu group không có role, lấy tất cả admins trong project
+            if (empty($groupAdminsIds)) {
+                $admins = $project->admin;
+            } else {
+                // Chỉ lấy những người có trong cả group và project (intersection)
+                $allowedAdminIds = array_intersect($groupAdminsIds, $projectAdminsIds);
+                $admins = $this->adminRepo->get()->whereIn('id', $allowedAdminIds)->values();
+            }
         }
 
         $design2Admins = $this->role->first(['slug' => 'Design2'], [], ['admin'])->admin->pluck('id')->toArray();
+
+        // Chuẩn bị danh sách admins cho các group khác (để order)
+        $groupAdmins = [];
+        if (!empty($phase[$pid]->group)) {
+            foreach ($phase[$pid]->group as $g) {
+                if ($isSuperAdmin) {
+                    // Super admin có thể order cho bất cứ ai
+                    $groupAdmins[$g->id] = $this->adminRepo->get();
+                } else {
+                    // User thường: Chỉ lấy admins vừa trong group vừa trong project
+                    $targetGroup = $this->groupRepo->first(['id' => $g->id], [], ['role.admin']);
+                    if ($targetGroup && $targetGroup->role && $targetGroup->role->admin) {
+                        $targetGroupAdminsIds = $targetGroup->role->admin->pluck('id')->toArray();
+                        // Chỉ lấy những người có trong cả group và project (intersection)
+                        $targetAllowedIds = array_intersect($targetGroupAdminsIds, $projectAdminsIds);
+                        $groupAdmins[$g->id] = $this->adminRepo->get()->whereIn('id', $targetAllowedIds)->values();
+                    } else {
+                        // Nếu group không có role, chỉ lấy admins trong project
+                        $groupAdmins[$g->id] = $project->admin;
+                    }
+                }
+            }
+        }
+
         $params['project_id'] = $id;
         $params['group_id'] = $gid;
         $params['phase_id'] = $pid;
@@ -107,7 +138,7 @@ class AdminTicketController extends Controller
         $notes = $this->note->get(['group_id' => $gid, 'phase_id' => $pid], ['id' => 'DESC'], ['admin']);
         $role = $this->role->getRole();
         $id = $request->input('id', 0);
-        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes', 'role', 'id', 'isSuperAdmin', 'user', 'design2Admins'));
+        return view('admin.ticket.index2', compact('data', 'project', 'admins', 'phase', 'pid', 'gid', 'group', 'isAdmin', 'notes', 'role', 'id', 'isSuperAdmin', 'user', 'design2Admins', 'groupAdmins'));
     }
 
     public function create(Request $request){
