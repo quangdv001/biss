@@ -709,6 +709,7 @@
 <script>
 let is_super_admin = @json($isSuperAdmin ?? false);
 let is_content = @json($user->hasRole(['super_admin', 'account', 'content']));
+let groupAdmins = @json($groupAdmins ?? []);
 
 // Xác định cấu trúc columns dựa trên quyền user
 let tableColumns = [];
@@ -1186,6 +1187,40 @@ function formatDate(dateString) {
     let parts = dateString.split('-');
     return parts[2] + '/' + parts[1] + '/' + parts[0];
 }
+
+// Hàm cập nhật danh sách người xử lý khi chọn group khác (order)
+function updateDesignHandleOptions(modalId) {
+    let selectedGroupId = $(modalId + ' select[name="phase_group_id"]').val();
+    let $selectHandle = $(modalId + ' select[name="design_handle[]"]');
+
+    // Xóa các options cũ
+    $selectHandle.empty();
+
+    // Nếu có groupAdmins cho group này
+    if (selectedGroupId && groupAdmins[selectedGroupId]) {
+        $.each(groupAdmins[selectedGroupId], function(index, admin) {
+            $selectHandle.append('<option value="' + admin.id + '">' + admin.username + '</option>');
+        });
+    }
+
+    // Trigger change để cập nhật select2
+    $selectHandle.trigger('change');
+}
+
+// Lắng nghe sự kiện thay đổi group trong modal Create
+$('#modalCreate select[name="phase_group_id"]').on('change', function() {
+    updateDesignHandleOptions('#modalCreate');
+});
+
+// Lắng nghe sự kiện thay đổi group trong modal Edit
+$('#modalEdit select[name="phase_group_id"]').on('change', function() {
+    updateDesignHandleOptions('#modalEdit');
+});
+
+// Khởi tạo ban đầu khi mở modal
+$('#modalCreate').on('shown.bs.modal', function() {
+    updateDesignHandleOptions('#modalCreate');
+});
 
 // Handle Auto Post button click
 $(document).on('click', '.btn-auto-post', function() {
