@@ -79,11 +79,11 @@ class AdminTicketController extends Controller
 
             // Nếu group không có role, lấy tất cả admins trong project
             if (empty($groupAdminsIds)) {
-                $admins = $project->admin;
+                $admins = $this->adminRepo->get();
             } else {
                 // Chỉ lấy những người có trong cả group và project (intersection)
-                $allowedAdminIds = array_intersect($groupAdminsIds, $projectAdminsIds);
-                $admins = $this->adminRepo->get()->whereIn('id', $allowedAdminIds)->values();
+                // $allowedAdminIds = array_intersect($groupAdminsIds, $projectAdminsIds);
+                $admins = $this->adminRepo->get()->whereIn('id', $groupAdminsIds)->values();
             }
         }
 
@@ -102,11 +102,11 @@ class AdminTicketController extends Controller
                     if ($targetGroup && $targetGroup->role && $targetGroup->role->admin) {
                         $targetGroupAdminsIds = $targetGroup->role->admin->pluck('id')->toArray();
                         // Chỉ lấy những người có trong cả group và project (intersection)
-                        $targetAllowedIds = array_intersect($targetGroupAdminsIds, $projectAdminsIds);
-                        $groupAdmins[$g->id] = $this->adminRepo->get()->whereIn('id', $targetAllowedIds)->values();
+                        // $targetAllowedIds = array_intersect($targetGroupAdminsIds, $projectAdminsIds);
+                        $groupAdmins[$g->id] = $this->adminRepo->get()->whereIn('id', $targetGroupAdminsIds)->values();
                     } else {
                         // Nếu group không có role, chỉ lấy admins trong project
-                        $groupAdmins[$g->id] = $project->admin;
+                        $groupAdmins[$g->id] = $this->adminRepo->get();
                     }
                 }
             }
