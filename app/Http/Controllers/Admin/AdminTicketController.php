@@ -143,7 +143,7 @@ class AdminTicketController extends Controller
 
     public function create(Request $request){
         $user = auth('admin')->user();
-        if($user->hasRole(['guest', 'Design', 'Design2', 'content_seo'])){
+        if($user->hasRole(['guest', 'Design', 'Design2', 'content_seo']) && !$user->hasRole(['super_admin'])){
             return response()->json(['success' => 0, 'mess' => 'Bạn không có quyền!']);
         }
         $params = $request->only('id', 'name', 'description', 'input', 'output', 'status', 'qty', 'priority', 'deadline_time', 'project_id', 'group_id', 'phase_id');
@@ -269,7 +269,7 @@ class AdminTicketController extends Controller
 
     public function createAjax(Request $request){
         $user = auth('admin')->user();
-        if($user->hasRole(['guest', 'Design', 'Design2'])){
+        if($user->hasRole(['guest', 'Design', 'Design2']) && !$user->hasRole(['super_admin'])){
             $res['success'] = 0;
             $res['mess'] = 'Bạn không có quyền!';
             return response()->json($res);
@@ -278,7 +278,7 @@ class AdminTicketController extends Controller
         $phaseGroup = PhaseGroup::where('phase_id', $params['phase_id'])->where('group_id', $params['group_id'])->first();
         if ($phaseGroup) {
             $count = $this->ticketRepo->get(['phase_id' => $params['phase_id'], 'group_id' => $params['group_id']])->count();
-            if ($count >= $phaseGroup->qty) {
+            if ($count >= $phaseGroup->qty && !$user->hasRole(['super_admin'])) {
                 $res['mess'] = 'Quá số lượng hợp đồng';
                 return response()->json($res);
             }
@@ -367,7 +367,7 @@ class AdminTicketController extends Controller
                     $phaseGroup = PhaseGroup::where('phase_id', $params['phase_id'])->where('group_id', $group->id)->first();
                     if ($phaseGroup) {
                         $count = $this->ticketRepo->get(['phase_id' => $params['phase_id'], 'group_id' => $group->id])->count();
-                        if ($count >= $phaseGroup->qty) {
+                        if ($count >= $phaseGroup->qty && !$user->hasRole(['super_admin'])) {
                             $res['mess'] = 'Quá số lượng hợp đồng cho group thiết kế';
                             return response()->json($res);
                         }
