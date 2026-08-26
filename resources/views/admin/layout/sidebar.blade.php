@@ -25,6 +25,19 @@
                         </span>
                     </a>
                 </div>
+                @if(auth('admin')->user()->hasRole(['super_admin', 'ceo', 'ads', 'ADS', 'content']))
+                <div class="navi-item mb-2">
+                    <a href="{{ route('admin.ads.index', ['id' => $project->id, 'pid' => $pid]) }}"
+                        class="navi-link py-4 @if(Route::is('admin.ads.index')) active @endif">
+                        <span class="navi-icon mr-2">
+                            <span class="svg-icon"><i class="flaticon2-graph"></i></span>
+                        </span>
+                        <span class="navi-text font-size-lg">
+                            Ads
+                        </span>
+                    </a>
+                </div>
+                @endif
                 <div class="navi-item mb-2">
                     <div class="navi-link py-4 d-flex justify-content-between">
                         <div class="dropdown">

@@ -79,6 +79,14 @@ Dashboard - Báo cáo
                     </a>
                 </li>
                 @endif
+                @if($canViewAdsReport)
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#tab_ads" role="tab">
+                        <span class="nav-icon"><i class="flaticon2-graph"></i></span>
+                        <span class="nav-text">Báo cáo Ads</span>
+                    </a>
+                </li>
+                @endif
             </ul>
         </div>
 
@@ -98,6 +106,13 @@ Dashboard - Báo cáo
                 <!-- Tab Dự án -->
                 <div class="tab-pane fade" id="tab_project" role="tabpanel">
                     @include('admin.home.partials.project_report')
+                </div>
+                @endif
+
+                <!-- Tab Ads -->
+                @if($canViewAdsReport)
+                <div class="tab-pane fade" id="tab_ads" role="tabpanel">
+                    @include('admin.home.partials.ads_report')
                 </div>
                 @endif
             </div>
@@ -176,6 +191,14 @@ $(document).ready(function() {
         if (!window.projectReportLoaded) {
             loadProjectReport();
             window.projectReportLoaded = true;
+        }
+    });
+
+    // Load ads report when tab is clicked
+    $('a[href="#tab_ads"]').on('shown.bs.tab', function() {
+        if (!window.adsReportLoaded) {
+            loadAdsReport();
+            window.adsReportLoaded = true;
         }
     });
 
@@ -738,6 +761,67 @@ function renderDepartmentExpiredReport(data) {
 
     html += '</div>';
     $('#department_expired_table').html(html);
+}
+
+function loadAdsReport() {
+    const projectId = $('#ads_project_id').val();
+    const startTime = $('#ads_start_time').val();
+    const endTime = $('#ads_end_time').val();
+
+    $.ajax({
+        url: '{{ route("admin.ads.dashboardReport") }}',
+        method: 'GET',
+        data: {
+            project_id: projectId,
+            start_time: startTime,
+            end_time: endTime
+        },
+        beforeSend: function() {
+            $('#ads_report_table').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
+        },
+        success: function(response) {
+            if (response.success) {
+                renderAdsReport(response.data);
+            } else {
+                init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
+            }
+        },
+        error: function() {
+            init.showNoty('Không thể tải dữ liệu báo cáo Ads!', 'error');
+        }
+    });
+}
+
+function renderAdsReport(data) {
+    if (!data || data.length === 0) {
+        $('#ads_report_table').html('<div class="text-center p-5"><p class="text-muted">Không có dữ liệu báo cáo</p></div>');
+        return;
+    }
+
+    let html = '<div class="table-responsive"><table class="table table-bordered table-hover">';
+    html += '<thead><tr><th>Dự án</th><th>Chiến dịch</th><th>Tổng ngân sách</th><th>Tổng đã chi</th><th>Còn dư</th></tr></thead><tbody>';
+
+    data.forEach(project => {
+        html += `<tr class="font-weight-bold bg-light">
+            <td>${project.project}</td>
+            <td>Tổng cộng</td>
+            <td>${Number(project.total_budget).toLocaleString('vi-VN')}</td>
+            <td>${Number(project.total_spend).toLocaleString('vi-VN')}</td>
+            <td>${Number(project.remaining).toLocaleString('vi-VN')}</td>
+        </tr>`;
+        (project.campaigns || []).forEach(c => {
+            html += `<tr>
+                <td></td>
+                <td>${c.campaign}</td>
+                <td>${Number(c.total_budget).toLocaleString('vi-VN')}</td>
+                <td>${Number(c.total_spend).toLocaleString('vi-VN')}</td>
+                <td>${Number(c.remaining).toLocaleString('vi-VN')}</td>
+            </tr>`;
+        });
+    });
+
+    html += '</tbody></table></div>';
+    $('#ads_report_table').html(html);
 }
 
 // Function để xem lịch công việc cá nhân

@@ -68,4 +68,15 @@ Route::middleware(['auth:admin'])->group(function () {
 
     Route::get('ai', 'AdminAiController@index')->name('ai.index');
     Route::post('ai/send', 'AdminAiController@send')->name('ai.send');
+
+    Route::post('ads/campaign/create', 'AdminAdsController@createCampaign')->name('ads.campaign.create');
+    Route::post('ads/campaign/remove', 'AdminAdsController@removeCampaign')->name('ads.campaign.remove');
+    Route::post('ads/budget/create', 'AdminAdsController@createBudget')->name('ads.budget.create');
+    Route::post('ads/budget/remove', 'AdminAdsController@removeBudget')->name('ads.budget.remove');
+    Route::post('ads/spend/create', 'AdminAdsController@createSpend')->name('ads.spend.create');
+    Route::post('ads/spend/remove', 'AdminAdsController@removeSpend')->name('ads.spend.remove');
+    Route::get('ads/report/{campaign_id}', 'AdminAdsController@report')->name('ads.report');
+    Route::get('ads/export/{campaign_id}', 'AdminAdsController@export')->name('ads.export');
+    Route::get('ads/dashboard-report', 'AdminAdsController@dashboardReport')->name('ads.dashboardReport');
+    Route::get('ads/{id}/{pid?}', 'AdminAdsController@index')->name('ads.index');
 });
