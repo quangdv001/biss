@@ -46,6 +46,11 @@ Dashboard - Báo cáo
                 <h5 class="text-dark font-weight-bold my-1 mr-5">Dashboard - Báo cáo</h5>
             </div>
         </div>
+        <div class="d-flex align-items-center">
+            <button type="button" id="btn_sync_expired_projects" class="btn btn-light-primary font-weight-bold">
+                <i class="flaticon-refresh"></i> Đồng bộ
+            </button>
+        </div>
     </div>
 </div>
 <!--end::Subheader-->
@@ -123,6 +128,37 @@ $(document).ready(function() {
         if (window.projectReportLoaded) {
             loadProjectReport();
         }
+    });
+
+    // Đồng bộ trạng thái dự án hết hạn
+    $('#btn_sync_expired_projects').on('click', function() {
+        var $btn = $(this);
+        $.ajax({
+            url: '{{ route("admin.home.syncExpiredProjects") }}',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            beforeSend: function() {
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Đang đồng bộ...');
+            },
+            success: function(response) {
+                if (response.success) {
+                    init.showNoty(response.message, 'success');
+                    if (response.count > 0) {
+                        setTimeout(function() { location.reload(); }, 1000);
+                    }
+                } else {
+                    init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
+                }
+            },
+            error: function() {
+                init.showNoty('Không thể đồng bộ dữ liệu!', 'error');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).html('<i class="flaticon-refresh"></i> Đồng bộ');
+            }
+        });
     });
 
     // Load personal report on page load

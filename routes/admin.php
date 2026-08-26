@@ -19,6 +19,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('home/getCalendarData', 'AdminHomeController@getCalendarData')->name('home.getCalendarData');
     Route::get('home/personal-calendar/{adminId?}', 'AdminHomeController@personalCalendar')->name('home.personalCalendar');
     Route::get('home/getPersonalCalendarData', 'AdminHomeController@getPersonalCalendarData')->name('home.getPersonalCalendarData');
+    Route::post('home/syncExpiredProjects', 'AdminHomeController@syncExpiredProjects')->name('home.syncExpiredProjects');
 
     Route::get('profile', 'AdminProfileController@index')->name('profile.index');
     Route::post('profile', 'AdminProfileController@postIndex')->name('profile.postIndex');

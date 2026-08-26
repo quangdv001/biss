@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Repo\ProjectRepo;
 use Illuminate\Http\Request;
 
 class AdminAuthController extends Controller
 {
-    public function __construct()
+    private $project;
+
+    public function __construct(ProjectRepo $project)
     {
         $this->middleware('guest:admin')->except('logout');
+        $this->project = $project;
     }
 
     public function login(){
@@ -25,6 +29,11 @@ class AdminAuthController extends Controller
         ]);
         $credentials['status'] = 1;
         if (auth('admin')->attempt($credentials, $remember)) {
+            $user = auth('admin')->user();
+            if ($user->hasRole(['super_admin', 'ceo'])) {
+                $this->project->completeExpiredProjects();
+            }
+
             return redirect()->intended('admin');
         }
  

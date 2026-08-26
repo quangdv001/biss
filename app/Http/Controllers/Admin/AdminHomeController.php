@@ -144,6 +144,23 @@ class AdminHomeController extends Controller
         ]);
     }
 
+    public function syncExpiredProjects(){
+        $user = auth('admin')->user();
+
+        // Chỉ cho phép super_admin, ceo và account thực hiện đồng bộ
+        if (!$user->hasRole(['super_admin', 'ceo', 'account'])) {
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này'], 403);
+        }
+
+        $count = $this->project->completeExpiredProjects();
+
+        return response()->json([
+            'success' => 1,
+            'count' => $count,
+            'message' => $count > 0 ? "Đã chuyển {$count} dự án hết hạn sang trạng thái Hoàn thành." : 'Không có dự án nào cần đồng bộ.'
+        ]);
+    }
+
     public function getNoty(){
         $user = auth('admin')->user();
 

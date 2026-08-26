@@ -230,4 +230,11 @@ class ProjectRepo
 
         return $query->get();
     }
+
+    public function completeExpiredProjects()
+    {
+        return $this->repo->where('status', 1)
+            ->where('expired_time', '<', time())
+            ->update(['status' => 2]);
+    }
 }
