@@ -51,12 +51,14 @@ class AdminHomeController extends Controller
     public function dashboard(Request $request){
         $user = auth('admin')->user();
 
-        // Chỉ cho phép super_admin và account truy cập dashboard
-        if (!$user->hasRole(['super_admin', 'account'])) {
+        // Cho phép super_admin, account truy cập đầy đủ dashboard; ceo chỉ để xem báo cáo Ads
+        if (!$user->hasRole(['super_admin', 'account', 'ceo'])) {
             return redirect()->route('admin.home.intro')->with('error_message', 'Bạn không có quyền truy cập Dashboard');
         }
 
         $isAdmin = $user->hasRole(['super_admin', 'account']);
+        // Tab "Báo cáo Ads" chỉ dành cho super_admin + ceo
+        $canViewAdsReport = $user->hasRole(['super_admin', 'ceo']);
 
         // Lấy danh sách roles và projects
         $roles = $this->role->get();
@@ -68,7 +70,7 @@ class AdminHomeController extends Controller
         // Lấy thông tin user hiện tại
         $userRoles = $user->roles;
 
-        return view('admin.home.dashboard', compact('user', 'isAdmin', 'roles', 'projects', 'userRoles', 'admins'));
+        return view('admin.home.dashboard', compact('user', 'isAdmin', 'canViewAdsReport', 'roles', 'projects', 'userRoles', 'admins'));
     }
 
     public function getPersonalReport(Request $request){
@@ -141,6 +143,23 @@ class AdminHomeController extends Controller
             'success' => 1,
             'data' => $data,
             'stats' => $stats
+        ]);
+    }
+
+    public function syncExpiredProjects(){
+        $user = auth('admin')->user();
+
+        // Chỉ cho phép super_admin, ceo và account thực hiện đồng bộ
+        if (!$user->hasRole(['super_admin', 'ceo', 'account'])) {
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này'], 403);
+        }
+
+        $count = $this->project->completeExpiredProjects();
+
+        return response()->json([
+            'success' => 1,
+            'count' => $count,
+            'message' => $count > 0 ? "Đã chuyển {$count} dự án hết hạn sang trạng thái Hoàn thành." : 'Không có dự án nào cần đồng bộ.'
         ]);
     }
 

@@ -19,6 +19,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('home/getCalendarData', 'AdminHomeController@getCalendarData')->name('home.getCalendarData');
     Route::get('home/personal-calendar/{adminId?}', 'AdminHomeController@personalCalendar')->name('home.personalCalendar');
     Route::get('home/getPersonalCalendarData', 'AdminHomeController@getPersonalCalendarData')->name('home.getPersonalCalendarData');
+    Route::post('home/syncExpiredProjects', 'AdminHomeController@syncExpiredProjects')->name('home.syncExpiredProjects');
 
     Route::get('profile', 'AdminProfileController@index')->name('profile.index');
     Route::post('profile', 'AdminProfileController@postIndex')->name('profile.postIndex');
@@ -67,4 +68,15 @@ Route::middleware(['auth:admin'])->group(function () {
 
     Route::get('ai', 'AdminAiController@index')->name('ai.index');
     Route::post('ai/send', 'AdminAiController@send')->name('ai.send');
+
+    Route::post('ads/campaign/create', 'AdminAdsController@createCampaign')->name('ads.campaign.create');
+    Route::post('ads/campaign/remove', 'AdminAdsController@removeCampaign')->name('ads.campaign.remove');
+    Route::post('ads/budget/create', 'AdminAdsController@createBudget')->name('ads.budget.create');
+    Route::post('ads/budget/remove', 'AdminAdsController@removeBudget')->name('ads.budget.remove');
+    Route::post('ads/spend/create', 'AdminAdsController@createSpend')->name('ads.spend.create');
+    Route::post('ads/spend/remove', 'AdminAdsController@removeSpend')->name('ads.spend.remove');
+    Route::get('ads/report/{campaign_id}', 'AdminAdsController@report')->name('ads.report');
+    Route::get('ads/export/{campaign_id}', 'AdminAdsController@export')->name('ads.export');
+    Route::get('ads/dashboard-report', 'AdminAdsController@dashboardReport')->name('ads.dashboardReport');
+    Route::get('ads/{id}/{pid?}', 'AdminAdsController@index')->name('ads.index');
 });

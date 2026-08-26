@@ -47,4 +47,9 @@ class Project extends Model
     {
         return $this->hasMany(Ticket::class, 'project_id', 'id');
     }
+
+    public function adsCampaign()
+    {
+        return $this->hasMany(AdsCampaign::class, 'project_id', 'id')->orderBy('id', 'DESC');
+    }
 }
