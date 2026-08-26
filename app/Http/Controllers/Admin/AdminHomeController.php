@@ -57,8 +57,8 @@ class AdminHomeController extends Controller
         }
 
         $isAdmin = $user->hasRole(['super_admin', 'account']);
-        // Tab "Báo cáo Ads" chỉ dành cho super_admin + ceo
-        $canViewAdsReport = $user->hasRole(['super_admin', 'ceo']);
+        // Tab "Báo cáo Ads" dành cho super_admin, ceo, account
+        $canViewAdsReport = $user->hasRole(['super_admin', 'ceo', 'account']);
 
         // Lấy danh sách roles và projects
         $roles = $this->role->get();
