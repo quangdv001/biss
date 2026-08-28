@@ -115,7 +115,7 @@ class AdminAdsController extends Controller
         }
 
         $id = $request->input('id');
-        $params = $request->only('name', 'project_id', 'channel', 'product_link', 'handler_id');
+        $params = $request->only('name', 'project_id', 'channel', 'product_link', 'handler_id', 'ad_account', 'payment_card');
         $params['handler_id'] = $params['handler_id'] ?: null;
         $params['start_time'] = $request->input('start_time') ? strtotime($request->input('start_time')) : null;
         $params['end_time'] = $request->input('end_time') ? strtotime($request->input('end_time')) : null;
@@ -343,15 +343,18 @@ class AdminAdsController extends Controller
 
             $totalBudget = $budgets->sum('amount');
             $totalSpend = $spends->sum('amount');
+            $totalResults = $spends->sum('results');
 
             return [
                 'handler_id' => $campaign->handler_id ?: 0,
                 'handler' => $campaign->handler->username ?? 'Chưa phân công',
                 'project_id' => $campaign->project_id,
                 'project' => $campaign->project->name ?? '',
+                'campaign_id' => $campaign->id,
                 'campaign' => $campaign->name,
                 'total_budget' => $totalBudget,
                 'total_spend' => $totalSpend,
+                'total_results' => $totalResults,
                 'remaining' => $totalBudget - $totalSpend,
             ];
         })->groupBy('handler_id')->map(function ($items, $handlerId) {
@@ -362,6 +365,7 @@ class AdminAdsController extends Controller
                     'campaigns' => $rows->values(),
                     'total_budget' => $rows->sum('total_budget'),
                     'total_spend' => $rows->sum('total_spend'),
+                    'total_results' => $rows->sum('total_results'),
                     'remaining' => $rows->sum('remaining'),
                 ];
             })->values();
@@ -372,6 +376,7 @@ class AdminAdsController extends Controller
                 'campaigns' => collect([]),
                 'total_budget' => $items->sum('total_budget'),
                 'total_spend' => $items->sum('total_spend'),
+                'total_results' => $items->sum('total_results'),
                 'remaining' => $items->sum('remaining'),
             ];
             $projects->prepend($rowAllProject);
@@ -383,5 +388,148 @@ class AdminAdsController extends Controller
         })->values();
 
         return response()->json(['success' => 1, 'data' => $data]);
+    }
+
+    // Ngưỡng cảnh báo "sắp hết ngân sách": còn dư <= 500.000đ (và chưa âm)
+    const BUDGET_ALERT_THRESHOLD = 500000;
+
+    public function budgetAlertReport(Request $request)
+    {
+        $user = $this->checkPermission();
+        if (!$user) {
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền truy cập mục này!']);
+        }
+
+        $month = $request->get('month', date('Y-m'));
+        $startTime = strtotime($month . '-01 00:00:00');
+        $endTime = strtotime(date('Y-m-t 23:59:59', $startTime));
+
+        $campaigns = $this->campaign->get([], ['id' => 'DESC'], ['project', 'budget', 'spend']);
+
+        $rows = $campaigns->map(function ($campaign) use ($startTime, $endTime) {
+            $budgets = $campaign->budget
+                ->where('entered_time', '>=', $startTime)
+                ->where('entered_time', '<=', $endTime);
+            $spends = $campaign->spend
+                ->where('spend_date', '>=', date('Y-m-d', $startTime))
+                ->where('spend_date', '<=', date('Y-m-d', $endTime));
+
+            $totalBudget = $budgets->sum('amount');
+            $totalSpend = $spends->sum('amount');
+
+            return [
+                'project_id' => $campaign->project_id,
+                'project' => $campaign->project->name ?? '',
+                'campaign_id' => $campaign->id,
+                'campaign' => $campaign->name,
+                'total_budget' => $totalBudget,
+                'total_spend' => $totalSpend,
+                'remaining' => $totalBudget - $totalSpend,
+            ];
+        });
+
+        $groupByProject = function ($items) {
+            return $items->groupBy('project_id')->map(function ($rows, $projectId) {
+                return [
+                    'project_id' => $projectId,
+                    'project' => $rows->first()['project'],
+                    'campaigns' => $rows->values(),
+                    'count' => $rows->count(),
+                ];
+            })->values();
+        };
+
+        $nearLimit = $rows->filter(function ($r) {
+            return $r['remaining'] >= 0 && $r['remaining'] <= self::BUDGET_ALERT_THRESHOLD;
+        });
+        $overBudget = $rows->filter(function ($r) {
+            return $r['remaining'] < 0;
+        });
+        $budgetDetail = $rows->filter(function ($r) {
+            return $r['total_budget'] > 0;
+        });
+        $spendDetail = $rows->filter(function ($r) {
+            return $r['total_spend'] > 0;
+        });
+
+        return response()->json([
+            'success' => 1,
+            'data' => [
+                'total_budget' => $rows->sum('total_budget'),
+                'total_spend' => $rows->sum('total_spend'),
+                'near_limit_count' => $nearLimit->count(),
+                'over_budget_count' => $overBudget->count(),
+                'near_limit' => $groupByProject($nearLimit),
+                'over_budget' => $groupByProject($overBudget),
+                'budget_detail' => $groupByProject($budgetDetail),
+                'spend_detail' => $groupByProject($spendDetail),
+            ],
+        ]);
+    }
+
+    public function accountList(Request $request)
+    {
+        $user = $this->checkPermission();
+        if (!$user) {
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền truy cập mục này!']);
+        }
+
+        $accounts = AdsCampaign::whereNotNull('ad_account')
+            ->where('ad_account', '!=', '')
+            ->distinct()
+            ->orderBy('ad_account')
+            ->pluck('ad_account');
+
+        return response()->json(['success' => 1, 'data' => $accounts]);
+    }
+
+    public function accountReport(Request $request)
+    {
+        $user = $this->checkPermission();
+        if (!$user) {
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền truy cập mục này!']);
+        }
+
+        $account = trim($request->get('account', ''));
+        if ($account === '') {
+            return response()->json(['success' => 0, 'message' => 'Vui lòng chọn tài khoản quảng cáo!']);
+        }
+
+        $campaigns = $this->campaign->get(['ad_account' => $account], ['id' => 'DESC'], ['project']);
+
+        $totalProjects = $campaigns->pluck('project_id')->unique()->count();
+        $totalCards = $campaigns->pluck('payment_card')->filter(function ($v) {
+            return !empty($v);
+        })->unique()->count();
+
+        $cards = $campaigns->groupBy(function ($c) {
+            return $c->payment_card ?: '';
+        })->map(function ($items, $card) {
+            $projects = $items->groupBy('project_id')->map(function ($rows, $projectId) {
+                return [
+                    'project_id' => $projectId,
+                    'project' => $rows->first()->project->name ?? '',
+                    'campaigns' => $rows->map(function ($c) {
+                        return ['campaign_id' => $c->id, 'campaign' => $c->name];
+                    })->values(),
+                ];
+            })->values();
+
+            return [
+                'card' => $card !== '' ? $card : '(Không có thẻ)',
+                'total_projects' => $projects->count(),
+                'projects' => $projects,
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => 1,
+            'data' => [
+                'account' => $account,
+                'total_cards' => $totalCards,
+                'total_projects' => $totalProjects,
+                'cards' => $cards,
+            ],
+        ]);
     }
 }

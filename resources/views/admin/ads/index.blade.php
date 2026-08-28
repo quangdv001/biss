@@ -76,6 +76,7 @@ Ads - {{ $project->name }}
                                         <a href="javascript:void(0);" class="mr-2 btn-edit-campaign"
                                             data-id="{{ $c->id }}" data-name="{{ $c->name }}"
                                             data-channel="{{ $c->channel }}" data-link="{{ $c->product_link }}" data-handler="{{ $c->handler_id }}"
+                                            data-account="{{ $c->ad_account }}" data-card="{{ $c->payment_card }}"
                                             data-start="{{ $c->start_time ? date('Y-m-d', $c->start_time) : '' }}"
                                             data-end="{{ $c->end_time ? date('Y-m-d', $c->end_time) : '' }}">
                                             <i class="la la-edit"></i>
@@ -137,6 +138,14 @@ Ads - {{ $project->name }}
                             <option value="{{ $a->id }}">{{ $a->username }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tài khoản quảng cáo</label>
+                        <input type="text" class="form-control" name="ad_account">
+                    </div>
+                    <div class="form-group">
+                        <label>Thẻ thanh toán</label>
+                        <input type="text" class="form-control" name="payment_card">
                     </div>
                     <div class="form-group">
                         <label>Ngày bắt đầu</label>
@@ -403,6 +412,16 @@ Ads - {{ $project->name }}
         loadCampaignDetail(currentCampaignId);
     });
 
+    // Tự mở chi tiết chiến dịch khi truy cập kèm ?campaign=ID (link từ báo cáo dashboard)
+    (function () {
+        let campaignId = new URLSearchParams(window.location.search).get('campaign');
+        if (campaignId) {
+            currentCampaignId = campaignId;
+            $('#modalCampaignDetail').modal('show');
+            loadCampaignDetail(currentCampaignId);
+        }
+    })();
+
     $('.btn-edit-campaign').click(function () {
         let modal = $('#modalCreateCampaign');
         modal.find('input[name="id"]').val($(this).data('id'));
@@ -410,6 +429,8 @@ Ads - {{ $project->name }}
         modal.find('select[name="channel"]').val($(this).data('channel'));
         modal.find('input[name="product_link"]').val($(this).data('link'));
         modal.find('select[name="handler_id"]').val($(this).data('handler')).trigger('change');
+        modal.find('input[name="ad_account"]').val($(this).data('account'));
+        modal.find('input[name="payment_card"]').val($(this).data('card'));
         modal.find('input[name="start_time"]').val($(this).data('start'));
         modal.find('input[name="end_time"]').val($(this).data('end'));
         modal.modal('show');
@@ -417,7 +438,7 @@ Ads - {{ $project->name }}
 
     $('#modalCreateCampaign').on('hidden.bs.modal', function () {
         $(this).find('input[name="id"]').val('');
-        $(this).find('input[name="name"], input[name="product_link"], input[name="start_time"], input[name="end_time"]').val('');
+        $(this).find('input[name="name"], input[name="product_link"], input[name="ad_account"], input[name="payment_card"], input[name="start_time"], input[name="end_time"]').val('');
         $(this).find('select[name="channel"]').val('');
         $(this).find('select[name="handler_id"]').val('').trigger('change');
     });

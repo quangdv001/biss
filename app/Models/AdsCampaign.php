@@ -24,6 +24,8 @@ class AdsCampaign extends Model
         'channel',
         'product_link',
         'handler_id',
+        'ad_account',
+        'payment_card',
         'start_time',
         'end_time',
         'created_by',

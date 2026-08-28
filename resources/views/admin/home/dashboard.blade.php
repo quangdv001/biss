@@ -140,23 +140,36 @@ $(document).ready(function() {
         width: '100%'
     });
 
-    // Initialize Select2 for ads report project filter (search theo tên dự án)
-    $('#ads_project_id').select2({
-        placeholder: '-- Tìm và chọn dự án --',
-        allowClear: true,
-        width: '100%'
-    });
-
-    // Search chọn dự án nào thì hiển thị báo cáo dự án đó luôn
-    $('#ads_project_id').on('change', function() {
-        loadAdsReport();
-    });
-
     // Initialize Select2 for ads handler report filter
     $('#ads_handler_id').select2({
         placeholder: 'Chọn người xử lý',
         allowClear: true,
         width: '100%'
+    });
+
+    // Initialize Select2 for ads handler report project filter (search theo tên dự án)
+    $('#ads_handler_project_id').select2({
+        placeholder: '-- Tìm và chọn dự án --',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Initialize Select2 for ads account report filter (search theo tài khoản quảng cáo)
+    $('#ads_account_filter').select2({
+        placeholder: '-- Tìm và chọn tài khoản quảng cáo --',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Reload account report when ads account filter changes
+    $('#ads_account_filter').on('change', function() {
+        const account = $(this).val();
+        if (!account) {
+            $('#ads_account_report_result').hide();
+            $('#ads_account_empty').show();
+            return;
+        }
+        loadAdsAccountReport(account);
     });
 
     // Reload project report when admin filter changes
@@ -218,8 +231,9 @@ $(document).ready(function() {
     // Load ads report when tab is clicked
     $('a[href="#tab_ads"]').on('shown.bs.tab', function() {
         if (!window.adsReportLoaded) {
-            $('#ads_report_table').html('<div class="text-center p-5"><p class="text-muted">Vui lòng tìm và chọn dự án để xem báo cáo</p></div>');
+            loadAdsBudgetAlertReport();
             loadAdsHandlerReport();
+            loadAdsAccountList();
             window.adsReportLoaded = true;
         }
     });
@@ -785,73 +799,96 @@ function renderDepartmentExpiredReport(data) {
     $('#department_expired_table').html(html);
 }
 
-function loadAdsReport() {
-    const projectId = $('#ads_project_id').val();
-    const startTime = $('#ads_start_time').val();
-    const endTime = $('#ads_end_time').val();
-
-    if (!projectId) {
-        $('#ads_report_table').html('<div class="text-center p-5"><p class="text-muted">Vui lòng tìm và chọn dự án để xem báo cáo</p></div>');
-        return;
-    }
+function loadAdsBudgetAlertReport() {
+    const month = $('#ads_alert_month').val();
 
     $.ajax({
-        url: '{{ route("admin.ads.dashboardReport") }}',
+        url: '{{ route("admin.ads.budgetAlertReport") }}',
         method: 'GET',
-        data: {
-            project_id: projectId,
-            start_time: startTime,
-            end_time: endTime
-        },
+        data: { month: month },
         beforeSend: function() {
-            $('#ads_report_table').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
+            $('#ads_total_budget_content, #ads_total_spend_content, #ads_near_limit_content, #ads_over_budget_content')
+                .html('<div class="text-center p-5"><div class="spinner-border" role="status"></div></div>');
         },
         success: function(response) {
             if (response.success) {
-                renderAdsReport(response.data);
+                renderAdsBudgetAlertReport(response.data);
             } else {
                 init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
             }
         },
         error: function() {
-            init.showNoty('Không thể tải dữ liệu báo cáo Ads!', 'error');
+            init.showNoty('Không thể tải dữ liệu cảnh báo ngân sách!', 'error');
         }
     });
 }
 
-function renderAdsReport(data) {
-    if (!data || data.length === 0) {
-        $('#ads_report_table').html('<div class="text-center p-5"><p class="text-muted">Không có dữ liệu báo cáo</p></div>');
+function renderAdsBudgetAlertGroup(containerId, accordionId, projects, emptyMessage) {
+    if (!projects || !projects.length) {
+        $('#' + containerId).html(`<div class="alert alert-light-primary">${emptyMessage}</div>`);
         return;
     }
 
-    let html = '<div class="table-responsive"><table class="table table-bordered table-hover">';
-    html += '<thead><tr><th>Dự án</th><th>Chiến dịch</th><th>Tổng ngân sách</th><th>Tổng đã chi</th><th>Còn dư</th></tr></thead><tbody>';
+    let html = `<div class="accordion accordion-toggle-arrow" id="${accordionId}">`;
 
-    data.forEach(project => {
+    projects.forEach((project, index) => {
+        const collapseId = accordionId + '_collapse_' + index;
         const projectName = project.project_id
             ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}">${project.project}</a>`
             : project.project;
-        html += `<tr class="font-weight-bold bg-light">
-            <td>${projectName}</td>
-            <td>Tổng cộng</td>
-            <td>${Number(project.total_budget).toLocaleString('vi-VN')}</td>
-            <td>${Number(project.total_spend).toLocaleString('vi-VN')}</td>
-            <td>${Number(project.remaining).toLocaleString('vi-VN')}</td>
-        </tr>`;
-        (project.campaigns || []).forEach(c => {
+
+        html += `<div class="card">
+            <div class="card-header">
+                <div class="card-title collapsed" data-toggle="collapse" data-target="#${collapseId}">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <span><i class="flaticon2-pie-chart-3"></i> ${projectName}</span>
+                        <span class="label label-warning label-inline mr-5">${project.count} chiến dịch</span>
+                    </div>
+                </div>
+            </div>
+            <div id="${collapseId}" class="collapse" data-parent="#${accordionId}">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Chiến dịch</th>
+                                    <th>Ngân sách nhận</th>
+                                    <th>Đã chi</th>
+                                    <th>Còn dư</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+        project.campaigns.forEach(c => {
+            const campaignName = (project.project_id && c.campaign_id)
+                ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}?campaign=${c.campaign_id}">${c.campaign}</a>`
+                : c.campaign;
             html += `<tr>
-                <td></td>
-                <td>${c.campaign}</td>
+                <td>${campaignName}</td>
                 <td>${Number(c.total_budget).toLocaleString('vi-VN')}</td>
                 <td>${Number(c.total_spend).toLocaleString('vi-VN')}</td>
                 <td>${Number(c.remaining).toLocaleString('vi-VN')}</td>
             </tr>`;
         });
+
+        html += `</tbody></table></div></div></div></div>`;
     });
 
-    html += '</tbody></table></div>';
-    $('#ads_report_table').html(html);
+    html += '</div>';
+    $('#' + containerId).html(html);
+}
+
+function renderAdsBudgetAlertReport(data) {
+    $('#ads_alert_total_budget, #ads_alert_total_budget_stat').text(Number(data.total_budget).toLocaleString('vi-VN'));
+    $('#ads_alert_total_spend, #ads_alert_total_spend_stat').text(Number(data.total_spend).toLocaleString('vi-VN'));
+    $('#ads_alert_near_limit_count, #ads_alert_near_limit_count_stat').text(data.near_limit_count);
+    $('#ads_alert_over_budget_count, #ads_alert_over_budget_count_stat').text(data.over_budget_count);
+
+    renderAdsBudgetAlertGroup('ads_near_limit_content', 'adsNearLimitAccordion', data.near_limit, 'Không có chiến dịch nào sắp hết ngân sách trong tháng này');
+    renderAdsBudgetAlertGroup('ads_over_budget_content', 'adsOverBudgetAccordion', data.over_budget, 'Không có chiến dịch nào vượt ngân sách trong tháng này');
+    renderAdsBudgetAlertGroup('ads_total_budget_content', 'adsTotalBudgetAccordion', data.budget_detail, 'Không có ngân sách nào được nhập trong tháng này');
+    renderAdsBudgetAlertGroup('ads_total_spend_content', 'adsTotalSpendAccordion', data.spend_detail, 'Không có chi tiêu nào trong tháng này');
 }
 
 function loadAdsHandlerReport() {
@@ -906,10 +943,11 @@ function renderAdsHandlerReport(data) {
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Dự án</th>
+                                    <th>Dự án / Chiến dịch</th>
                                     <th>Tổng ngân sách</th>
                                     <th>Tổng đã chi</th>
                                     <th>Còn dư</th>
+                                    <th>Kết quả</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -918,12 +956,25 @@ function renderAdsHandlerReport(data) {
             const projectName = project.project_id
                 ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}">${project.project}</a>`
                 : project.project;
-            html += `<tr>
+            html += `<tr class="font-weight-bold bg-light">
                 <td>${projectName}</td>
                 <td>${Number(project.total_budget).toLocaleString('vi-VN')}</td>
                 <td>${Number(project.total_spend).toLocaleString('vi-VN')}</td>
                 <td>${Number(project.remaining).toLocaleString('vi-VN')}</td>
+                <td>${Number(project.total_results).toLocaleString('vi-VN')}</td>
             </tr>`;
+            (project.campaigns || []).forEach(c => {
+                const campaignName = (project.project_id && c.campaign_id)
+                    ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}?campaign=${c.campaign_id}">${c.campaign}</a>`
+                    : c.campaign;
+                html += `<tr>
+                    <td class="pl-8">${campaignName}</td>
+                    <td>${Number(c.total_budget).toLocaleString('vi-VN')}</td>
+                    <td>${Number(c.total_spend).toLocaleString('vi-VN')}</td>
+                    <td>${Number(c.remaining).toLocaleString('vi-VN')}</td>
+                    <td>${Number(c.total_results).toLocaleString('vi-VN')}</td>
+                </tr>`;
+            });
         });
 
         html += `</tbody></table></div></div></div></div>`;
@@ -931,6 +982,95 @@ function renderAdsHandlerReport(data) {
 
     html += '</div>';
     $('#ads_handler_report_table').html(html);
+}
+
+function escapeHtml(str) {
+    return String(str === null || str === undefined ? '' : str).replace(/[&<>"']/g, function (s) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s];
+    });
+}
+
+function loadAdsAccountList() {
+    $.get('{{ route("admin.ads.accountList") }}', function(response) {
+        if (response.success) {
+            let options = '<option value="">-- Tìm và chọn tài khoản quảng cáo --</option>';
+            response.data.forEach(function(acc) {
+                options += `<option value="${escapeHtml(acc)}">${escapeHtml(acc)}</option>`;
+            });
+            $('#ads_account_filter').html(options);
+        }
+    });
+}
+
+function loadAdsAccountReport(account) {
+    $.ajax({
+        url: '{{ route("admin.ads.accountReport") }}',
+        method: 'GET',
+        data: { account: account },
+        beforeSend: function() {
+            $('#ads_account_empty').hide();
+            $('#ads_account_report_result').show();
+            $('#ads_account_cards_table').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div></div>');
+        },
+        success: function(response) {
+            if (response.success) {
+                renderAdsAccountReport(response.data);
+            } else {
+                init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
+            }
+        },
+        error: function() {
+            init.showNoty('Không thể tải báo cáo theo tài khoản quảng cáo!', 'error');
+        }
+    });
+}
+
+function renderAdsAccountReport(data) {
+    $('#ads_account_total_cards').text(data.total_cards);
+    $('#ads_account_total_projects').text(data.total_projects);
+
+    if (!data.cards || !data.cards.length) {
+        $('#ads_account_cards_table').html('<div class="alert alert-light-primary">Không có dữ liệu</div>');
+        return;
+    }
+
+    let html = '<div class="accordion accordion-toggle-arrow" id="adsAccountCardsAccordion">';
+
+    data.cards.forEach((cardItem, index) => {
+        const collapseId = 'ads_account_card_collapse_' + index;
+        html += `<div class="card">
+            <div class="card-header">
+                <div class="card-title collapsed" data-toggle="collapse" data-target="#${collapseId}">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <span><i class="flaticon2-list"></i> Thẻ: <strong>${escapeHtml(cardItem.card)}</strong></span>
+                        <span class="label label-primary label-inline mr-5">${cardItem.total_projects} dự án</span>
+                    </div>
+                </div>
+            </div>
+            <div id="${collapseId}" class="collapse" data-parent="#adsAccountCardsAccordion">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead><tr><th>Dự án</th><th>Chiến dịch</th></tr></thead>
+                            <tbody>`;
+
+        cardItem.projects.forEach(project => {
+            const projectName = project.project_id
+                ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}">${escapeHtml(project.project)}</a>`
+                : escapeHtml(project.project);
+            const campaignLinks = project.campaigns.map(c => {
+                return (project.project_id && c.campaign_id)
+                    ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}?campaign=${c.campaign_id}">${escapeHtml(c.campaign)}</a>`
+                    : escapeHtml(c.campaign);
+            }).join(', ');
+            html += `<tr><td>${projectName}</td><td>${campaignLinks}</td></tr>`;
+        });
+
+        html += `</tbody></table></div></div></div></div>`;
+    });
+
+    html += '</div>';
+    $('#ads_account_cards_table').html(html);
 }
 
 // Function để xem lịch công việc cá nhân
