@@ -169,11 +169,15 @@ Ads - {{ $project->name }}
 <div class="modal fade" id="modalCampaignDetail" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header flex-wrap">
                 <div>
                     <h5 class="modal-title" id="campaignDetailTitle">Chi tiết chiến dịch</h5>
                 </div>
-                <div>
+                <div class="d-flex align-items-center flex-wrap">
+                    <div class="d-flex align-items-center mr-2">
+                        <input type="text" class="form-control form-control-sm mr-2" id="campaignDetailDateRange" readonly placeholder="Chọn khoảng thời gian" style="width: 210px;">
+                        <button type="button" class="btn btn-secondary btn-sm mr-2" id="campaignDetailFilterClearBtn">Bỏ lọc</button>
+                    </div>
                     <a href="javascript:void(0);" id="campaignDetailExportBtn" class="btn btn-success btn-sm font-weight-bolder mr-2" target="_blank">
                         <i class="la la-file-excel-o"></i> Xuất Excel
                     </a>
@@ -335,9 +339,28 @@ Ads - {{ $project->name }}
         }).join('');
     }
 
+    function getFilterStartDate() {
+        return $('#campaignDetailDateRange').data('start') || '';
+    }
+
+    function getFilterEndDate() {
+        return $('#campaignDetailDateRange').data('end') || '';
+    }
+
+    function updateExportBtnHref(campaignId) {
+        let url = adsExportUrlTemplate.replace('__ID__', campaignId);
+        let startDate = getFilterStartDate();
+        let endDate = getFilterEndDate();
+        let params = [];
+        if (startDate) params.push('start_time=' + encodeURIComponent(startDate));
+        if (endDate) params.push('end_time=' + encodeURIComponent(endDate));
+        if (params.length) url += '?' + params.join('&');
+        $('#campaignDetailExportBtn').attr('href', url);
+    }
+
     function renderCampaignDetail(data) {
         $('#campaignDetailTitle').text('Chi tiết: ' + data.campaign.name);
-        $('#campaignDetailExportBtn').attr('href', adsExportUrlTemplate.replace('__ID__', data.campaign.id));
+        updateExportBtnHref(data.campaign.id);
 
         let html =
             '<div class="row mb-5">' +
@@ -396,19 +419,54 @@ Ads - {{ $project->name }}
 
     function loadCampaignDetail(id) {
         $('#campaignDetailBody').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div></div>');
-        $.get(adsReportUrlTemplate.replace('__ID__', id), function (res) {
+        let startDate = getFilterStartDate();
+        let endDate = getFilterEndDate();
+        let params = {};
+        if (startDate) params.start_time = startDate;
+        if (endDate) params.end_time = endDate;
+        $.get(adsReportUrlTemplate.replace('__ID__', id), params, function (res) {
             if (res.success) {
                 renderCampaignDetail(res.data);
-                refreshCampaignRow(id, res.data);
+                if (!startDate && !endDate) {
+                    refreshCampaignRow(id, res.data);
+                }
             } else {
                 init.showNoty(res.message || 'Không tải được dữ liệu!', 'error');
             }
         });
     }
 
+    function clearCampaignDetailFilter() {
+        $('#campaignDetailDateRange').val('').removeData('start').removeData('end');
+    }
+
     $(document).on('click', '.btn-view-detail', function () {
         currentCampaignId = $(this).data('id');
+        clearCampaignDetailFilter();
         $('#modalCampaignDetail').modal('show');
+        loadCampaignDetail(currentCampaignId);
+    });
+
+    $('#campaignDetailDateRange').daterangepicker({
+        autoUpdateInput: false,
+        locale: { format: 'DD/MM/YYYY', cancelLabel: 'Bỏ lọc' },
+    });
+
+    $('#campaignDetailDateRange').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        $(this).data('start', picker.startDate.format('YYYY-MM-DD'));
+        $(this).data('end', picker.endDate.format('YYYY-MM-DD'));
+        if (currentCampaignId) loadCampaignDetail(currentCampaignId);
+    });
+
+    $('#campaignDetailDateRange').on('cancel.daterangepicker', function () {
+        clearCampaignDetailFilter();
+        if (currentCampaignId) loadCampaignDetail(currentCampaignId);
+    });
+
+    $('#campaignDetailFilterClearBtn').click(function () {
+        if (!currentCampaignId) return;
+        clearCampaignDetailFilter();
         loadCampaignDetail(currentCampaignId);
     });
 

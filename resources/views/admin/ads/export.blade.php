@@ -11,6 +11,12 @@
             <td>Thời gian triển khai</td>
             <td colspan="3">{{ $campaign->start_time ? date('d/m/Y', $campaign->start_time) : '' }} - {{ $campaign->end_time ? date('d/m/Y', $campaign->end_time) : '' }}</td>
         </tr>
+        @if (!empty($start_date) || !empty($end_date))
+        <tr>
+            <td>Lọc theo khoảng thời gian</td>
+            <td colspan="3">{{ !empty($start_date) ? \Carbon\Carbon::parse($start_date)->format('d/m/Y') : 'Từ đầu' }} - {{ !empty($end_date) ? \Carbon\Carbon::parse($end_date)->format('d/m/Y') : 'Hiện tại' }}</td>
+        </tr>
+        @endif
         <tr>
             <td>Tổng ngân sách</td>
             <td colspan="3">{{ number_format($total_budget) }}</td>
