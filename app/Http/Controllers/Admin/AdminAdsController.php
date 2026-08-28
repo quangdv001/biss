@@ -55,10 +55,18 @@ class AdminAdsController extends Controller
         return $user;
     }
 
-    private function buildReport($campaign)
+    private function buildReport($campaign, $startTime = false, $endTime = false)
     {
-        $budgets = $campaign->budget->sortByDesc('entered_time')->values();
-        $spends = $campaign->spend->sortByDesc('spend_date')->values();
+        $budgets = $campaign->budget->when($startTime, function ($q) use ($startTime) {
+            return $q->where('entered_time', '>=', $startTime);
+        })->when($endTime, function ($q) use ($endTime) {
+            return $q->where('entered_time', '<=', $endTime);
+        })->sortByDesc('entered_time')->values();
+        $spends = $campaign->spend->when($startTime, function ($q) use ($startTime) {
+            return $q->where('spend_date', '>=', date('Y-m-d', $startTime));
+        })->when($endTime, function ($q) use ($endTime) {
+            return $q->where('spend_date', '<=', date('Y-m-d', $endTime));
+        })->sortByDesc('spend_date')->values();
         $totalBudget = $budgets->sum('amount');
         $totalSpend = $spends->sum('amount');
         $totalResults = $spends->sum('results');
@@ -234,10 +242,13 @@ class AdminAdsController extends Controller
             return response()->json(['success' => 0, 'message' => 'Không tìm thấy chiến dịch!']);
         }
 
-        return response()->json(['success' => 1, 'data' => $this->buildReport($campaign)]);
+        $startTime = $request->get('start_time', '') ? strtotime($request->get('start_time', '')) : false;
+        $endTime = $request->get('end_time', '') ? strtotime('tomorrow', strtotime($request->get('end_time', ''))) - 1 : false;
+
+        return response()->json(['success' => 1, 'data' => $this->buildReport($campaign, $startTime, $endTime)]);
     }
 
-    public function export($campaign_id)
+    public function export(Request $request, $campaign_id)
     {
         $user = $this->checkPermission();
         if (!$user) {
@@ -249,8 +260,17 @@ class AdminAdsController extends Controller
             return back()->with('error_message', 'Không tìm thấy chiến dịch!');
         }
 
-        $report = $this->buildReport($campaign);
-        return Excel::download(new AdsReportExport($report), 'Bao-cao-ads-' . $campaign->name . '.xlsx');
+        $startDate = $request->get('start_time', '');
+        $endDate = $request->get('end_time', '');
+        $startTime = $startDate ? strtotime($startDate) : false;
+        $endTime = $endDate ? strtotime('tomorrow', strtotime($endDate)) - 1 : false;
+
+        $report = $this->buildReport($campaign, $startTime, $endTime);
+        $report['start_date'] = $startDate;
+        $report['end_date'] = $endDate;
+
+        $fileName = 'Bao-cao-ads-' . $campaign->name . ($startDate || $endDate ? '-' . ($startDate ?: 'truoc') . '_' . ($endDate ?: 'nay') : '') . '.xlsx';
+        return Excel::download(new AdsReportExport($report), $fileName);
     }
 
     public function dashboardReport(Request $request)
