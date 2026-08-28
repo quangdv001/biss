@@ -9,10 +9,20 @@ class AdsCampaign extends Model
 {
     use HasFactory;
 
+    const CHANNELS = [
+        'facebook' => 'Facebook',
+        'tiktok' => 'TikTok',
+        'google' => 'Google Ads',
+        'zalo' => 'Zalo',
+        'other' => 'Khác',
+    ];
+
     protected $table = 'ads_campaign';
     protected $fillable = [
         'name',
         'project_id',
+        'channel',
+        'handler_id',
         'start_time',
         'end_time',
         'created_by',
@@ -23,6 +33,11 @@ class AdsCampaign extends Model
     public function project()
     {
         return $this->belongsTo(Project::class, 'project_id', 'id');
+    }
+
+    public function handler()
+    {
+        return $this->belongsTo(Admin::class, 'handler_id', 'id');
     }
 
     public function budget()

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exports\Ads\AdsReportExport;
 use App\Http\Controllers\Controller;
+use App\Models\AdsCampaign;
+use App\Repo\AdminRepo;
 use App\Repo\AdsBudgetRepo;
 use App\Repo\AdsCampaignRepo;
 use App\Repo\AdsSpendRepo;
@@ -24,6 +26,7 @@ class AdminAdsController extends Controller
     private $campaign;
     private $budget;
     private $spend;
+    private $admin;
 
     public function __construct(
         ProjectRepo $projectRepo,
@@ -31,7 +34,8 @@ class AdminAdsController extends Controller
         RoleRepo $role,
         AdsCampaignRepo $campaign,
         AdsBudgetRepo $budget,
-        AdsSpendRepo $spend
+        AdsSpendRepo $spend,
+        AdminRepo $admin
     ) {
         $this->projectRepo = $projectRepo;
         $this->phase = $phase;
@@ -39,6 +43,7 @@ class AdminAdsController extends Controller
         $this->campaign = $campaign;
         $this->budget = $budget;
         $this->spend = $spend;
+        $this->admin = $admin;
     }
 
     private function checkPermission()
@@ -85,7 +90,7 @@ class AdminAdsController extends Controller
         $pid = $pid > 0 ? $pid : ($phase->first() ? $phase->first()->id : 0);
         $role = $this->role->getRole();
 
-        $campaigns = $this->campaign->get(['project_id' => $id], ['id' => 'DESC'], ['budget', 'spend', 'creator', 'editor'])
+        $campaigns = $this->campaign->get(['project_id' => $id], ['id' => 'DESC'], ['budget', 'spend', 'creator', 'editor', 'handler'])
             ->map(function ($campaign) {
                 $campaign->total_budget = $campaign->budget->sum('amount');
                 $campaign->total_spend = $campaign->spend->sum('amount');
@@ -93,11 +98,10 @@ class AdminAdsController extends Controller
                 return $campaign;
             });
 
-        $campaignId = $request->get('campaign', 0);
-        $activeCampaign = $campaignId ? $campaigns->firstWhere('id', (int) $campaignId) : $campaigns->first();
-        $report = $activeCampaign ? $this->buildReport($activeCampaign) : null;
+        $admins = $this->admin->get();
+        $channels = AdsCampaign::CHANNELS;
 
-        return view('admin.ads.index', compact('project', 'phase', 'pid', 'isAdmin', 'gid', 'role', 'campaigns', 'activeCampaign', 'report'));
+        return view('admin.ads.index', compact('project', 'phase', 'pid', 'isAdmin', 'gid', 'role', 'campaigns', 'admins', 'channels'));
     }
 
     public function createCampaign(Request $request)
@@ -108,7 +112,8 @@ class AdminAdsController extends Controller
         }
 
         $id = $request->input('id');
-        $params = $request->only('name', 'project_id');
+        $params = $request->only('name', 'project_id', 'channel', 'handler_id');
+        $params['handler_id'] = $params['handler_id'] ?: null;
         $params['start_time'] = $request->input('start_time') ? strtotime($request->input('start_time')) : null;
         $params['end_time'] = $request->input('end_time') ? strtotime($request->input('end_time')) : null;
 
@@ -143,7 +148,7 @@ class AdminAdsController extends Controller
     {
         $user = $this->checkPermission();
         if (!$user) {
-            return back()->with('error_message', 'Bạn không có quyền thực hiện thao tác này!');
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này!']);
         }
 
         $id = $request->input('id');
@@ -153,16 +158,16 @@ class AdminAdsController extends Controller
         if ($id) {
             $budget = $this->budget->first(['id' => $id]);
             if (empty($budget)) {
-                return back()->with('error_message', 'Không tìm thấy khoản ngân sách!');
+                return response()->json(['success' => 0, 'message' => 'Không tìm thấy khoản ngân sách!']);
             }
             $params['updated_by'] = $user->id;
             $this->budget->update($budget, $params);
-            return back()->with('success_message', 'Cập nhật ngân sách thành công!');
+            return response()->json(['success' => 1, 'message' => 'Cập nhật ngân sách thành công!']);
         }
 
         $params['created_by'] = $user->id;
         $this->budget->create($params);
-        return back()->with('success_message', 'Nhập ngân sách thành công!');
+        return response()->json(['success' => 1, 'message' => 'Nhập ngân sách thành công!']);
     }
 
     public function removeBudget(Request $request)
@@ -181,7 +186,7 @@ class AdminAdsController extends Controller
     {
         $user = $this->checkPermission();
         if (!$user) {
-            return back()->with('error_message', 'Bạn không có quyền thực hiện thao tác này!');
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này!']);
         }
 
         $id = $request->input('id');
@@ -190,16 +195,16 @@ class AdminAdsController extends Controller
         if ($id) {
             $spend = $this->spend->first(['id' => $id]);
             if (empty($spend)) {
-                return back()->with('error_message', 'Không tìm thấy chi tiêu!');
+                return response()->json(['success' => 0, 'message' => 'Không tìm thấy chi tiêu!']);
             }
             $params['updated_by'] = $user->id;
             $this->spend->update($spend, $params);
-            return back()->with('success_message', 'Cập nhật chi tiêu thành công!');
+            return response()->json(['success' => 1, 'message' => 'Cập nhật chi tiêu thành công!']);
         }
 
         $params['created_by'] = $user->id;
         $this->spend->create($params);
-        return back()->with('success_message', 'Nhập chi tiêu thành công!');
+        return response()->json(['success' => 1, 'message' => 'Nhập chi tiêu thành công!']);
     }
 
     public function removeSpend(Request $request)
@@ -293,6 +298,82 @@ class AdminAdsController extends Controller
                 'total_budget' => $items->sum('total_budget'),
                 'total_spend' => $items->sum('total_spend'),
                 'remaining' => $items->sum('remaining'),
+            ];
+        })->values();
+
+        return response()->json(['success' => 1, 'data' => $data]);
+    }
+
+    public function handlerReport(Request $request)
+    {
+        $user = $this->checkPermission();
+        if (!$user) {
+            return response()->json(['success' => 0, 'message' => 'Bạn không có quyền truy cập mục này!']);
+        }
+
+        $handlerId = $request->get('handler_id', 0);
+        $projectId = $request->get('project_id', 0);
+        $startTime = $request->get('start_time', '') ? strtotime($request->get('start_time', '')) : false;
+        $endTime = $request->get('end_time', '') ? strtotime('tomorrow', strtotime($request->get('end_time', ''))) - 1 : false;
+
+        $condition = [];
+        if ($projectId) {
+            $condition['project_id'] = $projectId;
+        }
+        if ($handlerId) {
+            $condition['handler_id'] = $handlerId;
+        }
+
+        $campaigns = $this->campaign->get($condition, ['id' => 'DESC'], ['project', 'handler', 'budget', 'spend']);
+
+        $data = $campaigns->map(function ($campaign) use ($startTime, $endTime) {
+            $budgets = $campaign->budget->when($startTime, function ($q) use ($startTime) {
+                return $q->where('entered_time', '>=', $startTime);
+            })->when($endTime, function ($q) use ($endTime) {
+                return $q->where('entered_time', '<=', $endTime);
+            });
+            $spends = $campaign->spend->when($startTime, function ($q) use ($startTime) {
+                return $q->where('spend_date', '>=', date('Y-m-d', $startTime));
+            })->when($endTime, function ($q) use ($endTime) {
+                return $q->where('spend_date', '<=', date('Y-m-d', $endTime));
+            });
+
+            $totalBudget = $budgets->sum('amount');
+            $totalSpend = $spends->sum('amount');
+
+            return [
+                'handler_id' => $campaign->handler_id ?: 0,
+                'handler' => $campaign->handler->username ?? 'Chưa phân công',
+                'project_id' => $campaign->project_id,
+                'project' => $campaign->project->name ?? '',
+                'campaign' => $campaign->name,
+                'total_budget' => $totalBudget,
+                'total_spend' => $totalSpend,
+                'remaining' => $totalBudget - $totalSpend,
+            ];
+        })->groupBy('handler_id')->map(function ($items, $handlerId) {
+            $projects = $items->groupBy('project_id')->map(function ($rows) {
+                return [
+                    'project' => $rows->first()['project'],
+                    'campaigns' => $rows->values(),
+                    'total_budget' => $rows->sum('total_budget'),
+                    'total_spend' => $rows->sum('total_spend'),
+                    'remaining' => $rows->sum('remaining'),
+                ];
+            })->values();
+
+            $rowAllProject = [
+                'project' => 'Tất cả dự án',
+                'campaigns' => collect([]),
+                'total_budget' => $items->sum('total_budget'),
+                'total_spend' => $items->sum('total_spend'),
+                'remaining' => $items->sum('remaining'),
+            ];
+            $projects->prepend($rowAllProject);
+
+            return [
+                'handler' => $items->first()['handler'],
+                'projects' => $projects,
             ];
         })->values();
 

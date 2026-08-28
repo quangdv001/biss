@@ -37,3 +37,43 @@
 </div>
 
 <div id="ads_report_table"></div>
+
+<hr class="my-8">
+
+<h5 class="mb-4"><i class="flaticon2-group"></i> Báo cáo theo người xử lý</h5>
+<div class="filter-card">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Người xử lý:</label>
+                <select class="form-control" id="ads_handler_id">
+                    <option value="">Tất cả</option>
+                    @foreach($admins as $admin)
+                        <option value="{{ $admin->id }}">{{ $admin->username }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Dự án:</label>
+                <select class="form-control" id="ads_handler_project_id">
+                    <option value="">Tất cả dự án</option>
+                    @foreach($projects as $project)
+                        <option value="{{ $project->id }}">{{ $project->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="button" class="btn btn-primary btn-block" onclick="loadAdsHandlerReport()">
+                    <i class="flaticon2-reload"></i> Xem báo cáo theo người xử lý
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ads_handler_report_table"></div>

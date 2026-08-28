@@ -138,6 +138,13 @@ $(document).ready(function() {
         width: '100%'
     });
 
+    // Initialize Select2 for ads handler report filter
+    $('#ads_handler_id').select2({
+        placeholder: 'Chọn người xử lý',
+        allowClear: true,
+        width: '100%'
+    });
+
     // Reload project report when admin filter changes
     $('#project_admin_id').on('change', function() {
         if (window.projectReportLoaded) {
@@ -198,6 +205,7 @@ $(document).ready(function() {
     $('a[href="#tab_ads"]').on('shown.bs.tab', function() {
         if (!window.adsReportLoaded) {
             loadAdsReport();
+            loadAdsHandlerReport();
             window.adsReportLoaded = true;
         }
     });
@@ -822,6 +830,82 @@ function renderAdsReport(data) {
 
     html += '</tbody></table></div>';
     $('#ads_report_table').html(html);
+}
+
+function loadAdsHandlerReport() {
+    const handlerId = $('#ads_handler_id').val();
+    const projectId = $('#ads_handler_project_id').val();
+    const startTime = $('#ads_start_time').val();
+    const endTime = $('#ads_end_time').val();
+
+    $.ajax({
+        url: '{{ route("admin.ads.handlerReport") }}',
+        method: 'GET',
+        data: {
+            handler_id: handlerId,
+            project_id: projectId,
+            start_time: startTime,
+            end_time: endTime
+        },
+        beforeSend: function() {
+            $('#ads_handler_report_table').html('<div class="text-center p-5"><div class="spinner-border" role="status"></div><p>Đang tải dữ liệu...</p></div>');
+        },
+        success: function(response) {
+            if (response.success) {
+                renderAdsHandlerReport(response.data);
+            } else {
+                init.showNoty(response.message || 'Có lỗi xảy ra!', 'error');
+            }
+        },
+        error: function() {
+            init.showNoty('Không thể tải dữ liệu báo cáo theo người xử lý!', 'error');
+        }
+    });
+}
+
+function renderAdsHandlerReport(data) {
+    if (!data || data.length === 0) {
+        $('#ads_handler_report_table').html('<div class="text-center p-5"><p class="text-muted">Không có dữ liệu báo cáo</p></div>');
+        return;
+    }
+
+    let html = '<div class="accordion accordion-toggle-arrow" id="adsHandlerAccordion">';
+
+    data.forEach((handler, index) => {
+        html += `<div class="card">
+            <div class="card-header">
+                <div class="card-title collapsed" data-toggle="collapse" data-target="#ads_handler_collapse_${index}">
+                    <i class="flaticon2-user"></i> ${handler.handler}
+                </div>
+            </div>
+            <div id="ads_handler_collapse_${index}" class="collapse" data-parent="#adsHandlerAccordion">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Dự án</th>
+                                    <th>Tổng ngân sách</th>
+                                    <th>Tổng đã chi</th>
+                                    <th>Còn dư</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+        handler.projects.forEach(project => {
+            html += `<tr>
+                <td>${project.project}</td>
+                <td>${Number(project.total_budget).toLocaleString('vi-VN')}</td>
+                <td>${Number(project.total_spend).toLocaleString('vi-VN')}</td>
+                <td>${Number(project.remaining).toLocaleString('vi-VN')}</td>
+            </tr>`;
+        });
+
+        html += `</tbody></table></div></div></div></div>`;
+    });
+
+    html += '</div>';
+    $('#ads_handler_report_table').html(html);
 }
 
 // Function để xem lịch công việc cá nhân
