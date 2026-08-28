@@ -4,6 +4,10 @@
             <th colspan="4" style="font-size: 16px; font-weight: bold;">Báo cáo chiến dịch: {{ $campaign->name }}</th>
         </tr>
         <tr>
+            <td>Link sản phẩm</td>
+            <td colspan="3">{{ $campaign->product_link }}</td>
+        </tr>
+        <tr>
             <td>Thời gian triển khai</td>
             <td colspan="3">{{ $campaign->start_time ? date('d/m/Y', $campaign->start_time) : '' }} - {{ $campaign->end_time ? date('d/m/Y', $campaign->end_time) : '' }}</td>
         </tr>
@@ -18,6 +22,10 @@
         <tr>
             <td>Còn dư</td>
             <td colspan="3">{{ number_format($remaining) }}</td>
+        </tr>
+        <tr>
+            <td>Tổng kết quả</td>
+            <td colspan="3">{{ number_format($total_results) }}</td>
         </tr>
     </thead>
 </table>
@@ -55,7 +63,7 @@
             <th>#</th>
             <th>Ngày chạy</th>
             <th>Số tiền chi</th>
-            <th>Link sản phẩm</th>
+            <th>Kết quả</th>
         </tr>
     </thead>
     <tbody>
@@ -64,7 +72,7 @@
             <td>{{ $k + 1 }}</td>
             <td>{{ \Carbon\Carbon::parse($v->spend_date)->format('d/m/Y') }}</td>
             <td>{{ number_format($v->amount) }}</td>
-            <td>{{ $v->product_link }}</td>
+            <td>{{ number_format($v->results) }}</td>
         </tr>
         @endforeach
     </tbody>

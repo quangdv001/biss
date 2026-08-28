@@ -61,6 +61,7 @@ class AdminAdsController extends Controller
         $spends = $campaign->spend->sortByDesc('spend_date')->values();
         $totalBudget = $budgets->sum('amount');
         $totalSpend = $spends->sum('amount');
+        $totalResults = $spends->sum('results');
 
         return [
             'campaign' => $campaign,
@@ -68,6 +69,7 @@ class AdminAdsController extends Controller
             'spends' => $spends,
             'total_budget' => $totalBudget,
             'total_spend' => $totalSpend,
+            'total_results' => $totalResults,
             'remaining' => $totalBudget - $totalSpend,
         ];
     }
@@ -90,10 +92,11 @@ class AdminAdsController extends Controller
         $pid = $pid > 0 ? $pid : ($phase->first() ? $phase->first()->id : 0);
         $role = $this->role->getRole();
 
-        $campaigns = $this->campaign->get(['project_id' => $id], ['id' => 'DESC'], ['budget', 'spend', 'creator', 'editor', 'handler'])
+        $campaigns = $this->campaign->get(['project_id' => $id], ['id' => 'DESC'], ['budget', 'spend', 'handler'])
             ->map(function ($campaign) {
                 $campaign->total_budget = $campaign->budget->sum('amount');
                 $campaign->total_spend = $campaign->spend->sum('amount');
+                $campaign->total_results = $campaign->spend->sum('results');
                 $campaign->remaining = $campaign->total_budget - $campaign->total_spend;
                 return $campaign;
             });
@@ -112,7 +115,7 @@ class AdminAdsController extends Controller
         }
 
         $id = $request->input('id');
-        $params = $request->only('name', 'project_id', 'channel', 'handler_id');
+        $params = $request->only('name', 'project_id', 'channel', 'product_link', 'handler_id');
         $params['handler_id'] = $params['handler_id'] ?: null;
         $params['start_time'] = $request->input('start_time') ? strtotime($request->input('start_time')) : null;
         $params['end_time'] = $request->input('end_time') ? strtotime($request->input('end_time')) : null;
@@ -190,7 +193,7 @@ class AdminAdsController extends Controller
         }
 
         $id = $request->input('id');
-        $params = $request->only('campaign_id', 'spend_date', 'amount', 'product_link', 'note');
+        $params = $request->only('campaign_id', 'spend_date', 'amount', 'results', 'note');
 
         if ($id) {
             $spend = $this->spend->first(['id' => $id]);
@@ -352,9 +355,10 @@ class AdminAdsController extends Controller
                 'remaining' => $totalBudget - $totalSpend,
             ];
         })->groupBy('handler_id')->map(function ($items, $handlerId) {
-            $projects = $items->groupBy('project_id')->map(function ($rows) {
+            $projects = $items->groupBy('project_id')->map(function ($rows, $projectId) {
                 return [
                     'project' => $rows->first()['project'],
+                    'project_id' => $projectId,
                     'campaigns' => $rows->values(),
                     'total_budget' => $rows->sum('total_budget'),
                     'total_spend' => $rows->sum('total_spend'),
@@ -364,6 +368,7 @@ class AdminAdsController extends Controller
 
             $rowAllProject = [
                 'project' => 'Tất cả dự án',
+                'project_id' => 0,
                 'campaigns' => collect([]),
                 'total_budget' => $items->sum('total_budget'),
                 'total_spend' => $items->sum('total_spend'),

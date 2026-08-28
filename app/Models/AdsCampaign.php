@@ -22,6 +22,7 @@ class AdsCampaign extends Model
         'name',
         'project_id',
         'channel',
+        'product_link',
         'handler_id',
         'start_time',
         'end_time',

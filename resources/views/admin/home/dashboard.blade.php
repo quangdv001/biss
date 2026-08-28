@@ -123,6 +123,8 @@ Dashboard - Báo cáo
 
 @section('custom_js')
 <script>
+var adsProjectIndexUrlTemplate = '{{ route("admin.ads.index", ["id" => "__ID__"]) }}';
+
 $(document).ready(function() {
     // Initialize Select2 for personal admin filter
     $('#personal_admin_id').select2({
@@ -136,6 +138,18 @@ $(document).ready(function() {
         placeholder: 'Chọn account planer',
         allowClear: true,
         width: '100%'
+    });
+
+    // Initialize Select2 for ads report project filter (search theo tên dự án)
+    $('#ads_project_id').select2({
+        placeholder: '-- Tìm và chọn dự án --',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Search chọn dự án nào thì hiển thị báo cáo dự án đó luôn
+    $('#ads_project_id').on('change', function() {
+        loadAdsReport();
     });
 
     // Initialize Select2 for ads handler report filter
@@ -204,7 +218,7 @@ $(document).ready(function() {
     // Load ads report when tab is clicked
     $('a[href="#tab_ads"]').on('shown.bs.tab', function() {
         if (!window.adsReportLoaded) {
-            loadAdsReport();
+            $('#ads_report_table').html('<div class="text-center p-5"><p class="text-muted">Vui lòng tìm và chọn dự án để xem báo cáo</p></div>');
             loadAdsHandlerReport();
             window.adsReportLoaded = true;
         }
@@ -776,6 +790,11 @@ function loadAdsReport() {
     const startTime = $('#ads_start_time').val();
     const endTime = $('#ads_end_time').val();
 
+    if (!projectId) {
+        $('#ads_report_table').html('<div class="text-center p-5"><p class="text-muted">Vui lòng tìm và chọn dự án để xem báo cáo</p></div>');
+        return;
+    }
+
     $.ajax({
         url: '{{ route("admin.ads.dashboardReport") }}',
         method: 'GET',
@@ -810,8 +829,11 @@ function renderAdsReport(data) {
     html += '<thead><tr><th>Dự án</th><th>Chiến dịch</th><th>Tổng ngân sách</th><th>Tổng đã chi</th><th>Còn dư</th></tr></thead><tbody>';
 
     data.forEach(project => {
+        const projectName = project.project_id
+            ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}">${project.project}</a>`
+            : project.project;
         html += `<tr class="font-weight-bold bg-light">
-            <td>${project.project}</td>
+            <td>${projectName}</td>
             <td>Tổng cộng</td>
             <td>${Number(project.total_budget).toLocaleString('vi-VN')}</td>
             <td>${Number(project.total_spend).toLocaleString('vi-VN')}</td>
@@ -893,8 +915,11 @@ function renderAdsHandlerReport(data) {
                             <tbody>`;
 
         handler.projects.forEach(project => {
+            const projectName = project.project_id
+                ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', project.project_id)}">${project.project}</a>`
+                : project.project;
             html += `<tr>
-                <td>${project.project}</td>
+                <td>${projectName}</td>
                 <td>${Number(project.total_budget).toLocaleString('vi-VN')}</td>
                 <td>${Number(project.total_spend).toLocaleString('vi-VN')}</td>
                 <td>${Number(project.remaining).toLocaleString('vi-VN')}</td>
