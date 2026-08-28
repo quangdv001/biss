@@ -35,20 +35,21 @@ Ads - {{ $project->name }}
                     </div>
                 </div>
                 <div class="card-body">
+                    <style>
+                        #adsCampaignTable > tbody > tr > td { vertical-align: top; }
+                    </style>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover" id="adsCampaignTable">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Tên chiến dịch</th>
                                     <th>Kênh</th>
-                                    <th>Người xử lý</th>
-                                    <th>Thời gian triển khai</th>
                                     <th>Tổng ngân sách</th>
                                     <th>Tổng đã chi</th>
                                     <th>Còn dư</th>
-                                    <th>Người tạo</th>
-                                    <th>Người sửa</th>
+                                    <th>Link sản phẩm</th>
+                                    <th>Kết quả</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -62,17 +63,19 @@ Ads - {{ $project->name }}
                                         </a>
                                     </td>
                                     <td>{{ $channels[$c->channel] ?? '' }}</td>
-                                    <td>{{ $c->handler->username ?? '' }}</td>
-                                    <td>{{ $c->start_time ? date('d/m/Y', $c->start_time) : '' }} - {{ $c->end_time ? date('d/m/Y', $c->end_time) : '' }}</td>
                                     <td class="col-total-budget">{{ number_format($c->total_budget) }}</td>
                                     <td class="col-total-spend">{{ number_format($c->total_spend) }}</td>
                                     <td class="col-remaining">{{ number_format($c->remaining) }}</td>
-                                    <td>{{ $c->creator->username ?? '' }}</td>
-                                    <td>{{ $c->editor->username ?? '' }}</td>
+                                    <td style="max-width: 200px; word-break: break-word;">
+                                        @if ($c->product_link)
+                                        <a href="{{ $c->product_link }}" target="_blank">Link</a>
+                                        @endif
+                                    </td>
+                                    <td class="col-total-results">{{ number_format($c->total_results) }}</td>
                                     <td>
                                         <a href="javascript:void(0);" class="mr-2 btn-edit-campaign"
                                             data-id="{{ $c->id }}" data-name="{{ $c->name }}"
-                                            data-channel="{{ $c->channel }}" data-handler="{{ $c->handler_id }}"
+                                            data-channel="{{ $c->channel }}" data-link="{{ $c->product_link }}" data-handler="{{ $c->handler_id }}"
                                             data-start="{{ $c->start_time ? date('Y-m-d', $c->start_time) : '' }}"
                                             data-end="{{ $c->end_time ? date('Y-m-d', $c->end_time) : '' }}">
                                             <i class="la la-edit"></i>
@@ -84,7 +87,7 @@ Ads - {{ $project->name }}
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="11" class="text-center text-muted">Chưa có chiến dịch nào</td>
+                                    <td colspan="9" class="text-center text-muted">Chưa có chiến dịch nào</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -121,6 +124,10 @@ Ads - {{ $project->name }}
                             <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Link sản phẩm</label>
+                        <input type="text" class="form-control" name="product_link">
                     </div>
                     <div class="form-group">
                         <label>Người xử lý</label>
@@ -228,8 +235,8 @@ Ads - {{ $project->name }}
                         <input type="number" class="form-control" name="amount" min="0" required>
                     </div>
                     <div class="form-group">
-                        <label>Link sản phẩm</label>
-                        <input type="text" class="form-control" name="product_link">
+                        <label>Kết quả</label>
+                        <input type="number" class="form-control" name="results" min="0">
                     </div>
                     <div class="form-group">
                         <label>Ghi chú</label>
@@ -306,14 +313,13 @@ Ads - {{ $project->name }}
             return '<tr><td colspan="5" class="text-center text-muted">Chưa có dữ liệu</td></tr>';
         }
         return spends.map(function (s, i) {
-            let link = s.product_link ? '<a href="' + escapeHtml(s.product_link) + '" target="_blank">Link</a>' : '';
             return '<tr>' +
                 '<td>' + (i + 1) + '</td>' +
                 '<td>' + formatDate(s.spend_date) + '</td>' +
                 '<td>' + formatMoney(s.amount) + '</td>' +
-                '<td style="max-width: 200px; word-break: break-word;">' + link + '</td>' +
+                '<td>' + formatMoney(s.results) + '</td>' +
                 '<td>' +
-                    '<a href="javascript:void(0);" class="mr-2 btn-edit-spend" data-id="' + s.id + '" data-amount="' + s.amount + '" data-date="' + s.spend_date.substring(0, 10) + '" data-link="' + escapeHtml(s.product_link) + '" data-note="' + escapeHtml(s.note) + '"><i class="la la-edit"></i></a>' +
+                    '<a href="javascript:void(0);" class="mr-2 btn-edit-spend" data-id="' + s.id + '" data-amount="' + s.amount + '" data-date="' + s.spend_date.substring(0, 10) + '" data-results="' + (s.results || 0) + '" data-note="' + escapeHtml(s.note) + '"><i class="la la-edit"></i></a>' +
                     '<a href="javascript:void(0);" class="btn-remove-spend" data-id="' + s.id + '"><i class="la la-trash"></i></a>' +
                 '</td>' +
             '</tr>';
@@ -326,17 +332,21 @@ Ads - {{ $project->name }}
 
         let html =
             '<div class="row mb-5">' +
-                '<div class="col-lg-4"><div class="card card-custom bg-light-primary"><div class="card-body">' +
+                '<div class="col-lg-3"><div class="card card-custom bg-light-primary"><div class="card-body">' +
                     '<div class="font-weight-bold text-muted">Tổng ngân sách</div>' +
                     '<div class="font-size-h3 font-weight-bolder text-primary">' + formatMoney(data.total_budget) + '</div>' +
                 '</div></div></div>' +
-                '<div class="col-lg-4"><div class="card card-custom bg-light-danger"><div class="card-body">' +
+                '<div class="col-lg-3"><div class="card card-custom bg-light-danger"><div class="card-body">' +
                     '<div class="font-weight-bold text-muted">Tổng đã chi</div>' +
                     '<div class="font-size-h3 font-weight-bolder text-danger">' + formatMoney(data.total_spend) + '</div>' +
                 '</div></div></div>' +
-                '<div class="col-lg-4"><div class="card card-custom bg-light-success"><div class="card-body">' +
+                '<div class="col-lg-3"><div class="card card-custom bg-light-success"><div class="card-body">' +
                     '<div class="font-weight-bold text-muted">Còn dư</div>' +
                     '<div class="font-size-h3 font-weight-bolder text-success">' + formatMoney(data.remaining) + '</div>' +
+                '</div></div></div>' +
+                '<div class="col-lg-3"><div class="card card-custom bg-light-warning"><div class="card-body">' +
+                    '<div class="font-weight-bold text-muted">Tổng kết quả</div>' +
+                    '<div class="font-size-h3 font-weight-bolder text-warning">' + formatMoney(data.total_results) + '</div>' +
                 '</div></div></div>' +
             '</div>' +
             '<div class="row">' +
@@ -356,7 +366,7 @@ Ads - {{ $project->name }}
                         '<a href="javascript:void(0);" class="btn btn-sm btn-light-primary" data-toggle="modal" data-target="#modalCreateSpend"><i class="la la-plus"></i> Thêm</a>' +
                     '</div>' +
                     '<div class="table-responsive"><table class="table table-bordered table-sm">' +
-                        '<thead><tr><th>#</th><th>Ngày chạy</th><th>Số tiền chi</th><th>Link sản phẩm</th><th></th></tr></thead>' +
+                        '<thead><tr><th>#</th><th>Ngày chạy</th><th>Số tiền chi</th><th>Kết quả</th><th></th></tr></thead>' +
                         '<tbody>' + renderSpendRows(data.spends) + '</tbody>' +
                     '</table></div>' +
                 '</div>' +
@@ -372,6 +382,7 @@ Ads - {{ $project->name }}
         row.find('.col-total-budget').text(formatMoney(totals.total_budget));
         row.find('.col-total-spend').text(formatMoney(totals.total_spend));
         row.find('.col-remaining').text(formatMoney(totals.remaining));
+        row.find('.col-total-results').text(formatMoney(totals.total_results));
     }
 
     function loadCampaignDetail(id) {
@@ -397,6 +408,7 @@ Ads - {{ $project->name }}
         modal.find('input[name="id"]').val($(this).data('id'));
         modal.find('input[name="name"]').val($(this).data('name'));
         modal.find('select[name="channel"]').val($(this).data('channel'));
+        modal.find('input[name="product_link"]').val($(this).data('link'));
         modal.find('select[name="handler_id"]').val($(this).data('handler')).trigger('change');
         modal.find('input[name="start_time"]').val($(this).data('start'));
         modal.find('input[name="end_time"]').val($(this).data('end'));
@@ -405,7 +417,7 @@ Ads - {{ $project->name }}
 
     $('#modalCreateCampaign').on('hidden.bs.modal', function () {
         $(this).find('input[name="id"]').val('');
-        $(this).find('input[name="name"], input[name="start_time"], input[name="end_time"]').val('');
+        $(this).find('input[name="name"], input[name="product_link"], input[name="start_time"], input[name="end_time"]').val('');
         $(this).find('select[name="channel"]').val('');
         $(this).find('select[name="handler_id"]').val('').trigger('change');
     });
@@ -432,7 +444,7 @@ Ads - {{ $project->name }}
         modal.find('input[name="id"]').val($(this).data('id'));
         modal.find('input[name="spend_date"]').val($(this).data('date'));
         modal.find('input[name="amount"]').val($(this).data('amount'));
-        modal.find('input[name="product_link"]').val($(this).data('link'));
+        modal.find('input[name="results"]').val($(this).data('results'));
         modal.find('input[name="note"]').val($(this).data('note'));
         modal.modal('show');
     });
@@ -440,7 +452,7 @@ Ads - {{ $project->name }}
     $('#modalCreateSpend').on('hidden.bs.modal', function () {
         $(this).find('.modal-title').text('Nhập chi tiêu chạy ads');
         $(this).find('input[name="id"]').val('');
-        $(this).find('input[name="spend_date"], input[name="amount"], input[name="product_link"], input[name="note"]').val('');
+        $(this).find('input[name="spend_date"], input[name="amount"], input[name="results"], input[name="note"]').val('');
     });
 
     $('#modalCreateBudget form, #modalCreateSpend form').submit(function (e) {

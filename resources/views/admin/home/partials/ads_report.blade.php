@@ -6,7 +6,7 @@
             <div class="form-group">
                 <label>Dự án:</label>
                 <select class="form-control" id="ads_project_id">
-                    <option value="">Tất cả dự án</option>
+                    <option value="">-- Tìm và chọn dự án --</option>
                     @foreach($projects as $project)
                         <option value="{{ $project->id }}">{{ $project->name }}</option>
                     @endforeach

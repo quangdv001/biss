@@ -14,7 +14,7 @@ class AdsSpend extends Model
         'campaign_id',
         'spend_date',
         'amount',
-        'product_link',
+        'results',
         'note',
         'created_by',
         'updated_by',
