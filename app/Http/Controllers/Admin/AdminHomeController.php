@@ -51,14 +51,14 @@ class AdminHomeController extends Controller
     public function dashboard(Request $request){
         $user = auth('admin')->user();
 
-        // Cho phép super_admin, account truy cập đầy đủ dashboard; ceo chỉ để xem báo cáo Ads
-        if (!$user->hasRole(['super_admin', 'account', 'ceo'])) {
+        // Cho phép super_admin, account truy cập đầy đủ dashboard; ceo, ads chỉ để xem báo cáo Ads
+        if (!$user->hasRole(['super_admin', 'account', 'ceo', 'ads', 'ADS'])) {
             return redirect()->route('admin.home.intro')->with('error_message', 'Bạn không có quyền truy cập Dashboard');
         }
 
         $isAdmin = $user->hasRole(['super_admin', 'account']);
-        // Tab "Báo cáo Ads" dành cho super_admin, ceo, account
-        $canViewAdsReport = $user->hasRole(['super_admin', 'ceo', 'account']);
+        // Tab "Báo cáo Ads" dành cho super_admin, ceo, account, ads
+        $canViewAdsReport = $user->hasRole(['super_admin', 'ceo', 'account', 'ads', 'ADS']);
 
         // Lấy danh sách roles và projects
         $roles = $this->role->get();
