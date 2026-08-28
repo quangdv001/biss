@@ -79,5 +79,8 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('ads/export/{campaign_id}', 'AdminAdsController@export')->name('ads.export');
     Route::get('ads/dashboard-report', 'AdminAdsController@dashboardReport')->name('ads.dashboardReport');
     Route::get('ads/handler-report', 'AdminAdsController@handlerReport')->name('ads.handlerReport');
+    Route::get('ads/budget-alert-report', 'AdminAdsController@budgetAlertReport')->name('ads.budgetAlertReport');
+    Route::get('ads/account-list', 'AdminAdsController@accountList')->name('ads.accountList');
+    Route::get('ads/account-report', 'AdminAdsController@accountReport')->name('ads.accountReport');
     Route::get('ads/{id}/{pid?}', 'AdminAdsController@index')->name('ads.index');
 });
