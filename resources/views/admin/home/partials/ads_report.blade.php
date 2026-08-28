@@ -8,6 +8,14 @@
                 <input type="month" class="form-control" id="ads_alert_month" value="{{ date('Y-m') }}">
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="form-group mb-0">
+                <label>Tài khoản quảng cáo:</label>
+                <select class="form-control" id="ads_alert_account_filter" style="width: 100%">
+                    <option value="">-- Tất cả tài khoản --</option>
+                </select>
+            </div>
+        </div>
         <div class="col-md-3">
             <div class="form-group">
                 <label>&nbsp;</label>
@@ -88,6 +96,25 @@
         </div>
         <div id="collapse_ads_total_spend" class="collapse" data-parent="#adsBudgetAlertAccordion">
             <div class="card-body" id="ads_total_spend_content">
+                <div class="text-center p-5"><p class="text-muted">Đang tải dữ liệu...</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-custom gutter-b">
+        <div class="card-header collapsed" data-toggle="collapse" data-target="#collapse_ads_spend_by_account" style="cursor: pointer;">
+            <div class="card-title">
+                <h3 class="card-label">
+                    <i class="flaticon2-pie-chart text-danger"></i> Tổng ngân sách đã chi theo tài khoản quảng cáo
+                    <span class="badge badge-danger badge-lg ml-2" id="ads_alert_spend_by_account_count">0</span>
+                </h3>
+            </div>
+            <div class="card-toolbar">
+                <span class="svg-icon svg-icon-md"><i class="ki ki-arrow-down"></i></span>
+            </div>
+        </div>
+        <div id="collapse_ads_spend_by_account" class="collapse" data-parent="#adsBudgetAlertAccordion">
+            <div class="card-body" id="ads_spend_by_account_content">
                 <div class="text-center p-5"><p class="text-muted">Đang tải dữ liệu...</p></div>
             </div>
         </div>

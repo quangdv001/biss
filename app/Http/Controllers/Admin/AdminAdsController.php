@@ -401,10 +401,15 @@ class AdminAdsController extends Controller
         }
 
         $month = $request->get('month', date('Y-m'));
+        $account = trim($request->get('account', ''));
         $startTime = strtotime($month . '-01 00:00:00');
         $endTime = strtotime(date('Y-m-t 23:59:59', $startTime));
 
-        $campaigns = $this->campaign->get([], ['id' => 'DESC'], ['project', 'budget', 'spend']);
+        $campaigns = $this->campaign->get(
+            $account !== '' ? ['ad_account' => $account] : [],
+            ['id' => 'DESC'],
+            ['project', 'budget', 'spend']
+        );
 
         $rows = $campaigns->map(function ($campaign) use ($startTime, $endTime) {
             $budgets = $campaign->budget
@@ -422,6 +427,7 @@ class AdminAdsController extends Controller
                 'project' => $campaign->project->name ?? '',
                 'campaign_id' => $campaign->id,
                 'campaign' => $campaign->name,
+                'ad_account' => $campaign->ad_account ?: '',
                 'total_budget' => $totalBudget,
                 'total_spend' => $totalSpend,
                 'remaining' => $totalBudget - $totalSpend,
@@ -439,6 +445,18 @@ class AdminAdsController extends Controller
             })->values();
         };
 
+        $groupByAccount = function ($items) {
+            return $items->groupBy('ad_account')->map(function ($rows, $adAccount) {
+                return [
+                    'ad_account' => $adAccount !== '' ? $adAccount : '(Không có tài khoản)',
+                    'campaigns' => $rows->values(),
+                    'count' => $rows->count(),
+                    'total_budget' => $rows->sum('total_budget'),
+                    'total_spend' => $rows->sum('total_spend'),
+                ];
+            })->values()->sortByDesc('total_spend')->values();
+        };
+
         $nearLimit = $rows->filter(function ($r) {
             return $r['remaining'] >= 0 && $r['remaining'] <= self::BUDGET_ALERT_THRESHOLD;
         });
@@ -450,6 +468,9 @@ class AdminAdsController extends Controller
         });
         $spendDetail = $rows->filter(function ($r) {
             return $r['total_spend'] > 0;
+        });
+        $accountDetail = $rows->filter(function ($r) {
+            return $r['total_budget'] > 0 || $r['total_spend'] > 0;
         });
 
         return response()->json([
@@ -463,6 +484,7 @@ class AdminAdsController extends Controller
                 'over_budget' => $groupByProject($overBudget),
                 'budget_detail' => $groupByProject($budgetDetail),
                 'spend_detail' => $groupByProject($spendDetail),
+                'account_detail' => $groupByAccount($accountDetail),
             ],
         ]);
     }
