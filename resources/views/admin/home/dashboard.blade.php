@@ -161,6 +161,13 @@ $(document).ready(function() {
         width: '100%'
     });
 
+    // Initialize Select2 for ads budget alert account filter (search theo tài khoản quảng cáo)
+    $('#ads_alert_account_filter').select2({
+        placeholder: '-- Tất cả tài khoản --',
+        allowClear: true,
+        width: '100%'
+    });
+
     // Reload account report when ads account filter changes
     $('#ads_account_filter').on('change', function() {
         const account = $(this).val();
@@ -170,6 +177,11 @@ $(document).ready(function() {
             return;
         }
         loadAdsAccountReport(account);
+    });
+
+    // Reload budget alert report when ads alert account filter changes
+    $('#ads_alert_account_filter').on('change', function() {
+        loadAdsBudgetAlertReport();
     });
 
     // Reload project report when admin filter changes
@@ -801,13 +813,14 @@ function renderDepartmentExpiredReport(data) {
 
 function loadAdsBudgetAlertReport() {
     const month = $('#ads_alert_month').val();
+    const account = $('#ads_alert_account_filter').val();
 
     $.ajax({
         url: '{{ route("admin.ads.budgetAlertReport") }}',
         method: 'GET',
-        data: { month: month },
+        data: { month: month, account: account },
         beforeSend: function() {
-            $('#ads_total_budget_content, #ads_total_spend_content, #ads_near_limit_content, #ads_over_budget_content')
+            $('#ads_total_budget_content, #ads_total_spend_content, #ads_spend_by_account_content, #ads_near_limit_content, #ads_over_budget_content')
                 .html('<div class="text-center p-5"><div class="spinner-border" role="status"></div></div>');
         },
         success: function(response) {
@@ -884,11 +897,74 @@ function renderAdsBudgetAlertReport(data) {
     $('#ads_alert_total_spend, #ads_alert_total_spend_stat').text(Number(data.total_spend).toLocaleString('vi-VN'));
     $('#ads_alert_near_limit_count, #ads_alert_near_limit_count_stat').text(data.near_limit_count);
     $('#ads_alert_over_budget_count, #ads_alert_over_budget_count_stat').text(data.over_budget_count);
+    $('#ads_alert_spend_by_account_count').text((data.account_detail || []).length);
 
     renderAdsBudgetAlertGroup('ads_near_limit_content', 'adsNearLimitAccordion', data.near_limit, 'Không có chiến dịch nào sắp hết ngân sách trong tháng này');
     renderAdsBudgetAlertGroup('ads_over_budget_content', 'adsOverBudgetAccordion', data.over_budget, 'Không có chiến dịch nào vượt ngân sách trong tháng này');
     renderAdsBudgetAlertGroup('ads_total_budget_content', 'adsTotalBudgetAccordion', data.budget_detail, 'Không có ngân sách nào được nhập trong tháng này');
     renderAdsBudgetAlertGroup('ads_total_spend_content', 'adsTotalSpendAccordion', data.spend_detail, 'Không có chi tiêu nào trong tháng này');
+    renderAdsSpendByAccountGroup('ads_spend_by_account_content', 'adsSpendByAccountAccordion', data.account_detail, 'Không có chi tiêu nào trong tháng này');
+}
+
+function renderAdsSpendByAccountGroup(containerId, accordionId, accounts, emptyMessage) {
+    if (!accounts || !accounts.length) {
+        $('#' + containerId).html(`<div class="alert alert-light-primary">${emptyMessage}</div>`);
+        return;
+    }
+
+    let html = `<div class="accordion accordion-toggle-arrow" id="${accordionId}">`;
+
+    accounts.forEach((acc, index) => {
+        const collapseId = accordionId + '_collapse_' + index;
+
+        html += `<div class="card">
+            <div class="card-header">
+                <div class="card-title collapsed" data-toggle="collapse" data-target="#${collapseId}">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <span><i class="flaticon2-pie-chart-3"></i> ${escapeHtml(acc.ad_account)}</span>
+                        <span>
+                            <span class="label label-primary label-inline mr-2">Nhận: ${Number(acc.total_budget).toLocaleString('vi-VN')}</span>
+                            <span class="label label-danger label-inline mr-5">Đã chi: ${Number(acc.total_spend).toLocaleString('vi-VN')}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div id="${collapseId}" class="collapse" data-parent="#${accordionId}">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Dự án</th>
+                                    <th>Chiến dịch</th>
+                                    <th>Ngân sách nhận</th>
+                                    <th>Đã chi</th>
+                                    <th>Còn dư</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+        acc.campaigns.forEach(c => {
+            const projectName = c.project_id
+                ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', c.project_id)}">${c.project}</a>`
+                : c.project;
+            const campaignName = (c.project_id && c.campaign_id)
+                ? `<a href="${adsProjectIndexUrlTemplate.replace('__ID__', c.project_id)}?campaign=${c.campaign_id}">${c.campaign}</a>`
+                : c.campaign;
+            html += `<tr>
+                <td>${projectName}</td>
+                <td>${campaignName}</td>
+                <td>${Number(c.total_budget).toLocaleString('vi-VN')}</td>
+                <td>${Number(c.total_spend).toLocaleString('vi-VN')}</td>
+                <td>${Number(c.remaining).toLocaleString('vi-VN')}</td>
+            </tr>`;
+        });
+
+        html += `</tbody></table></div></div></div></div>`;
+    });
+
+    html += '</div>';
+    $('#' + containerId).html(html);
 }
 
 function loadAdsHandlerReport() {
@@ -994,10 +1070,13 @@ function loadAdsAccountList() {
     $.get('{{ route("admin.ads.accountList") }}', function(response) {
         if (response.success) {
             let options = '<option value="">-- Tìm và chọn tài khoản quảng cáo --</option>';
+            let alertOptions = '<option value="">-- Tất cả tài khoản --</option>';
             response.data.forEach(function(acc) {
                 options += `<option value="${escapeHtml(acc)}">${escapeHtml(acc)}</option>`;
+                alertOptions += `<option value="${escapeHtml(acc)}">${escapeHtml(acc)}</option>`;
             });
             $('#ads_account_filter').html(options);
+            $('#ads_alert_account_filter').html(alertOptions);
         }
     });
 }
