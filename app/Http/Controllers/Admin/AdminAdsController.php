@@ -18,7 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class AdminAdsController extends Controller
 {
     // slug role "Ads" trong DB hiện đang là "ADS" (viết hoa) nên check cả 2 dạng cho chắc
-    const ROLES = ['super_admin', 'ceo', 'ads', 'ADS', 'content'];
+    const ROLES = ['super_admin', 'ceo', 'ads', 'ADS', 'content', 'account'];
 
     private $projectRepo;
     private $phase;
