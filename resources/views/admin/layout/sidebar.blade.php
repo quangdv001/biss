@@ -25,7 +25,7 @@
                         </span>
                     </a>
                 </div>
-                @if(auth('admin')->user()->hasRole(['super_admin', 'ceo', 'ads', 'ADS', 'content']))
+                @if(auth('admin')->user()->hasRole(['super_admin', 'ceo', 'ads', 'ADS', 'content', 'account']))
                 <div class="navi-item mb-2">
                     <a href="{{ route('admin.ads.index', ['id' => $project->id, 'pid' => $pid]) }}"
                         class="navi-link py-4 @if(Route::is('admin.ads.index')) active @endif">
