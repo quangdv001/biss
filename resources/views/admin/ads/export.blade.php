@@ -18,46 +18,22 @@
         </tr>
         @endif
         <tr>
-            <td>Tổng ngân sách</td>
-            <td colspan="3">{{ number_format($total_budget) }}</td>
-        </tr>
-        <tr>
             <td>Tổng đã chi</td>
             <td colspan="3">{{ number_format($total_spend) }}</td>
         </tr>
         <tr>
-            <td>Còn dư</td>
-            <td colspan="3">{{ number_format($remaining) }}</td>
+            <td>Ngân sách dự án</td>
+            <td colspan="3">{{ number_format($project_budget) }}</td>
+        </tr>
+        <tr>
+            <td>Dự án còn dư</td>
+            <td colspan="3">{{ number_format($project_remaining) }}</td>
         </tr>
         <tr>
             <td>Tổng kết quả</td>
             <td colspan="3">{{ number_format($total_results) }}</td>
         </tr>
     </thead>
-</table>
-
-<table>
-    <thead>
-        <tr>
-            <th colspan="4" style="font-weight: bold;">Chi tiết các lần nhập ngân sách</th>
-        </tr>
-        <tr>
-            <th>#</th>
-            <th>Thời gian nhập</th>
-            <th>Số tiền</th>
-            <th>Ghi chú</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($budgets as $k => $v)
-        <tr>
-            <td>{{ $k + 1 }}</td>
-            <td>{{ $v->entered_time ? date('d/m/Y H:i', $v->entered_time) : '' }}</td>
-            <td>{{ number_format($v->amount) }}</td>
-            <td>{{ $v->note }}</td>
-        </tr>
-        @endforeach
-    </tbody>
 </table>
 
 <table>

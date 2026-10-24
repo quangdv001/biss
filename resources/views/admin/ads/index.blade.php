@@ -23,6 +23,77 @@ Ads - {{ $project->name }}
         @include('admin.layout.sidebar')
         <!--begin::Content-->
         <div class="flex-row-fluid ml-lg-8" style="min-width: 0; overflow:auto;">
+            <div class="card card-custom gutter-b">
+                <div class="card-header py-3 d-flex justify-content-between">
+                    <div class="card-title align-items-start flex-column">
+                        <h3 class="card-label font-weight-bolder text-dark">Ngân sách dự án</h3>
+                    </div>
+                    <div>
+                        <a href="{{ route('admin.ads.exportProject', ['project_id' => $project->id]) }}" class="btn btn-success font-weight-bolder mr-2" target="_blank">
+                            <i class="la la-file-excel-o"></i> Xuất Excel
+                        </a>
+                        <a href="javascript:void(0);" class="btn btn-primary font-weight-bolder" data-toggle="modal" data-target="#modalCreateBudget">
+                            <i class="la la-plus"></i> Nhập ngân sách
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-5">
+                        <div class="col-lg-4"><div class="card card-custom bg-light-primary"><div class="card-body">
+                            <div class="font-weight-bold text-muted">Tổng ngân sách</div>
+                            <div class="font-size-h3 font-weight-bolder text-primary">{{ number_format($totalBudget) }}</div>
+                        </div></div></div>
+                        <div class="col-lg-4"><div class="card card-custom bg-light-danger"><div class="card-body">
+                            <div class="font-weight-bold text-muted">Tổng đã chi (các chiến dịch)</div>
+                            <div class="font-size-h3 font-weight-bolder text-danger">{{ number_format($totalSpend) }}</div>
+                        </div></div></div>
+                        <div class="col-lg-4"><div class="card card-custom bg-light-success"><div class="card-body">
+                            <div class="font-weight-bold text-muted">Còn dư</div>
+                            <div class="font-size-h3 font-weight-bolder {{ $remaining < 0 ? 'text-danger' : 'text-success' }}">{{ number_format($remaining) }}</div>
+                        </div></div></div>
+                    </div>
+                    <h5>Các lần nhập ngân sách</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Thời gian nhập</th>
+                                    <th>Số tiền</th>
+                                    <th>Ghi chú</th>
+                                    <th>Người nhập</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($budgets as $b)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $b->entered_time ? date('d/m/Y H:i', $b->entered_time) : '' }}</td>
+                                    <td>{{ number_format($b->amount) }}</td>
+                                    <td style="max-width: 300px; word-break: break-word;">{{ $b->note }}</td>
+                                    <td>{{ $b->creator->username ?? '' }}</td>
+                                    <td>
+                                        <a href="javascript:void(0);" class="mr-2 btn-edit-budget"
+                                            data-id="{{ $b->id }}" data-amount="{{ $b->amount }}" data-note="{{ $b->note }}"
+                                            data-entered="{{ $b->entered_time ? date('Y-m-d\TH:i', $b->entered_time) : '' }}">
+                                            <i class="la la-edit"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" class="btn-remove-budget" data-id="{{ $b->id }}">
+                                            <i class="la la-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">Chưa nhập ngân sách</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <div class="card card-custom card-stretch gutter-b">
                 <div class="card-header py-3 d-flex justify-content-between">
                     <div class="card-title align-items-start flex-column">
@@ -45,9 +116,7 @@ Ads - {{ $project->name }}
                                     <th>#</th>
                                     <th>Tên chiến dịch</th>
                                     <th>Kênh</th>
-                                    <th>Tổng ngân sách</th>
                                     <th>Tổng đã chi</th>
-                                    <th>Còn dư</th>
                                     <th>Link sản phẩm</th>
                                     <th>Kết quả</th>
                                     <th></th>
@@ -63,9 +132,7 @@ Ads - {{ $project->name }}
                                         </a>
                                     </td>
                                     <td>{{ $channels[$c->channel] ?? '' }}</td>
-                                    <td class="col-total-budget">{{ number_format($c->total_budget) }}</td>
                                     <td class="col-total-spend">{{ number_format($c->total_spend) }}</td>
-                                    <td class="col-remaining">{{ number_format($c->remaining) }}</td>
                                     <td style="max-width: 200px; word-break: break-word;">
                                         @if ($c->product_link)
                                         <a href="{{ $c->product_link }}" target="_blank">Link</a>
@@ -88,7 +155,7 @@ Ads - {{ $project->name }}
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center text-muted">Chưa có chiến dịch nào</td>
+                                    <td colspan="7" class="text-center text-muted">Chưa có chiến dịch nào</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -202,7 +269,7 @@ Ads - {{ $project->name }}
             <form method="post" action="{{ route('admin.ads.budget.create') }}">
                 @csrf
                 <input type="hidden" name="id" value="">
-                <input type="hidden" name="campaign_id" value="">
+                <input type="hidden" name="project_id" value="{{ $project->id }}">
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Số tiền</label>
@@ -270,6 +337,8 @@ Ads - {{ $project->name }}
     var adsReportUrlTemplate = '{{ route("admin.ads.report", ["campaign_id" => "__ID__"]) }}';
     var adsExportUrlTemplate = '{{ route("admin.ads.export", ["campaign_id" => "__ID__"]) }}';
     var currentCampaignId = null;
+    // Chi tiêu chiến dịch thay đổi thì ngân sách còn dư của dự án cũng thay đổi -> tải lại trang khi đóng chi tiết
+    var adsSpendChanged = false;
 
     function escapeHtml(str) {
         return String(str === null || str === undefined ? '' : str).replace(/[&<>"']/g, function (s) {
@@ -281,44 +350,10 @@ Ads - {{ $project->name }}
         return Number(n || 0).toLocaleString('vi-VN');
     }
 
-    function pad2(n) {
-        return n < 10 ? '0' + n : '' + n;
-    }
-
-    function formatDateTime(ts) {
-        if (!ts) return '';
-        let d = new Date(ts * 1000);
-        return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
-    }
-
-    function toDatetimeLocal(ts) {
-        if (!ts) return '';
-        let d = new Date(ts * 1000);
-        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
-    }
-
     function formatDate(dateStr) {
         if (!dateStr) return '';
         let parts = dateStr.substring(0, 10).split('-');
         return parts.length === 3 ? (parts[2] + '/' + parts[1] + '/' + parts[0]) : dateStr;
-    }
-
-    function renderBudgetRows(budgets) {
-        if (!budgets || !budgets.length) {
-            return '<tr><td colspan="5" class="text-center text-muted">Chưa có dữ liệu</td></tr>';
-        }
-        return budgets.map(function (b, i) {
-            return '<tr>' +
-                '<td>' + (i + 1) + '</td>' +
-                '<td>' + formatDateTime(b.entered_time) + '</td>' +
-                '<td>' + formatMoney(b.amount) + '</td>' +
-                '<td style="max-width: 200px; word-break: break-word;">' + escapeHtml(b.note) + '</td>' +
-                '<td>' +
-                    '<a href="javascript:void(0);" class="mr-2 btn-edit-budget" data-id="' + b.id + '" data-amount="' + b.amount + '" data-entered="' + toDatetimeLocal(b.entered_time) + '" data-note="' + escapeHtml(b.note) + '"><i class="la la-edit"></i></a>' +
-                    '<a href="javascript:void(0);" class="btn-remove-budget" data-id="' + b.id + '"><i class="la la-trash"></i></a>' +
-                '</td>' +
-            '</tr>';
-        }).join('');
     }
 
     function renderSpendRows(spends) {
@@ -364,35 +399,22 @@ Ads - {{ $project->name }}
 
         let html =
             '<div class="row mb-5">' +
-                '<div class="col-lg-3"><div class="card card-custom bg-light-primary"><div class="card-body">' +
-                    '<div class="font-weight-bold text-muted">Tổng ngân sách</div>' +
-                    '<div class="font-size-h3 font-weight-bolder text-primary">' + formatMoney(data.total_budget) + '</div>' +
-                '</div></div></div>' +
-                '<div class="col-lg-3"><div class="card card-custom bg-light-danger"><div class="card-body">' +
-                    '<div class="font-weight-bold text-muted">Tổng đã chi</div>' +
+                '<div class="col-lg-4"><div class="card card-custom bg-light-danger"><div class="card-body">' +
+                    '<div class="font-weight-bold text-muted">Chiến dịch đã chi</div>' +
                     '<div class="font-size-h3 font-weight-bolder text-danger">' + formatMoney(data.total_spend) + '</div>' +
                 '</div></div></div>' +
-                '<div class="col-lg-3"><div class="card card-custom bg-light-success"><div class="card-body">' +
-                    '<div class="font-weight-bold text-muted">Còn dư</div>' +
-                    '<div class="font-size-h3 font-weight-bolder text-success">' + formatMoney(data.remaining) + '</div>' +
-                '</div></div></div>' +
-                '<div class="col-lg-3"><div class="card card-custom bg-light-warning"><div class="card-body">' +
+                '<div class="col-lg-4"><div class="card card-custom bg-light-warning"><div class="card-body">' +
                     '<div class="font-weight-bold text-muted">Tổng kết quả</div>' +
                     '<div class="font-size-h3 font-weight-bolder text-warning">' + formatMoney(data.total_results) + '</div>' +
                 '</div></div></div>' +
+                '<div class="col-lg-4"><div class="card card-custom bg-light-success"><div class="card-body">' +
+                    '<div class="font-weight-bold text-muted">Ngân sách dự án còn dư</div>' +
+                    '<div class="font-size-h3 font-weight-bolder ' + (data.project_remaining < 0 ? 'text-danger' : 'text-success') + '">' + formatMoney(data.project_remaining) + '</div>' +
+                    '<div class="text-muted font-size-sm">Tổng ngân sách ' + formatMoney(data.project_budget) + ' - đã chi ' + formatMoney(data.project_spend) + '</div>' +
+                '</div></div></div>' +
             '</div>' +
             '<div class="row">' +
-                '<div class="col-lg-6" style="min-width: 0;">' +
-                    '<div class="d-flex justify-content-between align-items-center mb-3">' +
-                        '<h5>Các lần nhập ngân sách</h5>' +
-                        '<a href="javascript:void(0);" class="btn btn-sm btn-light-primary" data-toggle="modal" data-target="#modalCreateBudget"><i class="la la-plus"></i> Thêm</a>' +
-                    '</div>' +
-                    '<div class="table-responsive"><table class="table table-bordered table-sm">' +
-                        '<thead><tr><th>#</th><th>Thời gian nhập</th><th>Số tiền</th><th>Ghi chú</th><th></th></tr></thead>' +
-                        '<tbody>' + renderBudgetRows(data.budgets) + '</tbody>' +
-                    '</table></div>' +
-                '</div>' +
-                '<div class="col-lg-6" style="min-width: 0;">' +
+                '<div class="col-lg-12" style="min-width: 0;">' +
                     '<div class="d-flex justify-content-between align-items-center mb-3">' +
                         '<h5>Chi tiêu theo ngày</h5>' +
                         '<a href="javascript:void(0);" class="btn btn-sm btn-light-primary" data-toggle="modal" data-target="#modalCreateSpend"><i class="la la-plus"></i> Thêm</a>' +
@@ -405,15 +427,12 @@ Ads - {{ $project->name }}
             '</div>';
 
         $('#campaignDetailBody').html(html);
-        $('#modalCreateBudget input[name="campaign_id"]').val(data.campaign.id);
         $('#modalCreateSpend input[name="campaign_id"]').val(data.campaign.id);
     }
 
     function refreshCampaignRow(campaignId, totals) {
         let row = $('[data-campaign-row="' + campaignId + '"]');
-        row.find('.col-total-budget').text(formatMoney(totals.total_budget));
         row.find('.col-total-spend').text(formatMoney(totals.total_spend));
-        row.find('.col-remaining').text(formatMoney(totals.remaining));
         row.find('.col-total-results').text(formatMoney(totals.total_results));
     }
 
@@ -501,6 +520,12 @@ Ads - {{ $project->name }}
         $(this).find('select[name="handler_id"]').val('').trigger('change');
     });
 
+    $('#modalCampaignDetail').on('hidden.bs.modal', function () {
+        if (adsSpendChanged) {
+            location.reload();
+        }
+    });
+
     $(document).on('click', '.btn-edit-budget', function () {
         let modal = $('#modalCreateBudget');
         modal.find('.modal-title').text('Sửa ngân sách');
@@ -534,7 +559,7 @@ Ads - {{ $project->name }}
         $(this).find('input[name="spend_date"], input[name="amount"], input[name="results"], input[name="note"]').val('');
     });
 
-    $('#modalCreateBudget form, #modalCreateSpend form').submit(function (e) {
+    $('#modalCreateBudget form').submit(function (e) {
         e.preventDefault();
         let form = $(this);
         $.ajax({
@@ -545,6 +570,29 @@ Ads - {{ $project->name }}
                 if (res.success) {
                     init.showNoty(res.message || 'Thành công!', 'success');
                     form.closest('.modal').modal('hide');
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    init.showNoty(res.message || 'Có lỗi xảy ra!', 'error');
+                }
+            },
+            error: function () {
+                init.showNoty('Có lỗi xảy ra!', 'error');
+            }
+        });
+    });
+
+    $('#modalCreateSpend form').submit(function (e) {
+        e.preventDefault();
+        let form = $(this);
+        $.ajax({
+            type: 'POST',
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: function (res) {
+                if (res.success) {
+                    init.showNoty(res.message || 'Thành công!', 'success');
+                    form.closest('.modal').modal('hide');
+                    adsSpendChanged = true;
                     if (currentCampaignId) {
                         loadCampaignDetail(currentCampaignId);
                     }
@@ -607,12 +655,11 @@ Ads - {{ $project->name }}
         removeItem('{{ route("admin.ads.campaign.remove") }}', $(this).data('id'));
     });
     $(document).on('click', '.btn-remove-budget', function () {
-        removeItem('{{ route("admin.ads.budget.remove") }}', $(this).data('id'), function () {
-            loadCampaignDetail(currentCampaignId);
-        });
+        removeItem('{{ route("admin.ads.budget.remove") }}', $(this).data('id'));
     });
     $(document).on('click', '.btn-remove-spend', function () {
         removeItem('{{ route("admin.ads.spend.remove") }}', $(this).data('id'), function () {
+            adsSpendChanged = true;
             loadCampaignDetail(currentCampaignId);
         });
     });

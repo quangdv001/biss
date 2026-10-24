@@ -11,6 +11,7 @@ class AdsBudget extends Model
 
     protected $table = 'ads_budget';
     protected $fillable = [
+        'project_id',
         'campaign_id',
         'amount',
         'note',
@@ -19,6 +20,11 @@ class AdsBudget extends Model
         'updated_by',
     ];
     protected $dates = ['created_at', 'updated_at'];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'id');
+    }
 
     public function campaign()
     {
