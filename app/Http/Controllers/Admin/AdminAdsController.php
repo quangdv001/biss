@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\Ads\AdsProjectReportExport;
 use App\Exports\Ads\AdsReportExport;
 use App\Http\Controllers\Controller;
+use App\Models\AdsBudget;
 use App\Models\AdsCampaign;
+use App\Models\AdsSpend;
 use App\Repo\AdminRepo;
 use App\Repo\AdsBudgetRepo;
 use App\Repo\AdsCampaignRepo;
@@ -55,30 +58,80 @@ class AdminAdsController extends Controller
         return $user;
     }
 
-    private function buildReport($campaign, $startTime = false, $endTime = false)
+    private function filterBudgets($budgets, $startTime = false, $endTime = false)
     {
-        $budgets = $campaign->budget->when($startTime, function ($q) use ($startTime) {
+        return $budgets->when($startTime, function ($q) use ($startTime) {
             return $q->where('entered_time', '>=', $startTime);
         })->when($endTime, function ($q) use ($endTime) {
             return $q->where('entered_time', '<=', $endTime);
-        })->sortByDesc('entered_time')->values();
-        $spends = $campaign->spend->when($startTime, function ($q) use ($startTime) {
+        });
+    }
+
+    private function filterSpends($spends, $startTime = false, $endTime = false)
+    {
+        return $spends->when($startTime, function ($q) use ($startTime) {
             return $q->where('spend_date', '>=', date('Y-m-d', $startTime));
         })->when($endTime, function ($q) use ($endTime) {
             return $q->where('spend_date', '<=', date('Y-m-d', $endTime));
-        })->sortByDesc('spend_date')->values();
-        $totalBudget = $budgets->sum('amount');
-        $totalSpend = $spends->sum('amount');
-        $totalResults = $spends->sum('results');
+        });
+    }
+
+    /**
+     * Ngân sách nhập theo dự án; chi tiêu của mọi chiến dịch trong dự án trừ vào ngân sách tổng đó.
+     * Trả về [project_id => [total_budget, total_spend, remaining]]
+     */
+    private function projectTotals($projectIds, $startTime = false, $endTime = false)
+    {
+        $projectIds = collect($projectIds)->filter()->unique()->values();
+        if ($projectIds->isEmpty()) {
+            return collect([]);
+        }
+
+        $budgets = AdsBudget::whereIn('project_id', $projectIds)
+            ->when($startTime, function ($q) use ($startTime) {
+                return $q->where('entered_time', '>=', $startTime);
+            })->when($endTime, function ($q) use ($endTime) {
+                return $q->where('entered_time', '<=', $endTime);
+            })
+            ->groupBy('project_id')
+            ->selectRaw('project_id, SUM(amount) as total')
+            ->pluck('total', 'project_id');
+
+        $spends = AdsSpend::join('ads_campaign', 'ads_campaign.id', '=', 'ads_spend.campaign_id')
+            ->whereIn('ads_campaign.project_id', $projectIds)
+            ->when($startTime, function ($q) use ($startTime) {
+                return $q->where('ads_spend.spend_date', '>=', date('Y-m-d', $startTime));
+            })->when($endTime, function ($q) use ($endTime) {
+                return $q->where('ads_spend.spend_date', '<=', date('Y-m-d', $endTime));
+            })
+            ->groupBy('ads_campaign.project_id')
+            ->selectRaw('ads_campaign.project_id, SUM(ads_spend.amount) as total')
+            ->pluck('total', 'project_id');
+
+        return $projectIds->mapWithKeys(function ($projectId) use ($budgets, $spends) {
+            $totalBudget = (int) ($budgets[$projectId] ?? 0);
+            $totalSpend = (int) ($spends[$projectId] ?? 0);
+            return [$projectId => [
+                'total_budget' => $totalBudget,
+                'total_spend' => $totalSpend,
+                'remaining' => $totalBudget - $totalSpend,
+            ]];
+        });
+    }
+
+    private function buildReport($campaign, $startTime = false, $endTime = false)
+    {
+        $spends = $this->filterSpends($campaign->spend, $startTime, $endTime)->sortByDesc('spend_date')->values();
+        $project = $this->projectTotals([$campaign->project_id])->get($campaign->project_id);
 
         return [
             'campaign' => $campaign,
-            'budgets' => $budgets,
             'spends' => $spends,
-            'total_budget' => $totalBudget,
-            'total_spend' => $totalSpend,
-            'total_results' => $totalResults,
-            'remaining' => $totalBudget - $totalSpend,
+            'total_spend' => $spends->sum('amount'),
+            'total_results' => $spends->sum('results'),
+            'project_budget' => $project['total_budget'] ?? 0,
+            'project_spend' => $project['total_spend'] ?? 0,
+            'project_remaining' => $project['remaining'] ?? 0,
         ];
     }
 
@@ -100,19 +153,22 @@ class AdminAdsController extends Controller
         $pid = $pid > 0 ? $pid : ($phase->first() ? $phase->first()->id : 0);
         $role = $this->role->getRole();
 
-        $campaigns = $this->campaign->get(['project_id' => $id], ['id' => 'DESC'], ['budget', 'spend', 'handler'])
+        $campaigns = $this->campaign->get(['project_id' => $id], ['id' => 'DESC'], ['spend', 'handler'])
             ->map(function ($campaign) {
-                $campaign->total_budget = $campaign->budget->sum('amount');
                 $campaign->total_spend = $campaign->spend->sum('amount');
                 $campaign->total_results = $campaign->spend->sum('results');
-                $campaign->remaining = $campaign->total_budget - $campaign->total_spend;
                 return $campaign;
             });
+
+        $budgets = $this->budget->get(['project_id' => $id], ['entered_time' => 'DESC'], ['creator']);
+        $totalBudget = $budgets->sum('amount');
+        $totalSpend = $campaigns->sum('total_spend');
+        $remaining = $totalBudget - $totalSpend;
 
         $admins = $this->admin->get();
         $channels = AdsCampaign::CHANNELS;
 
-        return view('admin.ads.index', compact('project', 'phase', 'pid', 'isAdmin', 'gid', 'role', 'campaigns', 'admins', 'channels'));
+        return view('admin.ads.index', compact('project', 'phase', 'pid', 'isAdmin', 'gid', 'role', 'campaigns', 'admins', 'channels', 'budgets', 'totalBudget', 'totalSpend', 'remaining'));
     }
 
     public function createCampaign(Request $request)
@@ -163,7 +219,10 @@ class AdminAdsController extends Controller
         }
 
         $id = $request->input('id');
-        $params = $request->only('campaign_id', 'amount', 'note');
+        $params = $request->only('project_id', 'amount', 'note');
+        if (empty($params['project_id']) || !$this->projectRepo->first(['id' => $params['project_id']])) {
+            return response()->json(['success' => 0, 'message' => 'Không tìm thấy dự án!']);
+        }
         $params['entered_time'] = $request->input('entered_time') ? strtotime($request->input('entered_time')) : time();
 
         if ($id) {
@@ -237,7 +296,7 @@ class AdminAdsController extends Controller
             return response()->json(['success' => 0, 'message' => 'Bạn không có quyền truy cập mục này!']);
         }
 
-        $campaign = $this->campaign->first(['id' => $campaign_id], [], ['budget', 'spend']);
+        $campaign = $this->campaign->first(['id' => $campaign_id], [], ['spend']);
         if (empty($campaign)) {
             return response()->json(['success' => 0, 'message' => 'Không tìm thấy chiến dịch!']);
         }
@@ -255,7 +314,7 @@ class AdminAdsController extends Controller
             return back()->with('error_message', 'Bạn không có quyền thực hiện thao tác này!');
         }
 
-        $campaign = $this->campaign->first(['id' => $campaign_id], [], ['budget.creator', 'spend.creator', 'project']);
+        $campaign = $this->campaign->first(['id' => $campaign_id], [], ['spend.creator', 'project']);
         if (empty($campaign)) {
             return back()->with('error_message', 'Không tìm thấy chiến dịch!');
         }
@@ -271,6 +330,40 @@ class AdminAdsController extends Controller
 
         $fileName = 'Bao-cao-ads-' . $campaign->name . ($startDate || $endDate ? '-' . ($startDate ?: 'truoc') . '_' . ($endDate ?: 'nay') : '') . '.xlsx';
         return Excel::download(new AdsReportExport($report), $fileName);
+    }
+
+    public function exportProject(Request $request, $project_id)
+    {
+        $user = $this->checkPermission();
+        if (!$user) {
+            return back()->with('error_message', 'Bạn không có quyền thực hiện thao tác này!');
+        }
+
+        $project = $this->projectRepo->first(['id' => $project_id]);
+        if (empty($project)) {
+            return back()->with('error_message', 'Không tìm thấy dự án!');
+        }
+
+        $budgets = $this->budget->get(['project_id' => $project_id], ['entered_time' => 'DESC']);
+        $campaigns = $this->campaign->get(['project_id' => $project_id], ['id' => 'DESC'], ['spend'])
+            ->map(function ($campaign) {
+                $campaign->total_spend = $campaign->spend->sum('amount');
+                $campaign->total_results = $campaign->spend->sum('results');
+                return $campaign;
+            });
+        $totalBudget = $budgets->sum('amount');
+        $totalSpend = $campaigns->sum('total_spend');
+
+        $report = [
+            'project' => $project,
+            'budgets' => $budgets,
+            'campaigns' => $campaigns,
+            'total_budget' => $totalBudget,
+            'total_spend' => $totalSpend,
+            'remaining' => $totalBudget - $totalSpend,
+        ];
+
+        return Excel::download(new AdsProjectReportExport($report), 'Bao-cao-ads-du-an-' . $project->name . '.xlsx');
     }
 
     public function dashboardReport(Request $request)
@@ -289,38 +382,24 @@ class AdminAdsController extends Controller
             $condition['project_id'] = $projectId;
         }
 
-        $campaigns = $this->campaign->get($condition, ['id' => 'DESC'], ['project', 'budget', 'spend']);
+        $campaigns = $this->campaign->get($condition, ['id' => 'DESC'], ['project', 'spend']);
+        $projectTotals = $this->projectTotals($campaigns->pluck('project_id'), $startTime, $endTime);
 
         $data = $campaigns->map(function ($campaign) use ($startTime, $endTime) {
-            $budgets = $campaign->budget->when($startTime, function ($q) use ($startTime) {
-                return $q->where('entered_time', '>=', $startTime);
-            })->when($endTime, function ($q) use ($endTime) {
-                return $q->where('entered_time', '<=', $endTime);
-            });
-            $spends = $campaign->spend->when($startTime, function ($q) use ($startTime) {
-                return $q->where('spend_date', '>=', date('Y-m-d', $startTime));
-            })->when($endTime, function ($q) use ($endTime) {
-                return $q->where('spend_date', '<=', date('Y-m-d', $endTime));
-            });
-
-            $totalBudget = $budgets->sum('amount');
-            $totalSpend = $spends->sum('amount');
-
             return [
                 'project' => $campaign->project->name ?? '',
                 'project_id' => $campaign->project_id,
                 'campaign' => $campaign->name,
-                'total_budget' => $totalBudget,
-                'total_spend' => $totalSpend,
-                'remaining' => $totalBudget - $totalSpend,
+                'total_spend' => $this->filterSpends($campaign->spend, $startTime, $endTime)->sum('amount'),
             ];
-        })->groupBy('project_id')->map(function ($items, $projectId) {
+        })->groupBy('project_id')->map(function ($items, $projectId) use ($projectTotals) {
+            $totals = $projectTotals->get($projectId);
             return [
                 'project' => $items->first()['project'],
                 'campaigns' => $items->values(),
-                'total_budget' => $items->sum('total_budget'),
-                'total_spend' => $items->sum('total_spend'),
-                'remaining' => $items->sum('remaining'),
+                'total_budget' => $totals['total_budget'] ?? 0,
+                'total_spend' => $totals['total_spend'] ?? 0,
+                'remaining' => $totals['remaining'] ?? 0,
             ];
         })->values();
 
@@ -347,23 +426,12 @@ class AdminAdsController extends Controller
             $condition['handler_id'] = $handlerId;
         }
 
-        $campaigns = $this->campaign->get($condition, ['id' => 'DESC'], ['project', 'handler', 'budget', 'spend']);
+        $campaigns = $this->campaign->get($condition, ['id' => 'DESC'], ['project', 'handler', 'spend']);
+        // Ngân sách/còn dư tính theo cả dự án (mọi chiến dịch), không riêng chiến dịch của người xử lý
+        $projectTotals = $this->projectTotals($campaigns->pluck('project_id'), $startTime, $endTime);
 
         $data = $campaigns->map(function ($campaign) use ($startTime, $endTime) {
-            $budgets = $campaign->budget->when($startTime, function ($q) use ($startTime) {
-                return $q->where('entered_time', '>=', $startTime);
-            })->when($endTime, function ($q) use ($endTime) {
-                return $q->where('entered_time', '<=', $endTime);
-            });
-            $spends = $campaign->spend->when($startTime, function ($q) use ($startTime) {
-                return $q->where('spend_date', '>=', date('Y-m-d', $startTime));
-            })->when($endTime, function ($q) use ($endTime) {
-                return $q->where('spend_date', '<=', date('Y-m-d', $endTime));
-            });
-
-            $totalBudget = $budgets->sum('amount');
-            $totalSpend = $spends->sum('amount');
-            $totalResults = $spends->sum('results');
+            $spends = $this->filterSpends($campaign->spend, $startTime, $endTime);
 
             return [
                 'handler_id' => $campaign->handler_id ?: 0,
@@ -372,21 +440,20 @@ class AdminAdsController extends Controller
                 'project' => $campaign->project->name ?? '',
                 'campaign_id' => $campaign->id,
                 'campaign' => $campaign->name,
-                'total_budget' => $totalBudget,
-                'total_spend' => $totalSpend,
-                'total_results' => $totalResults,
-                'remaining' => $totalBudget - $totalSpend,
+                'total_spend' => $spends->sum('amount'),
+                'total_results' => $spends->sum('results'),
             ];
-        })->groupBy('handler_id')->map(function ($items, $handlerId) {
-            $projects = $items->groupBy('project_id')->map(function ($rows, $projectId) {
+        })->groupBy('handler_id')->map(function ($items, $handlerId) use ($projectTotals) {
+            $projects = $items->groupBy('project_id')->map(function ($rows, $projectId) use ($projectTotals) {
+                $totals = $projectTotals->get($projectId);
                 return [
                     'project' => $rows->first()['project'],
                     'project_id' => $projectId,
                     'campaigns' => $rows->values(),
-                    'total_budget' => $rows->sum('total_budget'),
+                    'total_budget' => $totals['total_budget'] ?? 0,
                     'total_spend' => $rows->sum('total_spend'),
                     'total_results' => $rows->sum('total_results'),
-                    'remaining' => $rows->sum('remaining'),
+                    'remaining' => $totals['remaining'] ?? 0,
                 ];
             })->values();
 
@@ -394,10 +461,10 @@ class AdminAdsController extends Controller
                 'project' => 'Tất cả dự án',
                 'project_id' => 0,
                 'campaigns' => collect([]),
-                'total_budget' => $items->sum('total_budget'),
+                'total_budget' => $projects->sum('total_budget'),
                 'total_spend' => $items->sum('total_spend'),
                 'total_results' => $items->sum('total_results'),
-                'remaining' => $items->sum('remaining'),
+                'remaining' => $projects->sum('remaining'),
             ];
             $projects->prepend($rowAllProject);
 
@@ -428,83 +495,89 @@ class AdminAdsController extends Controller
         $campaigns = $this->campaign->get(
             $account !== '' ? ['ad_account' => $account] : [],
             ['id' => 'DESC'],
-            ['project', 'budget', 'spend']
+            ['project', 'spend']
         );
 
-        $rows = $campaigns->map(function ($campaign) use ($startTime, $endTime) {
-            $budgets = $campaign->budget
-                ->where('entered_time', '>=', $startTime)
-                ->where('entered_time', '<=', $endTime);
-            $spends = $campaign->spend
-                ->where('spend_date', '>=', date('Y-m-d', $startTime))
-                ->where('spend_date', '<=', date('Y-m-d', $endTime));
-
-            $totalBudget = $budgets->sum('amount');
-            $totalSpend = $spends->sum('amount');
-
+        $campaignRows = $campaigns->map(function ($campaign) use ($startTime, $endTime) {
             return [
                 'project_id' => $campaign->project_id,
                 'project' => $campaign->project->name ?? '',
                 'campaign_id' => $campaign->id,
                 'campaign' => $campaign->name,
                 'ad_account' => $campaign->ad_account ?: '',
-                'total_budget' => $totalBudget,
-                'total_spend' => $totalSpend,
-                'remaining' => $totalBudget - $totalSpend,
+                'total_spend' => $this->filterSpends($campaign->spend, $startTime, $endTime)->sum('amount'),
             ];
         });
 
-        $groupByProject = function ($items) {
-            return $items->groupBy('project_id')->map(function ($rows, $projectId) {
-                return [
-                    'project_id' => $projectId,
-                    'project' => $rows->first()['project'],
-                    'campaigns' => $rows->values(),
-                    'count' => $rows->count(),
-                ];
-            })->values();
-        };
+        // Dự án cần xét: có chiến dịch (theo tài khoản nếu có lọc); không lọc tài khoản thì gồm cả dự án chỉ mới nhập ngân sách
+        $projectIds = $campaignRows->pluck('project_id');
+        if ($account === '') {
+            $projectIds = $projectIds->merge(
+                AdsBudget::whereBetween('entered_time', [$startTime, $endTime])->whereNotNull('project_id')->pluck('project_id')
+            );
+        }
+        $projectIds = $projectIds->unique()->values();
+        $projectTotals = $this->projectTotals($projectIds, $startTime, $endTime);
+        $projectNames = $this->projectRepo->get(['id' => $projectIds->all()])->pluck('name', 'id');
+        $campaignsByProject = $campaignRows->groupBy('project_id');
 
-        $groupByAccount = function ($items) {
-            return $items->groupBy('ad_account')->map(function ($rows, $adAccount) {
-                return [
-                    'ad_account' => $adAccount !== '' ? $adAccount : '(Không có tài khoản)',
-                    'campaigns' => $rows->values(),
-                    'count' => $rows->count(),
-                    'total_budget' => $rows->sum('total_budget'),
-                    'total_spend' => $rows->sum('total_spend'),
-                ];
-            })->values()->sortByDesc('total_spend')->values();
-        };
-
-        $nearLimit = $rows->filter(function ($r) {
-            return $r['remaining'] >= 0 && $r['remaining'] <= self::BUDGET_ALERT_THRESHOLD;
+        // Ngân sách nhập theo dự án; còn dư = ngân sách dự án - chi tiêu mọi chiến dịch của dự án
+        $projects = $projectIds->map(function ($projectId) use ($projectTotals, $projectNames, $campaignsByProject) {
+            $totals = $projectTotals->get($projectId);
+            $campaigns = $campaignsByProject->get($projectId, collect([]))->values();
+            return [
+                'project_id' => $projectId,
+                'project' => $projectNames[$projectId] ?? '',
+                'campaigns' => $campaigns,
+                'count' => $campaigns->count(),
+                'total_budget' => $totals['total_budget'] ?? 0,
+                'total_spend' => $totals['total_spend'] ?? 0,
+                'remaining' => $totals['remaining'] ?? 0,
+            ];
         });
-        $overBudget = $rows->filter(function ($r) {
+
+        $nearLimit = $projects->filter(function ($r) {
+            return $r['total_budget'] > 0 && $r['remaining'] >= 0 && $r['remaining'] <= self::BUDGET_ALERT_THRESHOLD;
+        })->values();
+        $overBudget = $projects->filter(function ($r) {
             return $r['remaining'] < 0;
-        });
-        $budgetDetail = $rows->filter(function ($r) {
+        })->values();
+        $budgetDetail = $projects->filter(function ($r) {
             return $r['total_budget'] > 0;
-        });
-        $spendDetail = $rows->filter(function ($r) {
+        })->values();
+        $spendDetail = $projects->map(function ($r) {
+            $r['campaigns'] = $r['campaigns']->filter(function ($c) {
+                return $c['total_spend'] > 0;
+            })->values();
+            $r['count'] = $r['campaigns']->count();
+            return $r;
+        })->filter(function ($r) {
+            return $r['count'] > 0;
+        })->values();
+
+        $accountDetail = $campaignRows->filter(function ($r) {
             return $r['total_spend'] > 0;
-        });
-        $accountDetail = $rows->filter(function ($r) {
-            return $r['total_budget'] > 0 || $r['total_spend'] > 0;
-        });
+        })->groupBy('ad_account')->map(function ($rows, $adAccount) {
+            return [
+                'ad_account' => $adAccount !== '' ? $adAccount : '(Không có tài khoản)',
+                'campaigns' => $rows->values(),
+                'count' => $rows->count(),
+                'total_spend' => $rows->sum('total_spend'),
+            ];
+        })->values()->sortByDesc('total_spend')->values();
 
         return response()->json([
             'success' => 1,
             'data' => [
-                'total_budget' => $rows->sum('total_budget'),
-                'total_spend' => $rows->sum('total_spend'),
+                'total_budget' => $projects->sum('total_budget'),
+                'total_spend' => $campaignRows->sum('total_spend'),
                 'near_limit_count' => $nearLimit->count(),
                 'over_budget_count' => $overBudget->count(),
-                'near_limit' => $groupByProject($nearLimit),
-                'over_budget' => $groupByProject($overBudget),
-                'budget_detail' => $groupByProject($budgetDetail),
-                'spend_detail' => $groupByProject($spendDetail),
-                'account_detail' => $groupByAccount($accountDetail),
+                'near_limit' => $nearLimit,
+                'over_budget' => $overBudget,
+                'budget_detail' => $budgetDetail,
+                'spend_detail' => $spendDetail,
+                'account_detail' => $accountDetail,
             ],
         ]);
     }

@@ -855,20 +855,30 @@ function renderAdsBudgetAlertGroup(containerId, accordionId, projects, emptyMess
                 <div class="card-title collapsed" data-toggle="collapse" data-target="#${collapseId}">
                     <div class="d-flex justify-content-between w-100 align-items-center">
                         <span><i class="flaticon2-pie-chart-3"></i> ${projectName}</span>
-                        <span class="label label-warning label-inline mr-5">${project.count} chiến dịch</span>
+                        <span>
+                            <span class="label label-primary label-inline mr-2">Ngân sách: ${Number(project.total_budget).toLocaleString('vi-VN')}</span>
+                            <span class="label label-danger label-inline mr-2">Đã chi: ${Number(project.total_spend).toLocaleString('vi-VN')}</span>
+                            <span class="label label-${project.remaining < 0 ? 'danger' : 'success'} label-inline mr-2">Còn dư: ${Number(project.remaining).toLocaleString('vi-VN')}</span>
+                            <span class="label label-warning label-inline mr-5">${project.count} chiến dịch</span>
+                        </span>
                     </div>
                 </div>
             </div>
             <div id="${collapseId}" class="collapse" data-parent="#${accordionId}">
-                <div class="card-body">
-                    <div class="table-responsive">
+                <div class="card-body">`;
+
+        if (!project.campaigns.length) {
+            html += `<div class="text-muted">Dự án chưa có chiến dịch nào</div></div></div></div>`;
+            return;
+        }
+
+        html += `<div class="table-responsive">
                         <table class="table table-bordered table-sm">
                             <thead>
                                 <tr>
                                     <th>Chiến dịch</th>
-                                    <th>Ngân sách nhận</th>
+                                    <th>Tài khoản quảng cáo</th>
                                     <th>Đã chi</th>
-                                    <th>Còn dư</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -879,9 +889,8 @@ function renderAdsBudgetAlertGroup(containerId, accordionId, projects, emptyMess
                 : c.campaign;
             html += `<tr>
                 <td>${campaignName}</td>
-                <td>${Number(c.total_budget).toLocaleString('vi-VN')}</td>
+                <td>${escapeHtml(c.ad_account)}</td>
                 <td>${Number(c.total_spend).toLocaleString('vi-VN')}</td>
-                <td>${Number(c.remaining).toLocaleString('vi-VN')}</td>
             </tr>`;
         });
 
@@ -899,8 +908,8 @@ function renderAdsBudgetAlertReport(data) {
     $('#ads_alert_over_budget_count, #ads_alert_over_budget_count_stat').text(data.over_budget_count);
     $('#ads_alert_spend_by_account_count').text((data.account_detail || []).length);
 
-    renderAdsBudgetAlertGroup('ads_near_limit_content', 'adsNearLimitAccordion', data.near_limit, 'Không có chiến dịch nào sắp hết ngân sách trong tháng này');
-    renderAdsBudgetAlertGroup('ads_over_budget_content', 'adsOverBudgetAccordion', data.over_budget, 'Không có chiến dịch nào vượt ngân sách trong tháng này');
+    renderAdsBudgetAlertGroup('ads_near_limit_content', 'adsNearLimitAccordion', data.near_limit, 'Không có dự án nào sắp hết ngân sách trong tháng này');
+    renderAdsBudgetAlertGroup('ads_over_budget_content', 'adsOverBudgetAccordion', data.over_budget, 'Không có dự án nào vượt ngân sách trong tháng này');
     renderAdsBudgetAlertGroup('ads_total_budget_content', 'adsTotalBudgetAccordion', data.budget_detail, 'Không có ngân sách nào được nhập trong tháng này');
     renderAdsBudgetAlertGroup('ads_total_spend_content', 'adsTotalSpendAccordion', data.spend_detail, 'Không có chi tiêu nào trong tháng này');
     renderAdsSpendByAccountGroup('ads_spend_by_account_content', 'adsSpendByAccountAccordion', data.account_detail, 'Không có chi tiêu nào trong tháng này');
@@ -922,10 +931,7 @@ function renderAdsSpendByAccountGroup(containerId, accordionId, accounts, emptyM
                 <div class="card-title collapsed" data-toggle="collapse" data-target="#${collapseId}">
                     <div class="d-flex justify-content-between w-100 align-items-center">
                         <span><i class="flaticon2-pie-chart-3"></i> ${escapeHtml(acc.ad_account)}</span>
-                        <span>
-                            <span class="label label-primary label-inline mr-2">Nhận: ${Number(acc.total_budget).toLocaleString('vi-VN')}</span>
-                            <span class="label label-danger label-inline mr-5">Đã chi: ${Number(acc.total_spend).toLocaleString('vi-VN')}</span>
-                        </span>
+                        <span class="label label-danger label-inline mr-5">Đã chi: ${Number(acc.total_spend).toLocaleString('vi-VN')}</span>
                     </div>
                 </div>
             </div>
@@ -937,9 +943,7 @@ function renderAdsSpendByAccountGroup(containerId, accordionId, accounts, emptyM
                                 <tr>
                                     <th>Dự án</th>
                                     <th>Chiến dịch</th>
-                                    <th>Ngân sách nhận</th>
                                     <th>Đã chi</th>
-                                    <th>Còn dư</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -954,9 +958,7 @@ function renderAdsSpendByAccountGroup(containerId, accordionId, accounts, emptyM
             html += `<tr>
                 <td>${projectName}</td>
                 <td>${campaignName}</td>
-                <td>${Number(c.total_budget).toLocaleString('vi-VN')}</td>
                 <td>${Number(c.total_spend).toLocaleString('vi-VN')}</td>
-                <td>${Number(c.remaining).toLocaleString('vi-VN')}</td>
             </tr>`;
         });
 
@@ -1020,9 +1022,9 @@ function renderAdsHandlerReport(data) {
                             <thead>
                                 <tr>
                                     <th>Dự án / Chiến dịch</th>
-                                    <th>Tổng ngân sách</th>
+                                    <th>Ngân sách dự án</th>
                                     <th>Tổng đã chi</th>
-                                    <th>Còn dư</th>
+                                    <th>Dự án còn dư</th>
                                     <th>Kết quả</th>
                                 </tr>
                             </thead>
@@ -1045,9 +1047,9 @@ function renderAdsHandlerReport(data) {
                     : c.campaign;
                 html += `<tr>
                     <td class="pl-8">${campaignName}</td>
-                    <td>${Number(c.total_budget).toLocaleString('vi-VN')}</td>
+                    <td></td>
                     <td>${Number(c.total_spend).toLocaleString('vi-VN')}</td>
-                    <td>${Number(c.remaining).toLocaleString('vi-VN')}</td>
+                    <td></td>
                     <td>${Number(c.total_results).toLocaleString('vi-VN')}</td>
                 </tr>`;
             });

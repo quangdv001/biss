@@ -43,11 +43,6 @@ class AdsCampaign extends Model
         return $this->belongsTo(Admin::class, 'handler_id', 'id');
     }
 
-    public function budget()
-    {
-        return $this->hasMany(AdsBudget::class, 'campaign_id', 'id');
-    }
-
     public function spend()
     {
         return $this->hasMany(AdsSpend::class, 'campaign_id', 'id');

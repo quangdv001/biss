@@ -1,5 +1,5 @@
-<!-- Cảnh báo ngân sách chiến dịch theo tháng -->
-<h5 class="mb-4"><i class="flaticon2-graph"></i> Cảnh báo ngân sách chiến dịch theo tháng</h5>
+<!-- Cảnh báo ngân sách dự án theo tháng -->
+<h5 class="mb-4"><i class="flaticon2-graph"></i> Cảnh báo ngân sách dự án theo tháng</h5>
 <div class="filter-card">
     <div class="row">
         <div class="col-md-3">
@@ -47,7 +47,7 @@
     <div class="col-lg-3">
         <div class="card card-custom bg-light-warning">
             <div class="card-body">
-                <div class="font-weight-bold text-muted">Chiến dịch sắp hết ngân sách</div>
+                <div class="font-weight-bold text-muted">Dự án sắp hết ngân sách</div>
                 <div class="font-size-h3 font-weight-bolder text-warning" id="ads_alert_near_limit_count_stat">0</div>
             </div>
         </div>
@@ -55,7 +55,7 @@
     <div class="col-lg-3">
         <div class="card card-custom bg-light-danger">
             <div class="card-body">
-                <div class="font-weight-bold text-muted">Chiến dịch vượt ngân sách</div>
+                <div class="font-weight-bold text-muted">Dự án vượt ngân sách</div>
                 <div class="font-size-h3 font-weight-bolder text-danger" id="ads_alert_over_budget_count_stat">0</div>
             </div>
         </div>
@@ -124,7 +124,7 @@
         <div class="card-header collapsed" data-toggle="collapse" data-target="#collapse_ads_near_limit" style="cursor: pointer;">
             <div class="card-title">
                 <h3 class="card-label">
-                    <i class="flaticon2-warning text-warning"></i> Chiến dịch sắp hết ngân sách (còn ≤ 500.000đ)
+                    <i class="flaticon2-warning text-warning"></i> Dự án sắp hết ngân sách (còn ≤ 500.000đ)
                     <span class="badge badge-warning badge-lg ml-2" id="ads_alert_near_limit_count">0</span>
                 </h3>
             </div>
@@ -143,7 +143,7 @@
         <div class="card-header collapsed" data-toggle="collapse" data-target="#collapse_ads_over_budget" style="cursor: pointer;">
             <div class="card-title">
                 <h3 class="card-label">
-                    <i class="flaticon2-alarm text-danger"></i> Chiến dịch vượt ngân sách
+                    <i class="flaticon2-alarm text-danger"></i> Dự án vượt ngân sách
                     <span class="badge badge-danger badge-lg ml-2" id="ads_alert_over_budget_count">0</span>
                 </h3>
             </div>

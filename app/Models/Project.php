@@ -52,4 +52,9 @@ class Project extends Model
     {
         return $this->hasMany(AdsCampaign::class, 'project_id', 'id')->orderBy('id', 'DESC');
     }
+
+    public function adsBudget()
+    {
+        return $this->hasMany(AdsBudget::class, 'project_id', 'id');
+    }
 }
