@@ -487,10 +487,11 @@ class AdminAdsController extends Controller
             return response()->json(['success' => 0, 'message' => 'Bạn không có quyền truy cập mục này!']);
         }
 
-        $month = $request->get('month', date('Y-m'));
+        // Không chọn tháng thì xem tổng quan toàn thời gian
+        $month = trim($request->get('month', ''));
         $account = trim($request->get('account', ''));
-        $startTime = strtotime($month . '-01 00:00:00');
-        $endTime = strtotime(date('Y-m-t 23:59:59', $startTime));
+        $startTime = $month !== '' ? strtotime($month . '-01 00:00:00') : false;
+        $endTime = $startTime ? strtotime(date('Y-m-t 23:59:59', $startTime)) : false;
 
         $campaigns = $this->campaign->get(
             $account !== '' ? ['ad_account' => $account] : [],
@@ -513,7 +514,11 @@ class AdminAdsController extends Controller
         $projectIds = $campaignRows->pluck('project_id');
         if ($account === '') {
             $projectIds = $projectIds->merge(
-                AdsBudget::whereBetween('entered_time', [$startTime, $endTime])->whereNotNull('project_id')->pluck('project_id')
+                AdsBudget::whereNotNull('project_id')
+                    ->when($startTime, function ($q) use ($startTime, $endTime) {
+                        return $q->whereBetween('entered_time', [$startTime, $endTime]);
+                    })
+                    ->pluck('project_id')
             );
         }
         $projectIds = $projectIds->unique()->values();

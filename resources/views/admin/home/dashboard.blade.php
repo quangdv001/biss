@@ -908,11 +908,12 @@ function renderAdsBudgetAlertReport(data) {
     $('#ads_alert_over_budget_count, #ads_alert_over_budget_count_stat').text(data.over_budget_count);
     $('#ads_alert_spend_by_account_count').text((data.account_detail || []).length);
 
-    renderAdsBudgetAlertGroup('ads_near_limit_content', 'adsNearLimitAccordion', data.near_limit, 'Không có dự án nào sắp hết ngân sách trong tháng này');
-    renderAdsBudgetAlertGroup('ads_over_budget_content', 'adsOverBudgetAccordion', data.over_budget, 'Không có dự án nào vượt ngân sách trong tháng này');
-    renderAdsBudgetAlertGroup('ads_total_budget_content', 'adsTotalBudgetAccordion', data.budget_detail, 'Không có ngân sách nào được nhập trong tháng này');
-    renderAdsBudgetAlertGroup('ads_total_spend_content', 'adsTotalSpendAccordion', data.spend_detail, 'Không có chi tiêu nào trong tháng này');
-    renderAdsSpendByAccountGroup('ads_spend_by_account_content', 'adsSpendByAccountAccordion', data.account_detail, 'Không có chi tiêu nào trong tháng này');
+    const periodText = $('#ads_alert_month').val() ? ' trong tháng này' : '';
+    renderAdsBudgetAlertGroup('ads_near_limit_content', 'adsNearLimitAccordion', data.near_limit, 'Không có dự án nào sắp hết ngân sách' + periodText);
+    renderAdsBudgetAlertGroup('ads_over_budget_content', 'adsOverBudgetAccordion', data.over_budget, 'Không có dự án nào vượt ngân sách' + periodText);
+    renderAdsBudgetAlertGroup('ads_total_budget_content', 'adsTotalBudgetAccordion', data.budget_detail, 'Không có ngân sách nào được nhập' + periodText);
+    renderAdsBudgetAlertGroup('ads_total_spend_content', 'adsTotalSpendAccordion', data.spend_detail, 'Không có chi tiêu nào' + periodText);
+    renderAdsSpendByAccountGroup('ads_spend_by_account_content', 'adsSpendByAccountAccordion', data.account_detail, 'Không có chi tiêu nào' + periodText);
 }
 
 function renderAdsSpendByAccountGroup(containerId, accordionId, accounts, emptyMessage) {

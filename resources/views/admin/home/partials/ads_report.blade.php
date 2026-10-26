@@ -1,11 +1,11 @@
-<!-- Cảnh báo ngân sách dự án theo tháng -->
-<h5 class="mb-4"><i class="flaticon2-graph"></i> Cảnh báo ngân sách dự án theo tháng</h5>
+<!-- Cảnh báo ngân sách dự án (mặc định tổng quan, có thể lọc theo tháng) -->
+<h5 class="mb-4"><i class="flaticon2-graph"></i> Cảnh báo ngân sách dự án</h5>
 <div class="filter-card">
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
-                <label>Tháng:</label>
-                <input type="month" class="form-control" id="ads_alert_month" value="{{ date('Y-m') }}">
+                <label>Tháng (bỏ trống để xem tổng quan):</label>
+                <input type="month" class="form-control" id="ads_alert_month" value="">
             </div>
         </div>
         <div class="col-md-4">
@@ -21,6 +21,14 @@
                 <label>&nbsp;</label>
                 <button type="button" class="btn btn-primary btn-block" onclick="loadAdsBudgetAlertReport()">
                     <i class="flaticon2-reload"></i> Xem báo cáo
+                </button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="button" class="btn btn-light-primary btn-block" onclick="$('#ads_alert_month').val(''); loadAdsBudgetAlertReport();">
+                    Xem tổng quan
                 </button>
             </div>
         </div>
@@ -190,13 +198,13 @@
         <div class="col-md-2">
             <div class="form-group">
                 <label>Từ ngày:</label>
-                <input type="date" class="form-control" id="ads_start_time" value="{{ date('Y-m-d', strtotime('-30 days')) }}">
+                <input type="date" class="form-control" id="ads_start_time" value="">
             </div>
         </div>
         <div class="col-md-2">
             <div class="form-group">
                 <label>Đến ngày:</label>
-                <input type="date" class="form-control" id="ads_end_time" value="{{ date('Y-m-d') }}">
+                <input type="date" class="form-control" id="ads_end_time" value="">
             </div>
         </div>
     </div>
@@ -205,6 +213,13 @@
             <div class="form-group">
                 <button type="button" class="btn btn-primary btn-block" onclick="loadAdsHandlerReport()">
                     <i class="flaticon2-reload"></i> Xem báo cáo theo người xử lý
+                </button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <button type="button" class="btn btn-light-primary btn-block" onclick="$('#ads_start_time, #ads_end_time').val(''); loadAdsHandlerReport();">
+                    Bỏ lọc thời gian
                 </button>
             </div>
         </div>
